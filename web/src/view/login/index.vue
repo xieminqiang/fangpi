@@ -235,6 +235,8 @@
   // 跳转初始化
   const checkInit = async () => {
     const res = await checkDB()
+    userStore.NeedInit()
+    await router.push({ name: 'Init' })
     if (res.code === 0) {
       if (res.data?.needInit) {
         userStore.NeedInit()

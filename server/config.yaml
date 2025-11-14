@@ -1,10 +1,18 @@
 aliyun-oss:
-    endpoint: yourEndpoint
-    access-key-id: yourAccessKeyId
-    access-key-secret: yourAccessKeySecret
-    bucket-name: yourBucketName
-    bucket-url: yourBucketUrl
-    base-path: yourBasePath
+    endpoint: "https://oss-cn-shenzhen.aliyuncs.com"
+    access-key-id: "LTAI5t8mSVRCRVPBqxRzaM2M"
+    access-key-secret: "lWk3VKO7oNuaioG5hMIAOdGRSzMbZC"
+    bucket-name: "sbx-server"
+    bucket-url: "https://sbx-server.oss-cn-shenzhen.aliyuncs.com"
+    base-path: "fp-wx"
+fp_app:
+    app-id: wx25c9a46425ab7de4
+    app-secret: f76ba7319a4aaf248b2ea477ce064c06
+bee-exam:
+    app-id: wx25c9a46425ab7de4
+    app-secret: f76ba7319a4aaf248b2ea477ce064c06
+    host: http://127.0.0.1:8881
+# bee-exam configuration
 autocode:
     web: web/src
     root: /Users/xiaoqiang/Documents/xmq-pro/gin-vue-admin
@@ -203,9 +211,9 @@ redis-list:
       db: 0
       useCluster: false
       clusterAddrs:
-        - 172.21.0.3:7000
-        - 172.21.0.4:7001
-        - 172.21.0.2:7002
+          - 172.21.0.3:7000
+          - 172.21.0.4:7001
+          - 172.21.0.2:7002
 sqlite:
     prefix: ""
     port: ""
@@ -222,9 +230,9 @@ sqlite:
     log-zap: false
 system:
     db-type: mysql
-    oss-type: local
+    oss-type: aliyun-oss
     router-prefix: ""
-    addr: 8888
+    addr: 8889
     iplimit-count: 15000
     iplimit-time: 3600
     use-multipoint: false
@@ -249,3 +257,7 @@ zap:
     show-line: true
     log-in-console: true
     retention-day: -1
+openai:
+    api-key: "sk-38da2ed6c20a45a38808019fccc11bd1"
+    base-url: "https://dashscope.aliyuncs.com/compatible-mode/v1/"
+    model: "qwen-plus"
