@@ -1,0 +1,1 @@
+"use strict";const i=require("../../libs/config/config.js"),e=require("../../libs/i18n/index.js"),{color:n}=i.config,o={link:{color:n["u-primary"],fontSize:15,underLine:!1,href:"",mpTips:e.t("up.link.copyed"),lineColor:"",text:""}};exports.Link=o;

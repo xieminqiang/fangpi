@@ -1,0 +1,1 @@
+"use strict";const o={section:{title:"",subTitle:require("../../libs/i18n/index.js").t("up.common.more"),right:!0,fontSize:15,bold:!0,color:"#303133",subColor:"#909399",showLine:!0,lineColor:"",arrow:!0}};exports.Section=o;

@@ -1,0 +1,1 @@
+"use strict";const o=require("../../libs/i18n/index.js"),e={keyboard:{mode:"number",dotDisabled:!1,tooltip:!0,showTips:!0,tips:"",showCancel:!0,showConfirm:!0,random:!1,safeAreaInsetBottom:!0,closeOnClickOverlay:!0,show:!1,overlay:!0,zIndex:10075,cancelText:o.t("up.common.cancel"),confirmText:o.t("up.common.confirm"),autoChange:!1}};exports.Keyboard=e;

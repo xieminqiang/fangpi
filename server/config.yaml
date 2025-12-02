@@ -18,7 +18,7 @@ autocode:
     root: /Users/xiaoqiang/Documents/xmq-pro/gin-vue-admin
     server: server
     module: github.com/flipped-aurora/gin-vue-admin/server
-    ai-path: ""
+    ai-path: "https://ai.gin-vue-admin.com/{FUNC}/xmqxmq/40c33b3b-3d28-4dfa-a5bf-7690704f043d"
 aws-s3:
     bucket: xxxxx-10005608
     region: ap-shanghai
@@ -149,9 +149,9 @@ mysql:
     port: "3306"
     config: charset=utf8mb4&parseTime=True&loc=Local
     db-name: gva-xmq
-    username: root
+    username: gva-xmq
     password: Fd6jAACeT4HDTARs
-    path: 127.0.0.1
+    path: 110.40.155.14
     engine: ""
     log-mode: error
     max-idle-conns: 10

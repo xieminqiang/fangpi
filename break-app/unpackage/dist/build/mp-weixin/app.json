@@ -1,0 +1,48 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/login/index",
+    "pages/entry/index",
+    "pages/entry/detail",
+    "pages/data/index",
+    "pages/me/index",
+    "pages/me/level",
+    "pages/me/aiFx",
+    "pages/me/edit",
+    "pages/achievement/achievement"
+  ],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+    "color": "#B0B0B0",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "selectedColor": "#9E8747",
+    "position": "bottom",
+    "list": [
+      {
+        "iconPath": "/static/tabbar/home-m.png",
+        "selectedIconPath": "static/tabbar/home-s.png",
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "iconPath": "/static/tabbar/sy-m.png",
+        "selectedIconPath": "/static/tabbar/sy-s.png",
+        "pagePath": "pages/data/index",
+        "text": "实验室"
+      },
+      {
+        "iconPath": "/static/tabbar/pr-m.png",
+        "selectedIconPath": "/static/tabbar/pr-s.png",
+        "pagePath": "pages/me/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "usingComponents": {}
+}

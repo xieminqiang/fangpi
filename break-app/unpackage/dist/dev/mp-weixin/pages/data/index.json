@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "实验室",
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "u-subsection": "../../uni_modules/uview-plus/components/u-subsection/u-subsection",
+    "l-echart": "../../uni_modules/lime-echart/components/l-echart/l-echart"
+  }
+}

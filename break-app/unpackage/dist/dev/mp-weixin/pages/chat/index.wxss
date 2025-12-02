@@ -1,0 +1,123 @@
+/**
+ * 这里是uni-app内置的常用样式变量
+ *
+ * uni-app 官方扩展插件及插件市场（https://ext.dcloud.net.cn）上很多三方插件均使用了这些样式变量
+ * 如果你是插件开发者，建议你使用scss预处理，并在插件代码中直接使用这些变量（无需 import 这个文件），方便用户通过搭积木的方式开发整体风格一致的App
+ *
+ */
+/**
+ * 如果你是App开发者（插件使用者），你可以通过修改这些变量来定制自己的插件主题，实现自定义主题功能
+ *
+ * 如果你的项目同样使用了scss预处理，你也可以直接在你的 scss 代码中使用如下变量，同时无需 import 这个文件
+ */
+/* 颜色变量 */
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+/* uview-plus 主题变量 */
+/* 项目主题变量 */
+.chat-index-container.data-v-5a559478 {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+  padding: 20rpx;
+}
+.page-header.data-v-5a559478 {
+  text-align: center;
+  padding: 60rpx 0 40rpx;
+}
+.page-header .header-title.data-v-5a559478 {
+  display: block;
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+.page-header .header-subtitle.data-v-5a559478 {
+  font-size: 28rpx;
+  color: #999;
+}
+.role-list.data-v-5a559478 {
+  padding: 0 20rpx;
+}
+.role-card.data-v-5a559478 {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+  transition: all 0.3s;
+}
+.role-card.data-v-5a559478:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.08);
+}
+.role-avatar.data-v-5a559478 {
+  font-size: 80rpx;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+.role-info.data-v-5a559478 {
+  flex: 1;
+}
+.role-name.data-v-5a559478 {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 12rpx;
+}
+.role-description.data-v-5a559478 {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 16rpx;
+}
+.role-tags.data-v-5a559478 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+.role-tag.data-v-5a559478 {
+  display: inline-block;
+  padding: 6rpx 16rpx;
+  background: #f0f7ff;
+  color: #1890ff;
+  font-size: 22rpx;
+  border-radius: 8rpx;
+}
+.role-arrow.data-v-5a559478 {
+  margin-left: 16rpx;
+}
+.role-arrow .arrow-icon.data-v-5a559478 {
+  font-size: 40rpx;
+  color: #999;
+}
+.usage-tips.data-v-5a559478 {
+  margin-top: 60rpx;
+  padding: 32rpx;
+  background: #fff8e1;
+  border-radius: 24rpx;
+  border: 2rpx dashed #ffd54f;
+}
+.tips-title.data-v-5a559478 {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #f57c00;
+  margin-bottom: 20rpx;
+}
+.tips-item.data-v-5a559478 {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 2;
+  padding-left: 8rpx;
+}

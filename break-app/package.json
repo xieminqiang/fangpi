@@ -1,0 +1,35 @@
+{
+  "name": "love-app",
+  "version": "1.0.0",
+  "description": "一个充满爱意的应用",
+  "main": "main.js",
+  "scripts": {
+    "dev:mp-weixin": "uni build --platform mp-weixin --mode development --watch",
+    "build:mp-weixin": "uni build --platform mp-weixin --mode production",
+    "dev:app": "uni build --platform app --mode development --watch",
+    "build:app": "uni build --platform app --mode production",
+    "dev:h5": "uni build --platform h5 --mode development --watch",
+    "build:h5": "uni build --platform h5 --mode production"
+  },
+  "dependencies": {
+    "pinia": "^2.2.1",
+    "pinia-plugin-persistedstate": "^3.2.1",
+    "crypto-js": "^4.2.0"
+  },
+  "devDependencies": {
+    "@dcloudio/types": "^3.4.8",
+    "@dcloudio/uni-app": "^3.0.0",
+    "@dcloudio/uni-cli-shared": "^3.0.0",
+    "@dcloudio/uni-stacktracey": "^3.0.0",
+    "@dcloudio/vite-plugin-uni": "^3.0.0",
+    "sass": "^1.69.5",
+    "vite": "^5.0.0"
+  },
+  "browserslist": [
+    "Android >= 4.4",
+    "iOS >= 9"
+  ],
+  "uni-app": {
+    "scripts": {}
+  }
+}

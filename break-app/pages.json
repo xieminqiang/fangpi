@@ -1,0 +1,121 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "今日放屁",
+				"navigationBarBackgroundColor": "#f6f8f7"
+			}
+		},
+		{
+			"path": "pages/login/index",
+			"style": {
+				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path": "pages/entry/index",
+			"style": {
+				"navigationBarTitleText": "屁的全家族大全"
+				
+				
+			}
+		},
+		{
+			"path": "pages/entry/detail",
+			"style": {
+				"navigationBarTitleText": "屁趣家族成员",
+				"navigationBarBackgroundColor": "#f7fbf7"
+			}
+		},
+		{
+			"path": "pages/data/index",
+			"style": {
+				"navigationBarTitleText": "实验室",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/me/index",
+			"style": {
+				"navigationBarTitleText": "我的",
+				"navigationStyle": "custom"
+			}
+		},
+		
+		{
+			"path": "pages/me/level",
+			"style": {
+				"navigationBarTitleText": "等级称号"
+		
+			}
+		},
+		{
+			"path": "pages/me/aiFx",
+			"style": {
+				"navigationBarTitleText": "",
+				"navigationBarBackgroundColor": "#E8F5E9"
+			}
+		},
+		{
+			"path": "pages/me/edit",
+			"style": {
+				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path": "pages/achievement/achievement",
+			"style": {
+				"navigationBarTitleText": "成就档案"
+			
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	},
+	"tabBar": {
+		"color": "#B0B0B0",
+		"backgroundColor": "#FFFFFF",
+		"borderStyle": "white",
+		"selectedColor": "#9E8747",
+		"position": "bottom",
+		"list": [{
+				"iconPath": "/static/tabbar/home-m.png",
+				"selectedIconPath": "static/tabbar/home-s.png",
+				"pagePath": "pages/index/index",
+				"text": "首页"
+			},
+		
+			{
+				"iconPath": "/static/tabbar/sy-m.png",
+				"selectedIconPath": "/static/tabbar/sy-s.png",
+				"pagePath": "pages/data/index",
+				"text": "实验室"
+			},
+			// {
+			// 	"iconPath": "/static/tabbar/yinle-m.png",
+			// 	"selectedIconPath": "/static/tabbar/yinle-s.png",
+			// 	"pagePath": "pages/audio/index",
+			// 	"text": "屁音"
+			// },
+			// {
+			// 	"iconPath": "/static/tabbar/chat-m.png",
+			// 	"selectedIconPath": "/static/tabbar/chat-s.png",
+			// 	"pagePath": "pages/chat/index",
+			// 	"text": "屁谈"
+			// },
+			{
+				"iconPath": "/static/tabbar/pr-m.png",
+				"selectedIconPath": "/static/tabbar/pr-s.png",
+				"pagePath": "pages/me/index",
+				"text": "我的"
+			}
+		]
+	},
+	
+	"uniIdRouter": {}
+}

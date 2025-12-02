@@ -1,0 +1,1 @@
+"use strict";const r=require("../../libs/vue.js"),s=require("../../libs/config/props.js"),e=r.defineMixin({props:{bgColor:{type:String,default:()=>s.props.statusBar.bgColor},height:{type:Number,default:()=>s.props.statusBar.height}}});exports.props=e;

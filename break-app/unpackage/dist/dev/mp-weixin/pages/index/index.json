@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "今日放屁",
+  "navigationBarBackgroundColor": "#f6f8f7",
+  "usingComponents": {
+    "uni-popup": "../../uni_modules/uni-popup/components/uni-popup/uni-popup",
+    "u-datetime-picker": "../../uni_modules/uview-plus/components/u-datetime-picker/u-datetime-picker"
+  }
+}

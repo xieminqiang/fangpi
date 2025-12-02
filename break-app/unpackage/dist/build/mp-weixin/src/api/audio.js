@@ -1,0 +1,1 @@
+"use strict";const e=require("../util/http.js");exports.getAudioLibraryFeedAPI=(t={})=>{const{page:r=1,pageSize:a=20,type:p}=t,i={page:r,pageSize:a};return null!=p&&(i.type=p),e.http({method:"GET",url:"/break/audioLibrary/feed",params:i})};

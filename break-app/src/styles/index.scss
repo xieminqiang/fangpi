@@ -1,0 +1,196 @@
+%flex-base {
+  display: flex;
+}
+
+
+// 主要flex方向类
+.l-flex {
+  @extend %flex-base;
+  flex-direction: row;
+}
+
+.l-flex-1 {
+  flex: 1;
+}
+
+.l-flex-col {
+  @extend %flex-base;
+  flex-direction: column;
+}
+
+.l-flex-wrap {
+  @extend %flex-base;
+  flex-wrap: wrap;
+}
+
+.l-flex-nowrap {
+  @extend %flex-base;
+  flex-wrap: nowrap;
+}
+
+// align-items 对齐相关
+.l-col-center {
+  @extend %flex-base;
+  align-items: center;
+}
+
+.l-col-top {
+  @extend %flex-base;
+  align-items: flex-start;
+}
+
+.l-col-bottom {
+  @extend %flex-base;
+  align-items: flex-end;
+}
+
+.l-col-stretch {
+  @extend %flex-base;
+  align-items: stretch;
+}
+
+// justify-content 对齐相关
+.l-row-center {
+  @extend %flex-base;
+  justify-content: center;
+}
+
+.l-row-left {
+  @extend %flex-base;
+  justify-content: flex-start;
+}
+
+.l-row-right {
+  @extend %flex-base;
+  justify-content: flex-end;
+}
+
+.l-row-between {
+  @extend %flex-base;
+  justify-content: space-between;
+}
+
+.l-row-around {
+  @extend %flex-base;
+  justify-content: space-around;
+}
+
+// 自我对齐
+.b-self-start {
+  @extend %flex-base;
+  align-self: flex-start;
+}
+
+.b-self-end {
+  @extend %flex-base;
+  align-self: flex-end;
+}
+
+.b-self-center {
+  align-self: center;
+}
+
+.b-h-100 {
+  height: 100%;
+}
+
+.b-w-100 {
+  width: 100%;
+}
+
+// 命名更简洁的flex工具类
+.flex-between {
+  @extend %flex-base;
+  justify-content: space-between;
+}
+
+.flex-around {
+  @extend %flex-base;
+  justify-content: space-around;
+}
+
+.flex-center {
+  @extend %flex-base;
+  justify-content: center;
+}
+
+.flex_hcenter {
+  @extend %flex-base;
+  justify-content: center;
+}
+
+.flex_vcenter {
+  @extend %flex-base;
+  align-items: center;
+}
+
+.bottom-safe-area {
+  height: 70rpx;
+}	
+
+
+
+ // margin padding: 内外边距
+
+@for $i from 0 through 100 {
+  // 只要双数和能被5除尽的数
+  @if $i % 2==0 or $i % 5==0 {
+    // 得出：u-margin-30或者u-m-30
+    .l-margin-#{$i},
+    .l-m-#{$i} {
+      margin: $i + rpx;
+    }
+    .l-m-x-#{$i} {
+      margin-left: $i + rpx;
+      margin-right: $i + rpx;
+    }
+    .l-m-y-#{$i} {
+      margin-top: $i + rpx;
+      margin-bottom: $i + rpx;
+    }
+
+    // 得出：u-padding-30或者u-p-30
+    .l-padding-#{$i},
+    .l-p-#{$i} {
+      padding: $i + rpx;
+    }
+    .l-p-x-#{$i} {
+      padding-left: $i + rpx;
+      padding-right: $i + rpx;
+    }
+    .l-p-y-#{$i} {
+      padding-top: $i + rpx;
+      padding-bottom: $i + rpx;
+    }
+
+    @each $short, $long in l left, t top, r right, b bottom {
+      // 缩写版，结果如： u-m-l-30
+      // 定义外边距
+      .l-m-#{$short}-#{$i} {
+        margin-#{$long}: $i + rpx;
+      }
+
+      // 定义内边距
+      .l-p-#{$short}-#{$i} {
+        padding-#{$long}: $i + rpx;
+      }
+
+      // 完整版，结果如：u-margin-left-30
+      // 定义外边距
+      .l-margin-#{$long}-#{$i} {
+        margin-#{$long}: $i + rpx;
+      }
+
+      // 定义内边距
+      .l-padding-#{$long}-#{$i} {
+        padding-#{$long}: $i + rpx;
+      }
+    }
+  }
+}
+
+
+
+
+
+
