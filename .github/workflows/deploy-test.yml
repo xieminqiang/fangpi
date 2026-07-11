@@ -1,0 +1,67 @@
+name: Deploy Test
+
+on:
+  push:
+    branches:
+      - test
+
+concurrency:
+  group: deploy-test
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and deploy to test server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache-dependency-path: server/go.sum
+
+      - name: Build frontend
+        run: npm ci && npm run build
+        working-directory: web
+
+      - name: Build backend
+        run: |
+          go mod tidy
+          CGO_ENABLED=0 go build -o server .
+        working-directory: server
+
+      - name: Deploy via SSH
+        env:
+          SSH_KEY: ${{ secrets.KEY }}
+          SSH_HOST: ${{ secrets.HOST }}
+          SSH_USER: ${{ secrets.USER }}
+          SSH_PORT: ${{ secrets.PROT }}
+          DEPLOY_DIR: ${{ secrets.MKDIRTEST }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+          SSH_OPTS="-p ${SSH_PORT} -o StrictHostKeyChecking=no"
+          REMOTE="${SSH_USER}@${SSH_HOST}"
+
+          ssh $SSH_OPTS "$REMOTE" "mkdir -p ${DEPLOY_DIR}dist ${DEPLOY_DIR}resource"
+
+          scp $SSH_OPTS -r web/dist/* "${REMOTE}:${DEPLOY_DIR}dist/"
+          scp $SSH_OPTS server/server "${REMOTE}:${DEPLOY_DIR}server"
+          scp $SSH_OPTS -r server/resource/* "${REMOTE}:${DEPLOY_DIR}resource/"
+
+          ssh $SSH_OPTS "$REMOTE" "cd ${DEPLOY_DIR} && bash restart.sh"
