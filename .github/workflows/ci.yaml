@@ -1,11 +1,7 @@
 name: CI
 
+# 官方仓库专用；fangpi 仓库请使用 deploy-prod.yml 自动部署
 on:
-  push:
-    branches: [ '*' ]
-  pull_request:
-  release:
-    types: [ created, edited ]
   workflow_dispatch:
     inputs:
       gva_version:
