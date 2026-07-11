@@ -1,13 +1,10 @@
 <template>
   <div
-    class="rounded-lg flex items-center justify-evenly w-full h-full relative md:w-screen md:h-screen md:bg-[#194bfb] overflow-hidden"
+    class="flex items-center justify-center w-full h-full min-h-screen bg-white overflow-hidden"
   >
     <div
-      class="rounded-md w-full h-full flex items-center justify-center overflow-hidden"
+      class="rounded-md w-full max-w-lg px-6 flex items-center justify-center overflow-hidden"
     >
-      <div
-        class="oblique h-[130%] w-3/5 bg-white dark:bg-slate-900 transform -rotate-12 absolute -ml-80"
-      />
       <div
         v-if="!page.showForm"
         :class="[page.showReadme ? 'slide-out-right' : 'slide-in-fwd-top']"
@@ -16,7 +13,7 @@
           <div
             class="font-sans text-4xl font-bold text-center mb-4 dark:text-white"
           >
-            GIN-VUE-ADMIN
+            小强管理系统
           </div>
           <p class="text-gray-600 dark:text-gray-300 mb-2">初始化须知</p>
           <p class="text-gray-600 dark:text-gray-300 mb-2">
@@ -124,10 +121,6 @@
           </el-form-item>
         </el-form>
       </div>
-    </div>
-
-    <div class="hidden md:block w-1/2 h-full float-right bg-[#194bfb]">
-      <img class="h-full" src="@/assets/login_right_banner.jpg" alt="banner" />
     </div>
   </div>
 </template>

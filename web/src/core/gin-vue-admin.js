@@ -10,7 +10,7 @@ export default {
   install: (app) => {
     register(app)
     console.log(`
-       欢迎使用 Gin-Vue-Admin
+       欢迎使用 小强管理系统
       
     `)
   }
