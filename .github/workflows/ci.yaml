@@ -21,7 +21,7 @@ jobs:
         run: |
           echo "flipped-aurora"
   frontend:
-    if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'release'
+    if: github.repository_owner == 'flipped-aurora' && (github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'release')
     name: Frontend node ${{ matrix.node-version }}
     runs-on: ubuntu-latest
     strategy:
@@ -43,7 +43,7 @@ jobs:
         working-directory: ./web
 
   backend:
-    if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'release'
+    if: github.repository_owner == 'flipped-aurora' && (github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'release')
     name: Backend go
     runs-on: ubuntu-latest
     strategy:
