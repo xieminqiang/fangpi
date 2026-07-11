@@ -33,20 +33,6 @@ const _sfc_main = {
         className,
         items
       }));
-      groups.sort((a, b) => {
-        if (a.className === "声学类屁")
-          return -1;
-        if (b.className === "声学类屁")
-          return 1;
-        if (a.className === "其他类屁")
-          return 1;
-        if (b.className === "其他类屁")
-          return -1;
-        if (b.items.length !== a.items.length) {
-          return b.items.length - a.items.length;
-        }
-        return a.className.localeCompare(b.className, "zh-CN");
-      });
       return groups;
     });
     const getCardStyle = (item) => {
@@ -60,6 +46,59 @@ const _sfc_main = {
       const itemData = JSON.stringify(item);
       common_vendor.index.navigateTo({
         url: `/pages/entry/detail?data=${encodeURIComponent(itemData)}`
+      });
+    };
+    const goToCreateFart = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/entry/creat"
+      });
+    };
+    const handleDelete = async (item) => {
+      common_vendor.index.showModal({
+        title: "确认删除",
+        content: `确定要删除"${item.name}"吗？删除后无法恢复。`,
+        confirmText: "删除",
+        cancelText: "取消",
+        confirmColor: "#ff3b30",
+        success: async (res) => {
+          if (res.confirm) {
+            try {
+              common_vendor.index.showLoading({
+                title: "删除中..."
+              });
+              const { data } = await src_api_audio.deleteAudioLibraryAPI(item.id);
+              common_vendor.index.hideLoading();
+              if (data.code === 0) {
+                common_vendor.index.showToast({
+                  title: "删除成功",
+                  icon: "success",
+                  duration: 1500
+                });
+                const index = feed.value.list.findIndex((i) => i.id === item.id);
+                if (index !== -1) {
+                  feed.value.list.splice(index, 1);
+                  feed.value.total--;
+                  feed.value.empty = feed.value.list.length === 0;
+                }
+                common_vendor.index.$emit("audioLibraryUpdated");
+              } else {
+                common_vendor.index.showToast({
+                  title: data.msg || "删除失败",
+                  icon: "none",
+                  duration: 2e3
+                });
+              }
+            } catch (error) {
+              common_vendor.index.hideLoading();
+              common_vendor.index.__f__("error", "at pages/entry/index.vue:279", "删除失败:", error);
+              common_vendor.index.showToast({
+                title: "删除失败，请重试",
+                icon: "none",
+                duration: 2e3
+              });
+            }
+          }
+        }
       });
     };
     const normalizeFeed = (data) => {
@@ -139,8 +178,19 @@ const _sfc_main = {
       }
       loadFeed(true, false);
     };
+    const onAudioLibraryUpdated = () => {
+      common_vendor.index.__f__("log", "at pages/entry/index.vue:389", "收到音频库更新事件，刷新数据");
+      currentPage.value = 1;
+      feed.value.list = [];
+      hasMore.value = true;
+      loadFeed();
+    };
     common_vendor.onMounted(() => {
       loadFeed();
+      common_vendor.index.$on("audioLibraryUpdated", onAudioLibraryUpdated);
+    });
+    common_vendor.onUnmounted(() => {
+      common_vendor.index.$off("audioLibraryUpdated", onAudioLibraryUpdated);
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -155,27 +205,31 @@ const _sfc_main = {
             b: common_vendor.t(group.items.length),
             c: common_vendor.f(group.items, (item, k1, i1) => {
               return common_vendor.e({
-                a: item.image
-              }, item.image ? {
-                b: item.image
+                a: item.class_name === "自己放的屁"
+              }, item.class_name === "自己放的屁" ? {
+                b: common_vendor.o(($event) => handleDelete(item), item.id)
               } : {}, {
-                c: common_vendor.t(item.name),
-                d: common_vendor.t(item.description || item.moodText),
-                e: item.tags && item.tags.length
+                c: item.image
+              }, item.image ? {
+                d: item.image
+              } : {}, {
+                e: common_vendor.t(item.name),
+                f: common_vendor.t(item.description || item.moodText),
+                g: item.tags && item.tags.length
               }, item.tags && item.tags.length ? common_vendor.e({
-                f: common_vendor.f(item.tags.slice(0, 4), (tag, k2, i2) => {
+                h: common_vendor.f(item.tags.slice(0, 4), (tag, k2, i2) => {
                   return {
                     a: common_vendor.t(tag),
                     b: tag
                   };
                 }),
-                g: item.tags.length > 4
+                i: item.tags.length > 4
               }, item.tags.length > 4 ? {
-                h: common_vendor.t(item.tags.length - 4)
+                j: common_vendor.t(item.tags.length - 4)
               } : {}) : {}, {
-                i: item.id,
-                j: common_vendor.s(getCardStyle(item)),
-                k: common_vendor.o(($event) => goToDetail(item), item.id)
+                k: common_vendor.o(($event) => goToDetail(item), item.id),
+                l: item.id,
+                m: common_vendor.s(getCardStyle(item))
               });
             }),
             d: group.className
@@ -188,7 +242,8 @@ const _sfc_main = {
         e: feed.value.empty,
         i: common_vendor.o(onReachBottom),
         j: isRefreshingPull.value,
-        k: common_vendor.o(onPullRefresh)
+        k: common_vendor.o(onPullRefresh),
+        l: common_vendor.o(goToCreateFart)
       });
     };
   }

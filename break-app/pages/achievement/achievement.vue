@@ -9,8 +9,7 @@
     >
       <!-- 页面标题 -->
       <view class="page-header">
-        <view class="decoration-emoji decoration-1">🏆</view>
-        <view class="decoration-emoji decoration-2">💨</view>
+        <image class="decoration-img decoration-2" src="/static/emj/wusheng.png" mode="aspectFit"></image>
         <text class="page-subtitle">解锁更多成就，成为放屁大师！</text>
       </view>
 
@@ -83,7 +82,7 @@
               
               <!-- 奖励经验 -->
               <view class="reward-container">
-                <text class="reward-icon">💎</text>
+               
                 <text class="reward-text">+{{ achievement.rewardExp }}</text>
               </view>
             </view>
@@ -96,7 +95,7 @@
     <uni-popup ref="achievementPopup" type="center" :mask-click="false">
       <view class="achievement-detail-popup">
         <view class="popup-header">
-          <text class="popup-title">成就详情</text>
+          <text class="popup-title">{{ selectedAchievement && selectedAchievement.isUnlocked ? `恭喜您已获得了"${selectedAchievement.achievementName}"` : '您还未解锁该成就' }}</text>
           <text class="popup-close" @click="closeAchievementDetail">✕</text>
         </view>
         
@@ -173,7 +172,7 @@
     <!-- 加载状态 -->
     <view v-if="loading" class="loading-container">
       <view class="loading-spinner">
-        <text class="loading-emoji">💨</text>
+        <image class="loading-img" src="/static/emj/wusheng.png" mode="aspectFit"></image>
         <text class="loading-text">加载中...</text>
       </view>
     </view>
@@ -353,16 +352,16 @@ button::after {
   opacity: 0.5;
 }
 
-.decoration-1 {
-  top: -32rpx;
-  left: -64rpx;
-  font-size: 200rpx;
+.decoration-img {
+  position: absolute;
+  opacity: 0.3;
 }
 
 .decoration-2 {
   bottom: -64rpx;
   right: -32rpx;
-  font-size: 160rpx;
+  width: 160rpx;
+  height: 160rpx;
   transform: rotate(12deg);
 }
 
@@ -812,10 +811,13 @@ button::after {
   
   .loading-spinner {
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     
-    .loading-emoji {
-      display: block;
-      font-size: 80rpx;
+    .loading-img {
+      width: 80rpx;
+      height: 80rpx;
       margin-bottom: 20rpx;
       animation: spin 2s linear infinite;
     }

@@ -58,10 +58,11 @@ export const importURL = (data) => {
 
 
 // 上传文件 暂时用于头像上传
-export const uploadFile = (data) => {
+export const uploadFile = (data, config = {}) => {
   return service({
     url: "/fileUploadAndDownload/upload",
     method: "post",
     data,
+    ...config
   });
 };

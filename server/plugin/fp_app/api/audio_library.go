@@ -192,7 +192,7 @@ func (a *audioLibrary) GetAudioLibraryFeed(c *gin.Context) {
 		pageInfo.Page = 1
 		pageInfo.PageSize = 20
 	}
-	
+
 	// 设置默认值
 	if pageInfo.Page <= 0 {
 		pageInfo.Page = 1
@@ -205,7 +205,10 @@ func (a *audioLibrary) GetAudioLibraryFeed(c *gin.Context) {
 		pageInfo.PageSize = 100
 	}
 
-	feed, err := service.Service.AudioLibrary.GetAudioLibraryFeed(c.Request.Context(), pageInfo.Page, pageInfo.PageSize)
+	// 获取用户ID（如果未登录则为0，只能看到公共音频）
+	userID := getWxUserIdFromToken(c)
+
+	feed, err := service.Service.AudioLibrary.GetAudioLibraryFeed(c.Request.Context(), pageInfo.Page, pageInfo.PageSize, userID)
 	if err != nil {
 		global.GVA_LOG.Error("获取屁趣音效音频库失败", zap.Error(err))
 		response.FailWithMessage("获取失败: "+err.Error(), c)
@@ -213,4 +216,76 @@ func (a *audioLibrary) GetAudioLibraryFeed(c *gin.Context) {
 	}
 
 	response.OkWithDetailed(feed, "获取成功", c)
+}
+
+// CreateMyAudioLibrary 创建用户自己的音频库记录
+// @Tags BreakApp
+// @Summary 创建用户自己的音频库记录
+// @Security ApiKeyAuth
+// @Accept application/json
+// @Produce application/json
+// @Param data body model.BreakAudioLibrary true "音频库信息（不需要传user_id，会自动设置为当前用户ID）"
+// @Success 200 {object} response.Response{data=model.BreakAudioLibrary,msg=string} "创建成功"
+// @Router /break/audioLibrary/my [post]
+func (a *audioLibrary) CreateMyAudioLibrary(c *gin.Context) {
+	// 获取用户ID
+	userID := getWxUserIdFromToken(c)
+	if userID == 0 {
+		response.FailWithMessage("未登录或Token无效", c)
+		return
+	}
+
+	var audioLibrary model.BreakAudioLibrary
+	err := c.ShouldBindJSON(&audioLibrary)
+	if err != nil {
+		response.FailWithMessage("参数错误: "+err.Error(), c)
+		return
+	}
+
+	// 设置用户ID（用户自己创建的音频）
+	audioLibrary.UserId = userID
+
+	// 调用服务层
+	result, err := service.Service.AudioLibrary.CreateAudioLibrary(c.Request.Context(), &audioLibrary)
+	if err != nil {
+		global.GVA_LOG.Error("创建用户音频库失败", zap.Error(err))
+		response.FailWithMessage("创建失败: "+err.Error(), c)
+		return
+	}
+
+	response.OkWithDetailed(result, "创建成功", c)
+}
+
+// DeleteMyAudioLibrary 删除用户自己的音频库记录
+// @Tags BreakApp
+// @Summary 删除用户自己的音频库记录
+// @Security ApiKeyAuth
+// @Accept application/json
+// @Produce application/json
+// @Param id path uint true "音频库ID"
+// @Success 200 {object} response.Response{msg=string} "删除成功"
+// @Router /break/audioLibrary/my/:id [delete]
+func (a *audioLibrary) DeleteMyAudioLibrary(c *gin.Context) {
+	// 获取用户ID
+	userID := getWxUserIdFromToken(c)
+	if userID == 0 {
+		response.FailWithMessage("未登录或Token无效", c)
+		return
+	}
+
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+
+	// 调用服务层，验证权限并删除
+	err = service.Service.AudioLibrary.DeleteMyAudioLibrary(c.Request.Context(), uint(id), userID)
+	if err != nil {
+		global.GVA_LOG.Error("删除用户音频库失败", zap.Error(err))
+		response.FailWithMessage("删除失败: "+err.Error(), c)
+		return
+	}
+
+	response.OkWithMessage("删除成功", c)
 }

@@ -22,6 +22,8 @@ export const useUserStore = defineStore('user',{
     totalFarts: (state) => state.userInfo?.totalFarts || 0,
     // 获取经验值
     experience: (state) => state.userInfo?.experience || 0,
+    // 获取屁币
+    points: (state) => state.userInfo?.points || 0,
     // 判断是否已登录
     isLogin: (state) => !!state.token && !!state.userInfo?.id
   },

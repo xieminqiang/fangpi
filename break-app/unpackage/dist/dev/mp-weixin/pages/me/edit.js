@@ -29,30 +29,17 @@ const _sfc_main = {
           originalAvatar.value = userInfo.avatar || defaultAvatar;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/me/edit.vue:101", "获取用户信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/me/edit.vue:98", "获取用户信息失败:", error);
         common_vendor.index.showToast({
           title: "获取用户信息失败",
           icon: "none"
         });
       }
     };
-    const chooseAvatar = () => {
-      common_vendor.index.chooseImage({
-        count: 1,
-        sizeType: ["compressed"],
-        sourceType: ["album", "camera"],
-        success: async (res) => {
-          const tempFilePath = res.tempFilePaths[0];
-          await uploadAvatar(tempFilePath);
-        },
-        fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/me/edit.vue:120", "选择图片失败:", err);
-          common_vendor.index.showToast({
-            title: "选择图片失败",
-            icon: "none"
-          });
-        }
-      });
+    const onChooseAvatar = ({ detail }) => {
+      if (detail.avatarUrl) {
+        uploadAvatar(detail.avatarUrl);
+      }
     };
     const uploadAvatar = async (filePath) => {
       common_vendor.index.showLoading({
@@ -74,7 +61,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/me/edit.vue:152", "上传头像失败:", error);
+        common_vendor.index.__f__("error", "at pages/me/edit.vue:136", "上传头像失败:", error);
         common_vendor.index.showToast({
           title: "上传失败，请重试",
           icon: "none"
@@ -133,7 +120,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/me/edit.vue:226", "保存用户信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/me/edit.vue:210", "保存用户信息失败:", error);
         common_vendor.index.showToast({
           title: "保存失败，请重试",
           icon: "none"
@@ -151,7 +138,7 @@ const _sfc_main = {
     return (_ctx, _cache) => {
       return {
         a: avatarUrl.value || defaultAvatar,
-        b: common_vendor.o(chooseAvatar),
+        b: common_vendor.o(onChooseAvatar),
         c: common_vendor.o([($event) => nickname.value = $event.detail.value, onNicknameInput]),
         d: nickname.value,
         e: common_vendor.t(nickname.value.length),

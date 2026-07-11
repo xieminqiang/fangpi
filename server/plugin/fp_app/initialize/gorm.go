@@ -15,11 +15,13 @@ func Gorm(ctx context.Context) {
 		model.WxUser{},
 		model.BreakUserCheckinDays{},
 		model.BreakFartRecord{},
+		model.BreakFartTogetherRecord{},
 		model.BreakAchievement{},
 		model.BreakUserAchievement{},
 		model.BreakLevelConfig{},
 		model.BreakAudioLibrary{},
 		model.BreakAppConfig{},
+		model.BreakUserPointsRecord{},
 	)
 	if err != nil {
 		err = errors.Wrap(err, "注册表失败!")

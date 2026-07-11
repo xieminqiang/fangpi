@@ -62,35 +62,48 @@ const _sfc_main = {
     const showTimePicker = common_vendor.ref(false);
     const makeupTimeDisplay = common_vendor.ref("");
     const todayCount = common_vendor.ref(0);
-    const mostHappyMood = common_vendor.ref("🤣");
+    const mostHappyMood = common_vendor.ref("/static/emj/kaixin.png");
     const lastFartTime = common_vendor.ref("暂无记录");
+    const moodEmojiToIcon = {
+      "😌": "/static/emj/fangsong.png",
+      // 放松
+      "🤣": "/static/emj/kaixin.png",
+      // 开心
+      "😖": "/static/emj/ganga.png"
+      // 尴尬
+    };
+    const moodValueToIcon = {
+      "normal": "/static/emj/fangsong.png",
+      "happy": "/static/emj/kaixin.png",
+      "embarrassed": "/static/emj/ganga.png"
+    };
     const fartTypes = common_vendor.reactive([
-      { value: "响亮型", emoji: "🔥", label: "响亮型" },
-      { value: "轻柔型", emoji: "🌬️", label: "轻柔型" },
-      { value: "无声型", emoji: "💨", label: "无声型" }
+      { value: "响亮型", icon: "/static/emj/iangliang.png", label: "响亮型" },
+      { value: "轻柔型", icon: "/static/emj/qingrou.png", label: "轻柔型" },
+      { value: "无声型", icon: "/static/emj/wusheng.png", label: "无声型" }
     ]);
     const smellLevels = common_vendor.reactive([
-      { value: "清香", emoji: "😊", label: "清香" },
-      { value: "一般", emoji: "😐", label: "一般" },
-      { value: "浓烈", emoji: "😷", label: "浓烈" }
+      { value: "清香", icon: "/static/emj/qingxiang.png", label: "清香" },
+      { value: "一般", icon: "/static/emj/yiban.png", label: "一般" },
+      { value: "浓烈", icon: "/static/emj/nonglie.png", label: "浓烈" }
     ]);
     const moods = common_vendor.reactive([
-      { value: "放松", emoji: "😌", label: "放松" },
-      { value: "开心", emoji: "🤣", label: "开心" },
-      { value: "尴尬", emoji: "😖", label: "尴尬" }
+      { value: "放松", icon: "/static/emj/fangsong.png", label: "放松" },
+      { value: "开心", icon: "/static/emj/kaixin.png", label: "开心" },
+      { value: "尴尬", icon: "/static/emj/ganga.png", label: "尴尬" }
     ]);
     const openPopup = () => {
       popup.value.open();
     };
     const onGifLoaded = () => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:564", "GIF加载完成");
+      common_vendor.index.__f__("log", "at pages/index/index.vue:586", "GIF加载完成");
       isGifPlaying.value = true;
       setTimeout(() => {
         isGifPlaying.value = false;
       }, 3e3);
     };
     const replayGif = () => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:574", "开始重播GIF");
+      common_vendor.index.__f__("log", "at pages/index/index.vue:596", "开始重播GIF");
       showGifImage.value = false;
       isGifPlaying.value = false;
       const timestamp = Date.now();
@@ -98,7 +111,7 @@ const _sfc_main = {
       gifUrl.value = `https://sbx-server.oss-cn-shenzhen.aliyuncs.com/fp-wx/niao-fp.gif?t=${timestamp}`;
       setTimeout(() => {
         showGifImage.value = true;
-        common_vendor.index.__f__("log", "at pages/index/index.vue:590", "GIF重新显示，URL:", gifUrl.value);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:612", "GIF重新显示，URL:", gifUrl.value);
       }, 100);
     };
     const playFartSound = () => {
@@ -120,16 +133,16 @@ const _sfc_main = {
         audioContext.volume = 0.8;
         audioContext.obeyMuteSwitch = false;
         audioContext.onPlay(() => {
-          common_vendor.index.__f__("log", "at pages/index/index.vue:638", "开始播放放屁声音，路径:", audioContext.src);
+          common_vendor.index.__f__("log", "at pages/index/index.vue:660", "开始播放放屁声音，路径:", audioContext.src);
         });
         audioContext.onEnded(() => {
-          common_vendor.index.__f__("log", "at pages/index/index.vue:642", "放屁声音播放完成");
+          common_vendor.index.__f__("log", "at pages/index/index.vue:664", "放屁声音播放完成");
         });
         audioContext.onError((err) => {
-          common_vendor.index.__f__("error", "at pages/index/index.vue:647", "播放放屁声音失败:", err);
-          common_vendor.index.__f__("error", "at pages/index/index.vue:648", "音频路径:", audioContext.src);
+          common_vendor.index.__f__("error", "at pages/index/index.vue:669", "播放放屁声音失败:", err);
+          common_vendor.index.__f__("error", "at pages/index/index.vue:670", "音频路径:", audioContext.src);
           if (err.errMsg && (err.errMsg.includes("404") || err.errMsg.includes("not found"))) {
-            common_vendor.index.__f__("warn", "at pages/index/index.vue:651", "音频文件未找到，请确保已将 fangpi.MP3 上传到 OSS 服务器");
+            common_vendor.index.__f__("warn", "at pages/index/index.vue:673", "音频文件未找到，请确保已将 fangpi.MP3 上传到 OSS 服务器");
             common_vendor.index.showToast({
               title: "音频文件未找到",
               icon: "none",
@@ -146,14 +159,24 @@ const _sfc_main = {
         });
         audioContext.play();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:673", "创建音频上下文失败:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:695", "创建音频上下文失败:", error);
         audioContext = null;
       }
+    };
+    const goToPoints = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/me/points"
+      });
+    };
+    const goToFartPage = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/index/fart"
+      });
     };
     const openMakeupPopup = () => {
       const now = /* @__PURE__ */ new Date();
       makeupTimeDisplay.value = formatTimeDisplay(now);
-      common_vendor.index.__f__("log", "at pages/index/index.vue:686", "打开补卡弹窗，初始化时间:", makeupTimeDisplay.value);
+      common_vendor.index.__f__("log", "at pages/index/index.vue:729", "打开补卡弹窗，初始化时间:", makeupTimeDisplay.value);
       makeupPopup.value.open();
     };
     const closeMakeupPopup = () => {
@@ -161,7 +184,7 @@ const _sfc_main = {
     };
     const formatTimeDisplay = (date) => {
       if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:699", "formatTimeDisplay 接收到无效的日期:", date);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:742", "formatTimeDisplay 接收到无效的日期:", date);
         return "00:00";
       }
       const hours = String(date.getHours()).padStart(2, "0");
@@ -169,13 +192,13 @@ const _sfc_main = {
       return `${hours}:${minutes}`;
     };
     const onTimeChange = (e) => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:710", "时间选择器 change 事件:", e);
-      common_vendor.index.__f__("log", "at pages/index/index.vue:711", "当前 makeupTimeDisplay:", makeupTimeDisplay.value);
+      common_vendor.index.__f__("log", "at pages/index/index.vue:753", "时间选择器 change 事件:", e);
+      common_vendor.index.__f__("log", "at pages/index/index.vue:754", "当前 makeupTimeDisplay:", makeupTimeDisplay.value);
     };
     const onTimeConfirm = (e) => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:716", "===== 时间选择器确认 =====");
-      common_vendor.index.__f__("log", "at pages/index/index.vue:717", "e.value:", e.value);
-      common_vendor.index.__f__("log", "at pages/index/index.vue:718", "当前 makeupTimeDisplay:", makeupTimeDisplay.value);
+      common_vendor.index.__f__("log", "at pages/index/index.vue:759", "===== 时间选择器确认 =====");
+      common_vendor.index.__f__("log", "at pages/index/index.vue:760", "e.value:", e.value);
+      common_vendor.index.__f__("log", "at pages/index/index.vue:761", "当前 makeupTimeDisplay:", makeupTimeDisplay.value);
       const selectedTime = makeupTimeDisplay.value;
       if (selectedTime) {
         const now = /* @__PURE__ */ new Date();
@@ -230,9 +253,9 @@ const _sfc_main = {
           fartTime: makeupTimeDisplay.value
           // HH:mm
         };
-        common_vendor.index.__f__("log", "at pages/index/index.vue:795", "提交补卡记录:", requestData);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:838", "提交补卡记录:", requestData);
         const { data } = await src_api_fart.makeupFartRecordAPI(requestData);
-        common_vendor.index.__f__("log", "at pages/index/index.vue:800", "补卡结果:", data);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:843", "补卡结果:", data);
         if (data.code === 0) {
           common_vendor.index.vibrateShort({
             type: "heavy"
@@ -244,12 +267,12 @@ const _sfc_main = {
           notifyMePageRefresh();
           loadStatisticsData();
           common_vendor.index.showToast({
-            title: "补卡成功 ✅",
+            title: "记录成功 ✅",
             icon: "none",
             duration: 1500
           });
           if (data.data && data.data.newAchievements && data.data.newAchievements.length > 0) {
-            common_vendor.index.__f__("log", "at pages/index/index.vue:834", "解锁新成就:", data.data.newAchievements);
+            common_vendor.index.__f__("log", "at pages/index/index.vue:877", "解锁新成就:", data.data.newAchievements);
             showNewAchievements(data.data.newAchievements);
           }
           makeupFartType.value = "响亮型";
@@ -264,7 +287,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:852", "补卡失败:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:895", "补卡失败:", error);
         common_vendor.index.showToast({
           title: "补卡失败，请重试",
           icon: "none"
@@ -291,12 +314,38 @@ const _sfc_main = {
         }
         if (statsResponse.data.code === 0) {
           const statsData = statsResponse.data.data;
-          if (statsData.mostCommonMood && statsData.mostCommonMood.moodEmoji) {
-            mostHappyMood.value = statsData.mostCommonMood.moodEmoji;
+          common_vendor.index.__f__("log", "at pages/index/index.vue:929", "统计数据返回:", statsData);
+          if (statsData.mostCommonMood) {
+            common_vendor.index.__f__("log", "at pages/index/index.vue:933", "mostCommonMood 数据:", statsData.mostCommonMood);
+            let newMoodIcon = null;
+            if (statsData.mostCommonMood.moodEmoji) {
+              common_vendor.index.__f__("log", "at pages/index/index.vue:939", "尝试使用 moodEmoji 映射:", statsData.mostCommonMood.moodEmoji);
+              newMoodIcon = moodEmojiToIcon[statsData.mostCommonMood.moodEmoji];
+              if (newMoodIcon) {
+                common_vendor.index.__f__("log", "at pages/index/index.vue:942", "moodEmoji 映射成功:", newMoodIcon);
+              }
+            }
+            if (!newMoodIcon && statsData.mostCommonMood.mood) {
+              common_vendor.index.__f__("log", "at pages/index/index.vue:948", "尝试使用 mood 值映射:", statsData.mostCommonMood.mood);
+              newMoodIcon = moodValueToIcon[statsData.mostCommonMood.mood];
+              if (newMoodIcon) {
+                common_vendor.index.__f__("log", "at pages/index/index.vue:951", "mood 值映射成功:", newMoodIcon);
+              } else {
+                common_vendor.index.__f__("warn", "at pages/index/index.vue:953", "mood 值映射失败，可用的映射:", Object.keys(moodValueToIcon));
+              }
+            }
+            if (newMoodIcon) {
+              mostHappyMood.value = newMoodIcon;
+              common_vendor.index.__f__("log", "at pages/index/index.vue:960", "✅ mostHappyMood 更新成功:", mostHappyMood.value);
+            } else {
+              common_vendor.index.__f__("warn", "at pages/index/index.vue:962", "⚠️ 无法映射心情图标，保持当前值:", mostHappyMood.value);
+            }
+          } else {
+            common_vendor.index.__f__("log", "at pages/index/index.vue:965", "暂无 mostCommonMood 数据");
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:892", "加载统计数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:969", "加载统计数据失败:", error);
       }
     };
     const formatLastFartTime = (fartTime) => {
@@ -321,7 +370,7 @@ const _sfc_main = {
           return `${diffHours}小时前`;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:925", "格式化时间失败:", error, fartTime);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:1002", "格式化时间失败:", error, fartTime);
         return "时间未知";
       }
     };
@@ -348,7 +397,7 @@ const _sfc_main = {
     };
     const notifyMePageRefresh = () => {
       common_vendor.index.$emit("userInfoUpdated");
-      common_vendor.index.__f__("log", "at pages/index/index.vue:966", "已发送 userInfoUpdated 事件，通知其他页面刷新");
+      common_vendor.index.__f__("log", "at pages/index/index.vue:1043", "已发送 userInfoUpdated 事件，通知其他页面刷新");
     };
     const confirmFart = async () => {
       if (isSubmitting.value) {
@@ -372,7 +421,10 @@ const _sfc_main = {
           "尴尬": "embarrassed"
         };
         const now = /* @__PURE__ */ new Date();
-        const fartDate = now.toISOString().split("T")[0];
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const fartDate = `${year}-${month}-${day}`;
         const fartTime = now.toTimeString().split(" ")[0];
         const requestData = {
           fartType: typeMap[selectedFartType.value],
@@ -382,9 +434,9 @@ const _sfc_main = {
           fartDate,
           fartTime
         };
-        common_vendor.index.__f__("log", "at pages/index/index.vue:1014", "提交放屁记录:", requestData);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:1094", "提交放屁记录:", requestData);
         const { data } = await src_api_fart.createFartRecordAPI(requestData);
-        common_vendor.index.__f__("log", "at pages/index/index.vue:1019", "打卡结果:", data);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:1099", "打卡结果:", data);
         if (data.code === 0) {
           common_vendor.index.vibrateShort({
             type: "heavy"
@@ -397,7 +449,7 @@ const _sfc_main = {
           notifyMePageRefresh();
           loadStatisticsData();
           if (data.data && data.data.newAchievements && data.data.newAchievements.length > 0) {
-            common_vendor.index.__f__("log", "at pages/index/index.vue:1046", "解锁新成就:", data.data.newAchievements);
+            common_vendor.index.__f__("log", "at pages/index/index.vue:1126", "解锁新成就:", data.data.newAchievements);
             showNewAchievements(data.data.newAchievements);
           }
           selectedFartType.value = "响亮型";
@@ -411,7 +463,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:1063", "打卡失败:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:1143", "打卡失败:", error);
         common_vendor.index.showToast({
           title: "打卡失败，请重试",
           icon: "none"
@@ -423,15 +475,15 @@ const _sfc_main = {
     common_vendor.onMounted(() => {
       const userStore = src_stores_user.useUserStore();
       if (userStore.token) {
-        common_vendor.index.__f__("log", "at pages/index/index.vue:1080", "已有 token，直接加载统计数据");
+        common_vendor.index.__f__("log", "at pages/index/index.vue:1160", "已有 token，直接加载统计数据");
         loadStatisticsData();
       } else {
-        common_vendor.index.__f__("log", "at pages/index/index.vue:1083", "暂无 token，等待登录完成...");
+        common_vendor.index.__f__("log", "at pages/index/index.vue:1163", "暂无 token，等待登录完成...");
       }
       common_vendor.index.$on("loginSuccess", onLoginSuccess);
     });
     const onLoginSuccess = () => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:1092", "收到 loginSuccess 事件，开始加载统计数据");
+      common_vendor.index.__f__("log", "at pages/index/index.vue:1172", "收到 loginSuccess 事件，开始加载统计数据");
       loadStatisticsData();
     };
     common_vendor.onUnmounted(() => {
@@ -483,19 +535,20 @@ const _sfc_main = {
       if (!selectedAchievement.value) {
         return;
       }
-      common_vendor.index.__f__("log", "at pages/index/index.vue:1167", "准备分享成就:", selectedAchievement.value.achievementName);
+      common_vendor.index.__f__("log", "at pages/index/index.vue:1247", "准备分享成就:", selectedAchievement.value.achievementName);
     };
     common_vendor.onShareAppMessage(() => {
       if (selectedAchievement.value) {
         return {
           title: `我解锁了「${selectedAchievement.value.achievementName}」成就！🎉`,
           path: "/pages/index/index",
-          imageUrl: selectedAchievement.value.achievementIcon || selectedAchievement.value.achievementGif || ""
+          imageUrl: "https://sbx-server.oss-cn-shenzhen.aliyuncs.com/fp-wx/uploads/2025-12-09/share_bg.png"
         };
       }
       return {
         title: "快来一起记录放屁，解锁成就吧！💨",
-        path: "/pages/index/index"
+        path: "/pages/index/index",
+        imageUrl: "https://sbx-server.oss-cn-shenzhen.aliyuncs.com/fp-wx/uploads/2025-12-09/share_bg.png"
       };
     });
     const openAudioSettingPopup = async () => {
@@ -509,7 +562,7 @@ const _sfc_main = {
       } else {
         selectedAudioUrl.value = defaultAudioUrl;
       }
-      common_vendor.index.__f__("log", "at pages/index/index.vue:1208", "打开音频设置弹窗，当前选中:", selectedAudioUrl.value);
+      common_vendor.index.__f__("log", "at pages/index/index.vue:1289", "打开音频设置弹窗，当前选中:", selectedAudioUrl.value);
       (_b = audioSettingPopup.value) == null ? void 0 : _b.open();
       setTimeout(() => {
         const query = common_vendor.index.createSelectorQuery().in(getCurrentPages()[getCurrentPages().length - 1]);
@@ -553,17 +606,13 @@ const _sfc_main = {
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:1289", "加载音频列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:1370", "加载音频列表失败:", error);
         if (!isLoadMore) {
           audioList.value = [];
         }
       } finally {
         isLoadingAudio.value = false;
       }
-    };
-    const selectAudio = (url, name) => {
-      selectedAudioUrl.value = url;
-      common_vendor.index.__f__("log", "at pages/index/index.vue:1301", "选择音频:", name, url);
     };
     const playAudio = (audio) => {
       if (playingAudioId.value === audio.id) {
@@ -577,10 +626,10 @@ const _sfc_main = {
       previewAudioContext.obeyMuteSwitch = false;
       playingAudioId.value = audio.id;
       previewAudioContext.onPlay(() => {
-        common_vendor.index.__f__("log", "at pages/index/index.vue:1327", "开始播放预览音频:", audio.name);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:1408", "开始播放预览音频:", audio.name);
       });
       previewAudioContext.onEnded(() => {
-        common_vendor.index.__f__("log", "at pages/index/index.vue:1331", "预览音频播放完成");
+        common_vendor.index.__f__("log", "at pages/index/index.vue:1412", "预览音频播放完成");
         playingAudioId.value = null;
         if (previewAudioContext) {
           previewAudioContext.destroy();
@@ -588,7 +637,7 @@ const _sfc_main = {
         }
       });
       previewAudioContext.onError((err) => {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:1340", "播放预览音频失败:", err);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:1421", "播放预览音频失败:", err);
         playingAudioId.value = null;
         if (previewAudioContext) {
           previewAudioContext.destroy();
@@ -602,33 +651,22 @@ const _sfc_main = {
       });
       previewAudioContext.play();
     };
-    const stopPreviewAudio = () => {
-      if (previewAudioContext) {
-        try {
-          previewAudioContext.stop();
-          previewAudioContext.destroy();
-        } catch (e) {
-        }
-        previewAudioContext = null;
-      }
-      playingAudioId.value = null;
+    const handleSelectAudio = async (audio) => {
+      common_vendor.index.__f__("log", "at pages/index/index.vue:1439", "选择音频:", audio);
+      selectedAudioUrl.value = audio.url;
+      await saveAudioSettingDirectly(audio.url);
     };
-    const saveAudioSetting = async () => {
+    const saveAudioSettingDirectly = async (audioUrl) => {
       try {
-        if (!selectedAudioUrl.value) {
-          common_vendor.index.showToast({
-            title: "请选择音频",
-            icon: "none"
-          });
+        if (!audioUrl) {
           return;
         }
-        const { data } = await src_api_user.setUserAudioUrlAPI(selectedAudioUrl.value);
+        const { data } = await src_api_user.setUserAudioUrlAPI(audioUrl);
         if (data.code === 0) {
           const userStore = src_stores_user.useUserStore();
           userStore.updateUserInfo({
-            audioUrl: selectedAudioUrl.value
+            audioUrl
           });
-          closeAudioSettingPopup();
           common_vendor.index.showToast({
             title: "设置成功 ✅",
             icon: "none",
@@ -641,26 +679,53 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:1407", "保存音频设置失败:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:1477", "保存音频设置失败:", error);
         common_vendor.index.showToast({
           title: "设置失败，请重试",
           icon: "none"
         });
       }
     };
+    const goToCreateFartFromPopup = () => {
+      closeAudioSettingPopup();
+      common_vendor.index.navigateTo({
+        url: "/pages/entry/creat"
+      });
+    };
+    const stopPreviewAudio = () => {
+      if (previewAudioContext) {
+        try {
+          previewAudioContext.stop();
+          previewAudioContext.destroy();
+        } catch (e) {
+        }
+        previewAudioContext = null;
+      }
+      playingAudioId.value = null;
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_assets._imports_0,
-        b: common_vendor.o(openAudioSettingPopup),
-        c: common_vendor.t(todayCount.value),
-        d: common_vendor.t(mostHappyMood.value),
-        e: common_vendor.t(lastFartTime.value),
-        f: gifUrl.value,
-        g: common_vendor.o(onGifLoaded),
+        a: common_vendor.t(todayCount.value),
+        b: mostHappyMood.value
+      }, mostHappyMood.value ? {
+        c: mostHappyMood.value
+      } : {}, {
+        d: common_vendor.t(lastFartTime.value),
+        e: gifUrl.value,
+        f: common_vendor.o(onGifLoaded),
+        g: common_assets._imports_0,
         h: common_vendor.o(openPopup),
-        i: common_vendor.f(fartTypes, (type, index, i0) => {
+        i: common_assets._imports_1,
+        j: common_vendor.o(goToPoints),
+        k: common_assets._imports_2,
+        l: common_vendor.o(openMakeupPopup),
+        m: common_assets._imports_3,
+        n: common_vendor.o(goToFartPage),
+        o: common_assets._imports_4,
+        p: common_vendor.o(openAudioSettingPopup),
+        q: common_vendor.f(fartTypes, (type, index, i0) => {
           return {
-            a: common_vendor.t(type.emoji),
+            a: type.icon,
             b: common_vendor.t(type.label),
             c: index,
             d: common_vendor.n({
@@ -669,9 +734,9 @@ const _sfc_main = {
             e: common_vendor.o(($event) => selectFartType(type.value), index)
           };
         }),
-        j: common_vendor.f(smellLevels, (level, index, i0) => {
+        r: common_vendor.f(smellLevels, (level, index, i0) => {
           return {
-            a: common_vendor.t(level.emoji),
+            a: level.icon,
             b: common_vendor.t(level.label),
             c: index,
             d: common_vendor.n({
@@ -680,9 +745,9 @@ const _sfc_main = {
             e: common_vendor.o(($event) => selectSmellLevel(level.value), index)
           };
         }),
-        k: common_vendor.f(moods, (mood, index, i0) => {
+        s: common_vendor.f(moods, (mood, index, i0) => {
           return {
-            a: common_vendor.t(mood.emoji),
+            a: mood.icon,
             b: common_vendor.t(mood.label),
             c: index,
             d: common_vendor.n({
@@ -691,53 +756,53 @@ const _sfc_main = {
             e: common_vendor.o(($event) => selectMood(mood.value), index)
           };
         }),
-        l: inputText.value,
-        m: common_vendor.o(($event) => inputText.value = $event.detail.value),
-        n: common_vendor.t(isSubmitting.value ? "提交中..." : "确认打卡"),
-        o: isSubmitting.value,
-        p: common_vendor.o(confirmFart),
-        q: common_vendor.sr(popup, "1cf27b2a-0", {
+        t: common_assets._imports_0,
+        v: inputText.value,
+        w: common_vendor.o(($event) => inputText.value = $event.detail.value),
+        x: common_vendor.t(isSubmitting.value ? "记录中..." : "记一下"),
+        y: isSubmitting.value,
+        z: common_vendor.o(confirmFart),
+        A: common_vendor.sr(popup, "1cf27b2a-0", {
           "k": "popup"
         }),
-        r: common_vendor.p({
+        B: common_vendor.p({
           type: "bottom",
           ["safe-area"]: false
         }),
-        s: showCloud.value
+        C: showCloud.value
       }, showCloud.value ? {
-        t: showCloud.value ? 1 : ""
+        D: showCloud.value ? 1 : ""
       } : {}, {
-        v: common_vendor.o(closeAchievementDetail),
-        w: selectedAchievement.value
+        E: common_vendor.o(closeAchievementDetail),
+        F: selectedAchievement.value
       }, selectedAchievement.value ? common_vendor.e({
-        x: selectedAchievement.value.achievementGif
+        G: selectedAchievement.value.achievementGif
       }, selectedAchievement.value.achievementGif ? {
-        y: selectedAchievement.value.achievementGif
+        H: selectedAchievement.value.achievementGif
       } : selectedAchievement.value.achievementIcon ? {
-        A: selectedAchievement.value.achievementIcon
+        J: selectedAchievement.value.achievementIcon
       } : {
-        B: common_vendor.t(selectedAchievement.value.achievementEmoji)
+        K: common_vendor.t(selectedAchievement.value.achievementEmoji)
       }, {
-        z: selectedAchievement.value.achievementIcon,
-        C: common_vendor.t(selectedAchievement.value.achievementName),
-        D: common_vendor.t(selectedAchievement.value.rewardExp),
-        E: common_vendor.o(handleShare),
-        F: common_vendor.o(closeAchievementDetail)
+        I: selectedAchievement.value.achievementIcon,
+        L: common_vendor.t(selectedAchievement.value.achievementName),
+        M: common_vendor.t(selectedAchievement.value.rewardExp),
+        N: common_vendor.o(handleShare),
+        O: common_vendor.o(closeAchievementDetail)
       }) : {}, {
-        G: common_vendor.sr(achievementPopup, "1cf27b2a-1", {
+        P: common_vendor.sr(achievementPopup, "1cf27b2a-1", {
           "k": "achievementPopup"
         }),
-        H: common_vendor.p({
+        Q: common_vendor.p({
           type: "center",
           ["mask-click"]: false
         }),
-        I: common_assets._imports_1,
-        J: common_vendor.o(openMakeupPopup),
-        K: common_vendor.t(makeupTimeDisplay.value || "请选择时间"),
-        L: common_vendor.o(($event) => showTimePicker.value = true),
-        M: common_vendor.f(fartTypes, (type, index, i0) => {
+        R: common_assets._imports_5,
+        S: common_vendor.t(makeupTimeDisplay.value || "请选择时间"),
+        T: common_vendor.o(($event) => showTimePicker.value = true),
+        U: common_vendor.f(fartTypes, (type, index, i0) => {
           return {
-            a: common_vendor.t(type.emoji),
+            a: type.icon,
             b: common_vendor.t(type.label),
             c: index,
             d: common_vendor.n({
@@ -746,9 +811,9 @@ const _sfc_main = {
             e: common_vendor.o(($event) => makeupFartType.value = type.value, index)
           };
         }),
-        N: common_vendor.f(smellLevels, (level, index, i0) => {
+        V: common_vendor.f(smellLevels, (level, index, i0) => {
           return {
-            a: common_vendor.t(level.emoji),
+            a: level.icon,
             b: common_vendor.t(level.label),
             c: index,
             d: common_vendor.n({
@@ -757,9 +822,9 @@ const _sfc_main = {
             e: common_vendor.o(($event) => makeupSmellLevel.value = level.value, index)
           };
         }),
-        O: common_vendor.f(moods, (mood, index, i0) => {
+        W: common_vendor.f(moods, (mood, index, i0) => {
           return {
-            a: common_vendor.t(mood.emoji),
+            a: mood.icon,
             b: common_vendor.t(mood.label),
             c: index,
             d: common_vendor.n({
@@ -768,91 +833,85 @@ const _sfc_main = {
             e: common_vendor.o(($event) => makeupMood.value = mood.value, index)
           };
         }),
-        P: makeupInputText.value,
-        Q: common_vendor.o(($event) => makeupInputText.value = $event.detail.value),
-        R: common_vendor.t(isSubmittingMakeup.value ? "提交中..." : "确认补卡"),
-        S: isSubmittingMakeup.value,
-        T: common_vendor.o(confirmMakeup),
-        U: common_vendor.sr(makeupPopup, "1cf27b2a-2", {
+        X: common_assets._imports_0,
+        Y: makeupInputText.value,
+        Z: common_vendor.o(($event) => makeupInputText.value = $event.detail.value),
+        aa: common_vendor.t(isSubmittingMakeup.value ? "记录中..." : "补一记"),
+        ab: isSubmittingMakeup.value,
+        ac: common_vendor.o(confirmMakeup),
+        ad: common_vendor.sr(makeupPopup, "1cf27b2a-2", {
           "k": "makeupPopup"
         }),
-        V: common_vendor.p({
+        ae: common_vendor.p({
           type: "bottom",
           ["safe-area"]: false
         }),
-        W: common_vendor.sr("timePickerRef", "1cf27b2a-3"),
-        X: common_vendor.o(onTimeConfirm),
-        Y: common_vendor.o(onTimeChange),
-        Z: common_vendor.o(($event) => showTimePicker.value = false),
-        aa: common_vendor.o(($event) => showTimePicker.value = false),
-        ab: common_vendor.o(($event) => makeupTimeDisplay.value = $event),
-        ac: common_vendor.p({
+        af: common_vendor.sr("timePickerRef", "1cf27b2a-3"),
+        ag: common_vendor.o(onTimeConfirm),
+        ah: common_vendor.o(onTimeChange),
+        ai: common_vendor.o(($event) => showTimePicker.value = false),
+        aj: common_vendor.o(($event) => showTimePicker.value = false),
+        ak: common_vendor.o(($event) => makeupTimeDisplay.value = $event),
+        al: common_vendor.p({
           mode: "time",
           show: showTimePicker.value,
           title: "选择时间",
           modelValue: makeupTimeDisplay.value
         }),
-        ad: selectedAudioUrl.value === defaultAudioUrl
-      }, selectedAudioUrl.value === defaultAudioUrl ? {
-        ae: common_assets._imports_2
-      } : {
-        af: common_assets._imports_3
-      }, {
-        ag: selectedAudioUrl.value === defaultAudioUrl ? 1 : "",
-        ah: common_vendor.o(($event) => selectAudio(defaultAudioUrl, "默认音频")),
-        ai: common_vendor.f(audioList.value, (audio, k0, i0) => {
+        am: common_vendor.f(audioList.value, (audio, k0, i0) => {
           return common_vendor.e({
             a: selectedAudioUrl.value === audio.url
           }, selectedAudioUrl.value === audio.url ? {
-            b: common_assets._imports_2
+            b: common_assets._imports_6,
+            c: common_vendor.o(($event) => handleSelectAudio(audio), audio.id)
           } : {
-            c: common_assets._imports_3
+            d: common_assets._imports_7,
+            e: common_vendor.o(($event) => handleSelectAudio(audio), audio.id)
           }, {
-            d: audio.image
+            f: audio.image
           }, audio.image ? {
-            e: audio.image
+            g: audio.image
           } : {}, {
-            f: playingAudioId.value === audio.id
+            h: playingAudioId.value === audio.id
           }, playingAudioId.value === audio.id ? {} : {}, {
-            g: playingAudioId.value === audio.id ? "/static/img/24gf-pause2.png" : "/static/img/24gl-playCircle.png",
-            h: playingAudioId.value === audio.id ? 1 : "",
-            i: common_vendor.o(($event) => playAudio(audio), audio.id),
-            j: common_vendor.t(audio.name),
-            k: common_vendor.t(audio.description || ""),
-            l: audio.tags && audio.tags.length
+            i: playingAudioId.value === audio.id ? "/static/img/24gf-pause2.png" : "/static/img/24gl-playCircle.png",
+            j: playingAudioId.value === audio.id ? 1 : "",
+            k: common_vendor.o(($event) => playAudio(audio), audio.id),
+            l: common_vendor.t(audio.name),
+            m: common_vendor.t(audio.description || ""),
+            n: audio.tags && audio.tags.length
           }, audio.tags && audio.tags.length ? common_vendor.e({
-            m: common_vendor.f(audio.tags.slice(0, 3), (tag, k1, i1) => {
+            o: common_vendor.f(audio.tags.slice(0, 3), (tag, k1, i1) => {
               return {
                 a: common_vendor.t(tag),
                 b: tag
               };
             }),
-            n: audio.tags.length > 3
+            p: audio.tags.length > 3
           }, audio.tags.length > 3 ? {
-            o: common_vendor.t(audio.tags.length - 3)
+            q: common_vendor.t(audio.tags.length - 3)
           } : {}) : {}, {
-            p: audio.id,
-            q: `audio-${audio.id}`,
-            r: selectedAudioUrl.value === audio.url ? 1 : "",
-            s: common_vendor.s(getCardStyle(audio)),
-            t: common_vendor.o(($event) => selectAudio(audio.url, audio.name), audio.id)
+            r: audio.id,
+            s: `audio-${audio.id}`,
+            t: selectedAudioUrl.value === audio.url ? 1 : "",
+            v: common_vendor.s(getCardStyle(audio)),
+            w: common_vendor.o(($event) => handleSelectAudio(audio), audio.id)
           });
         }),
-        aj: audioList.value.length === 0 && !isLoadingAudio.value
+        an: audioList.value.length === 0 && !isLoadingAudio.value
       }, audioList.value.length === 0 && !isLoadingAudio.value ? {} : {}, {
-        ak: isLoadingAudio.value && audioList.value.length === 0
+        ao: isLoadingAudio.value && audioList.value.length === 0
       }, isLoadingAudio.value && audioList.value.length === 0 ? {} : {}, {
-        al: isLoadingAudio.value && audioList.value.length > 0
+        ap: isLoadingAudio.value && audioList.value.length > 0
       }, isLoadingAudio.value && audioList.value.length > 0 ? {} : {}, {
-        am: !audioHasMore.value && audioList.value.length > 0
+        aq: !audioHasMore.value && audioList.value.length > 0
       }, !audioHasMore.value && audioList.value.length > 0 ? {} : {}, {
-        an: common_vendor.o(onAudioListScrollToLower),
-        ao: common_vendor.o(closeAudioSettingPopup),
-        ap: common_vendor.o(saveAudioSetting),
-        aq: common_vendor.sr(audioSettingPopup, "1cf27b2a-4", {
+        ar: common_vendor.o(onAudioListScrollToLower),
+        as: common_vendor.o(goToCreateFartFromPopup),
+        at: common_vendor.sr(audioSettingPopup, "1cf27b2a-4", {
           "k": "audioSettingPopup"
         }),
-        ar: common_vendor.p({
+        av: common_vendor.p({
           type: "bottom",
           ["safe-area"]: false
         })

@@ -90,15 +90,16 @@ func (d DateOnly) Format(layout string) string {
 // BreakFartRecord 放屁记录 结构体
 type BreakFartRecord struct {
 	global.GVA_MODEL
-	UserId     uint     `json:"userId" form:"userId" gorm:"not null;index;comment:用户ID"`                                                 //用户ID
-	FartType   string   `json:"fartType" form:"fartType" gorm:"size:20;not null;comment:屁屁类型" binding:"required,oneof=loud soft silent"` //屁屁类型：loud-响亮型，soft-轻柔型，silent-无声型
-	SmellLevel int      `json:"smellLevel" form:"smellLevel" gorm:"not null;comment:气味等级" binding:"required,min=1,max=3"`                //气味等级：1-清香，2-一般，3-浓烈
-	Mood       string   `json:"mood" form:"mood" gorm:"size:20;not null;comment:心情" binding:"required,oneof=happy normal embarrassed"`   //心情：happy-开心，normal-一般，embarrassed-尴尬
-	Note       string   `json:"note" form:"note" gorm:"size:500;comment:备注"`                                                             //备注（饮食、心情描述）
-	FartDate   DateOnly `json:"fartDate" form:"fartDate" gorm:"type:date;not null;index;comment:放屁日期" binding:"required"`                //放屁日期
-	FartTime   string   `json:"fartTime" form:"fartTime" gorm:"type:time;not null;comment:放屁时间" binding:"required"`                      //放屁时间
-	HourOfDay  int      `json:"hourOfDay" form:"hourOfDay" gorm:"not null;comment:小时(0-23)"`                                             //小时（0-23）
-	TimePeriod string   `json:"timePeriod" form:"timePeriod" gorm:"size:10;not null;index;comment:时间段"`                                  //时间段：dawn-凌晨，morning-上午，afternoon-下午，evening-晚上
+	UserId      uint     `json:"userId" form:"userId" gorm:"not null;index;comment:用户ID"`                                                 //用户ID
+	FartType    string   `json:"fartType" form:"fartType" gorm:"size:20;not null;comment:屁屁类型" binding:"required,oneof=loud soft silent"` //屁屁类型：loud-响亮型，soft-轻柔型，silent-无声型
+	SmellLevel  int      `json:"smellLevel" form:"smellLevel" gorm:"not null;comment:气味等级" binding:"required,min=1,max=3"`                //气味等级：1-清香，2-一般，3-浓烈
+	Mood        string   `json:"mood" form:"mood" gorm:"size:20;not null;comment:心情" binding:"required,oneof=happy normal embarrassed"`   //心情：happy-开心，normal-一般，embarrassed-尴尬
+	VolumeLevel string   `json:"volumeLevel" form:"volumeLevel" gorm:"size:20;comment:放屁当量"`                                              //放屁当量：large-大当量、medium-中当量、small-小当量、micro-微单量
+	Note        string   `json:"note" form:"note" gorm:"size:500;comment:备注"`                                                             //备注（饮食、心情描述）
+	FartDate    DateOnly `json:"fartDate" form:"fartDate" gorm:"type:date;not null;index;comment:放屁日期" binding:"required"`                //放屁日期
+	FartTime    string   `json:"fartTime" form:"fartTime" gorm:"type:time;not null;comment:放屁时间" binding:"required"`                      //放屁时间
+	HourOfDay   int      `json:"hourOfDay" form:"hourOfDay" gorm:"not null;comment:小时(0-23)"`                                             //小时（0-23）
+	TimePeriod  string   `json:"timePeriod" form:"timePeriod" gorm:"size:10;not null;index;comment:时间段"`                                  //时间段：dawn-凌晨，morning-上午，afternoon-下午，evening-晚上
 }
 
 // TableName 放屁记录 BreakFartRecord自定义表名 break_fart_record

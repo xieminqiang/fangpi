@@ -2,9 +2,8 @@
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const src_api_ai = require("../../src/api/ai.js");
+const src_api_user = require("../../src/api/user.js");
 const src_stores_user = require("../../src/stores/user.js");
-const CACHE_KEY = "ai_analysis_cache";
-const CACHE_EXPIRE_TIME = 60 * 60 * 1e3;
 const _sfc_main = {
   __name: "aiFx",
   setup(__props) {
@@ -15,35 +14,6 @@ const _sfc_main = {
     const airflowActivity = common_vendor.ref(0);
     const reviewText = common_vendor.ref("");
     const healthAdvice = common_vendor.ref([]);
-    const getCacheData = () => {
-      try {
-        const cacheStr = common_vendor.index.getStorageSync(CACHE_KEY);
-        if (!cacheStr)
-          return null;
-        const cache = JSON.parse(cacheStr);
-        const now = Date.now();
-        if (now - cache.timestamp > CACHE_EXPIRE_TIME) {
-          common_vendor.index.removeStorageSync(CACHE_KEY);
-          return null;
-        }
-        return cache.data;
-      } catch (error) {
-        common_vendor.index.__f__("error", "at pages/me/aiFx.vue:132", "读取缓存失败:", error);
-        return null;
-      }
-    };
-    const saveCacheData = (data) => {
-      try {
-        const cache = {
-          timestamp: Date.now(),
-          data
-        };
-        common_vendor.index.setStorageSync(CACHE_KEY, JSON.stringify(cache));
-        common_vendor.index.__f__("log", "at pages/me/aiFx.vue:145", "缓存已保存");
-      } catch (error) {
-        common_vendor.index.__f__("error", "at pages/me/aiFx.vue:147", "保存缓存失败:", error);
-      }
-    };
     const applyDataToPage = (data) => {
       var _a, _b;
       healthScore.value = data.healthScore || 0;
@@ -60,33 +30,52 @@ const _sfc_main = {
       }
       healthAdvice.value = advice.length > 0 ? advice : ["继续保持良好的生活习惯"];
     };
-    const loadAiAnalysis = async (useCache = true) => {
-      if (useCache) {
-        const cachedData = getCacheData();
-        if (cachedData) {
-          common_vendor.index.__f__("log", "at pages/me/aiFx.vue:174", "使用缓存数据");
-          applyDataToPage(cachedData);
-          isLoading.value = false;
-          return;
-        }
-      }
+    const loadAiAnalysis = async () => {
       isLoading.value = true;
       try {
         const response = await src_api_ai.getAiPersonalityReviewAPI();
         if (response.data.code === 0) {
           const data = response.data.data;
           applyDataToPage(data);
-          saveCacheData(data);
-          common_vendor.index.__f__("log", "at pages/me/aiFx.vue:194", "智能分析数据已加载:", data);
+          common_vendor.index.__f__("log", "at pages/me/aiFx.vue:138", "智能分析数据已加载:", data);
+          await deductPoints();
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/me/aiFx.vue:197", "获取智能分析失败:", error);
+        common_vendor.index.__f__("error", "at pages/me/aiFx.vue:144", "获取智能分析失败:", error);
         common_vendor.index.showToast({
           title: "加载失败，请重试",
           icon: "error"
         });
       } finally {
         isLoading.value = false;
+      }
+    };
+    const deductPoints = async () => {
+      try {
+        const currentPoints = userStore.points || 0;
+        if (currentPoints < 15) {
+          common_vendor.index.__f__("log", "at pages/me/aiFx.vue:160", "屁币不足15，跳过扣除");
+          return;
+        }
+        const { data } = await src_api_user.updateUserPointsAPI({
+          points: 15,
+          pointsType: 2,
+          // 2代表扣除屁币
+          remark: "使用智能肠道健康分析"
+        });
+        if (data.code === 0) {
+          common_vendor.index.__f__("log", "at pages/me/aiFx.vue:171", "屁币扣除成功，当前屁币:", data.data.points);
+          userStore.setUserInfo(data.data);
+          common_vendor.index.showToast({
+            title: `已扣除15屁币，当前屁币：${data.data.points}`,
+            icon: "none",
+            duration: 2e3
+          });
+        } else {
+          common_vendor.index.__f__("error", "at pages/me/aiFx.vue:182", "屁币扣除失败:", data.msg);
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/me/aiFx.vue:185", "扣除屁币失败:", error);
       }
     };
     const getHealthClass = (score) => {
@@ -100,7 +89,7 @@ const _sfc_main = {
     };
     common_vendor.onMounted(() => {
       if (userStore.token) {
-        loadAiAnalysis(true);
+        loadAiAnalysis();
       } else {
         common_vendor.index.showToast({
           title: "请先登录",
@@ -113,18 +102,19 @@ const _sfc_main = {
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: isLoading.value
+        a: common_assets._imports_0,
+        b: isLoading.value
       }, isLoading.value ? {} : {
-        b: common_assets._imports_0$5,
-        c: common_vendor.t(healthScore.value || 0),
-        d: (healthScore.value || 0) + "%",
-        e: common_vendor.n(getHealthClass(healthScore.value || 0)),
-        f: common_vendor.t(patencyIndex.value || 0),
-        g: (patencyIndex.value || 0) + "%",
-        h: common_vendor.t(airflowActivity.value || 0),
-        i: (airflowActivity.value || 0) + "%",
-        j: common_vendor.t(reviewText.value || "正在生成评估报告..."),
-        k: common_vendor.f(healthAdvice.value, (advice, index, i0) => {
+        c: common_assets._imports_1$5,
+        d: common_vendor.t(healthScore.value || 0),
+        e: (healthScore.value || 0) + "%",
+        f: common_vendor.n(getHealthClass(healthScore.value || 0)),
+        g: common_vendor.t(patencyIndex.value || 0),
+        h: (patencyIndex.value || 0) + "%",
+        i: common_vendor.t(airflowActivity.value || 0),
+        j: (airflowActivity.value || 0) + "%",
+        k: common_vendor.t(reviewText.value || "正在生成评估报告..."),
+        l: common_vendor.f(healthAdvice.value, (advice, index, i0) => {
           return {
             a: common_vendor.t(advice),
             b: index

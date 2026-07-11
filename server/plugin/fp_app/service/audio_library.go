@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/plugin/fp_app/model"
 	"github.com/flipped-aurora/gin-vue-admin/server/plugin/fp_app/model/request"
+	"gorm.io/gorm"
 )
 
 var AudioLibrary = new(audioLibrary)
@@ -33,6 +35,36 @@ func (s *audioLibrary) CreateAudioLibrary(ctx context.Context, audioLibrary *mod
 
 // DeleteAudioLibrary 删除音频库
 func (s *audioLibrary) DeleteAudioLibrary(ctx context.Context, id uint) error {
+	// 删除音频库
+	if err := global.GVA_DB.Delete(&model.BreakAudioLibrary{}, id).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// DeleteMyAudioLibrary 删除用户自己的音频库记录（需要验证权限）
+func (s *audioLibrary) DeleteMyAudioLibrary(ctx context.Context, id uint, userID uint) error {
+	// 先查询记录，验证是否是用户自己的
+	var record model.BreakAudioLibrary
+	err := global.GVA_DB.Where("id = ?", id).First(&record).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return fmt.Errorf("记录不存在")
+		}
+		return err
+	}
+
+	// 验证权限：只有创建该音频的用户才能删除
+	if record.UserId != userID {
+		return fmt.Errorf("无权限删除此音频，只能删除自己创建的音频")
+	}
+
+	// 验证分类：只有"自己放的屁"分类才能删除
+	if record.ClassName != "自己放的屁" {
+		return fmt.Errorf("只能删除分类为'自己放的屁'的音频")
+	}
+
 	// 删除音频库
 	if err := global.GVA_DB.Delete(&model.BreakAudioLibrary{}, id).Error; err != nil {
 		return err
@@ -148,26 +180,50 @@ type TagStat struct {
 // AudioFeedResponse 小程序端总数据（简化版）
 type AudioFeedResponse struct {
 	List         []AudioFeedCard `json:"list"`         // 音频列表
-	TrendingTags []TagStat        `json:"trendingTags"` // 热门标签
-	Empty        bool             `json:"empty"`        // 是否为空
-	Total        int              `json:"total"`        // 总数
+	TrendingTags []TagStat       `json:"trendingTags"` // 热门标签
+	Empty        bool            `json:"empty"`        // 是否为空
+	Total        int             `json:"total"`        // 总数
 }
 
 // GetAudioLibraryFeed 获取小程序端音频库数据（简化版，支持分页）
 // 过滤掉没有音频URL的数据
-func (s *audioLibrary) GetAudioLibraryFeed(ctx context.Context, page, pageSize int) (*AudioFeedResponse, error) {
+// userID: 当前用户ID，如果为0表示未登录，只能看到公共音频
+// 返回：公共音频（user_id为0或null） + 当前用户自己的私人音频（user_id = userID）
+func (s *audioLibrary) GetAudioLibraryFeed(ctx context.Context, page, pageSize int, userID uint) (*AudioFeedResponse, error) {
 	var audios []model.BreakAudioLibrary
 	var total int64
-	
-	// 先获取总数（只统计有URL的数据）
+
+	// 构建查询条件：只查询有URL的数据
 	db := global.GVA_DB.Model(&model.BreakAudioLibrary{}).Where("url IS NOT NULL AND url != ''")
+
+	// 添加用户权限过滤：
+	// 1. 公共音频：user_id = 0 或 user_id IS NULL
+	// 2. 如果已登录，还要包含当前用户自己的私人音频：user_id = userID
+	if userID > 0 {
+		// 已登录：返回公共音频 + 自己的私人音频
+		db = db.Where("(user_id = 0 OR user_id IS NULL) OR user_id = ?", userID)
+	} else {
+		// 未登录：只返回公共音频
+		db = db.Where("user_id = 0 OR user_id IS NULL")
+	}
+
+	// 先获取总数
 	if err := db.Count(&total).Error; err != nil {
 		return nil, err
 	}
-	
-	// 分页查询（只查询有URL的数据）
+
+	// 分页查询
+	// 排序规则：当前用户自己的音频（user_id = userID）排在第一位，然后按更新时间倒序
 	offset := (page - 1) * pageSize
-	if err := db.Order("updated_at DESC, id DESC").Offset(offset).Limit(pageSize).Find(&audios).Error; err != nil {
+	if userID > 0 {
+		// 如果已登录，将自己的音频排在第一位
+		// 使用 CASE WHEN 实现：当前用户的音频排在前面（排序值为0），其他排在后面（排序值为1）
+		db = db.Order(fmt.Sprintf("CASE WHEN user_id = %d THEN 0 ELSE 1 END, updated_at DESC, id DESC", userID))
+	} else {
+		// 未登录，只按更新时间排序
+		db = db.Order("updated_at DESC, id DESC")
+	}
+	if err := db.Offset(offset).Limit(pageSize).Find(&audios).Error; err != nil {
 		return nil, err
 	}
 
@@ -222,7 +278,7 @@ func extractClassName(audio model.BreakAudioLibrary) string {
 	if audio.ClassName != "" {
 		return audio.ClassName
 	}
-	
+
 	// 否则从tags中提取（兼容旧数据）
 	tags := []string(audio.Tags)
 	classKeywords := map[string]string{
@@ -239,7 +295,7 @@ func extractClassName(audio model.BreakAudioLibrary) string {
 		"传奇": "传奇神话类屁",
 		"神话": "传奇神话类屁",
 	}
-	
+
 	// 遍历tags，查找匹配的分类关键词
 	for _, tag := range tags {
 		for keyword, className := range classKeywords {
@@ -248,7 +304,7 @@ func extractClassName(audio model.BreakAudioLibrary) string {
 			}
 		}
 	}
-	
+
 	// 如果没有匹配到，返回默认分类
 	return "其他类屁"
 }

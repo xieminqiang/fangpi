@@ -43,6 +43,7 @@ func (a *fartRecord) CreateFartRecord(c *gin.Context) {
 
 	// 调用服务层
 	result, err := service.Service.FartRecord.CreateFartRecord(c.Request.Context(), &record)
+	
 	if err != nil {
 		global.GVA_LOG.Error("创建放屁记录失败", zap.Error(err))
 		response.FailWithMessage("打卡失败: "+err.Error(), c)
@@ -73,6 +74,39 @@ func (a *fartRecord) GetTodayRecords(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("获取今日记录失败", zap.Error(err))
 		response.FailWithMessage("获取失败: "+err.Error(), c)
+		return
+	}
+
+	response.OkWithData(result, c)
+}
+
+// GetTodayLastRecord 获取今日最近一次记录
+// @Tags BreakApp
+// @Summary 获取今日最近一次放屁记录
+// @Security ApiKeyAuth
+// @Accept application/json
+// @Produce application/json
+// @Success 200 {object} response.Response{data=service.LastRecordInfo,msg=string} "获取成功，如果没有记录则data为null"
+// @Router /break/today/last [get]
+func (a *fartRecord) GetTodayLastRecord(c *gin.Context) {
+	// 获取用户ID
+	userID := getWxUserIdFromToken(c)
+	if userID == 0 {
+		response.FailWithMessage("未登录或Token无效", c)
+		return
+	}
+
+	// 调用服务层
+	result, err := service.Service.FartRecord.GetTodayLastRecord(c.Request.Context(), userID)
+	if err != nil {
+		global.GVA_LOG.Error("获取今日最近一次记录失败", zap.Error(err))
+		response.FailWithMessage("获取失败: "+err.Error(), c)
+		return
+	}
+
+	// 如果没有记录，返回 null
+	if result == nil {
+		response.OkWithData(nil, c)
 		return
 	}
 

@@ -1,0 +1,461 @@
+/**
+ * 这里是uni-app内置的常用样式变量
+ *
+ * uni-app 官方扩展插件及插件市场（https://ext.dcloud.net.cn）上很多三方插件均使用了这些样式变量
+ * 如果你是插件开发者，建议你使用scss预处理，并在插件代码中直接使用这些变量（无需 import 这个文件），方便用户通过搭积木的方式开发整体风格一致的App
+ *
+ */
+/**
+ * 如果你是App开发者（插件使用者），你可以通过修改这些变量来定制自己的插件主题，实现自定义主题功能
+ *
+ * 如果你的项目同样使用了scss预处理，你也可以直接在你的 scss 代码中使用如下变量，同时无需 import 这个文件
+ */
+/* 颜色变量 */
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+/* uview-plus 主题变量 */
+/* 项目主题变量 */
+.uni-popup[data-v-4dd3c44b] {
+  position: fixed;
+  z-index: 99;
+}
+.uni-popup.top[data-v-4dd3c44b], .uni-popup.left[data-v-4dd3c44b], .uni-popup.right[data-v-4dd3c44b] {
+  top: 0;
+}
+.uni-popup .uni-popup__wrapper[data-v-4dd3c44b] {
+  display: block;
+  position: relative;
+  /* iphonex 等安全区设置，底部安全区适配 */
+}
+.uni-popup .uni-popup__wrapper.left[data-v-4dd3c44b], .uni-popup .uni-popup__wrapper.right[data-v-4dd3c44b] {
+  padding-top: 0;
+  flex: 1;
+}
+.fixforpc-z-index[data-v-4dd3c44b] {
+  z-index: 999;
+}
+.fixforpc-top[data-v-4dd3c44b] {
+  top: 0;
+}
+
+.me-container[data-v-c8e26b33] {
+  height: 100vh;
+  background: linear-gradient(180deg, #A8E6CF 0%, #FFFACD 100%);
+  position: relative;
+}
+
+/* Header Area */
+.header-area[data-v-c8e26b33] {
+  padding: 3.4375rem 1rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+.avatar[data-v-c8e26b33] {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  border: 0.1875rem solid white;
+  box-shadow: 0 0.125rem 0.375rem rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+.avatar[data-v-c8e26b33]:active {
+  transform: scale(0.95);
+  opacity: 0.9;
+}
+.header-info[data-v-c8e26b33] {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.nickname-row[data-v-c8e26b33] {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  transition: all 0.3s ease;
+}
+.nickname-row[data-v-c8e26b33]:active {
+  opacity: 0.7;
+}
+.nickname[data-v-c8e26b33] {
+  font-size: 1.0625rem;
+  font-weight: bold;
+  color: #5D5D5D;
+}
+.nickname-arrow[data-v-c8e26b33] {
+  width: 1.1875rem;
+  height:1.1875rem
+}
+.info-row[data-v-c8e26b33] {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.info-badge[data-v-c8e26b33] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 0.625rem;
+  padding: 0.25rem 0.5rem;
+  box-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+.info-badge[data-v-c8e26b33]:active {
+  transform: scale(0.95);
+  opacity: 0.9;
+}
+.info-label[data-v-c8e26b33] {
+  font-size: 0.6875rem;
+  color: #5D5D5D;
+  font-weight: 500;
+}
+.info-value[data-v-c8e26b33] {
+  font-size: 0.6875rem;
+  color: #1B5E20;
+  font-weight: bold;
+}
+.level-info[data-v-c8e26b33] {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 0.625rem;
+  padding: 0.25rem 0.5rem;
+  box-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.1);
+  align-self: flex-start;
+}
+.level-info[data-v-c8e26b33]:active {
+  transform: scale(0.95);
+  opacity: 0.9;
+}
+.level-icon[data-v-c8e26b33] {
+  width: 1rem;
+  height: 1rem;
+}
+.level-name[data-v-c8e26b33] {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1B5E20;
+}
+.arrow-right[data-v-c8e26b33] {
+  width: 0.75rem;
+  height: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Achievement Section */
+.achievement-section[data-v-c8e26b33] {
+  padding: 0 1rem 1rem;
+  margin-top: 1.5625rem;
+}
+.section-header[data-v-c8e26b33] {
+ 
+  display: flex;
+  justify-content: space-between;
+  
+  margin-bottom: 0.75rem;
+}
+.view-all-btn[data-v-c8e26b33] {
+  background: rgba(255, 255, 255, 0.8);
+
+  border-radius: 312.46875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-left: 0.625rem;
+  padding-right: 0.3125rem;
+}
+.view-all-btn[data-v-c8e26b33]::after {
+  border: none;
+}
+.view-all-btn[data-v-c8e26b33]:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.9);
+}
+.btn-text[data-v-c8e26b33] {
+  font-size: 0.625rem;
+  color: #5D5D5D;
+  font-weight: 500;
+}
+.btn-arrow[data-v-c8e26b33] {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+.achievement-grid[data-v-c8e26b33] {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+.achievement-item[data-v-c8e26b33] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+.achievement-item[data-v-c8e26b33]:active {
+  transform: scale(0.95);
+}
+.achievement-badge[data-v-c8e26b33] {
+  width: 3.125rem;
+  height: 3.125rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+}
+.achievement-badge-1[data-v-c8e26b33] {
+  background: #A8E6CF;
+}
+.achievement-badge-2[data-v-c8e26b33] {
+  background: #FFD3B6;
+}
+.achievement-badge-3[data-v-c8e26b33] {
+  background: #FFFACD;
+}
+.achievement-badge-locked[data-v-c8e26b33] {
+  background: #D1D5DB;
+  opacity: 0.5;
+}
+.achievement-emoji[data-v-c8e26b33] {
+  font-size: 1.875rem;
+}
+.achievement-icon[data-v-c8e26b33] {
+  width: 1.875rem;
+  height: 1.875rem;
+  border-radius: 0.25rem;
+}
+.achievement-label[data-v-c8e26b33] {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #5D5D5D;
+}
+.achievement-label-locked[data-v-c8e26b33] {
+  color: #9CA3AF;
+}
+
+/* AI Entry Section */
+.ai-entry-section[data-v-c8e26b33] {
+  padding: 0 1rem 1.25rem;
+}
+.ai-entry-card[data-v-c8e26b33] {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #FFC3A0, #A8E6CF);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+.ai-entry-card[data-v-c8e26b33]:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+.donation-card[data-v-c8e26b33] {
+  background: linear-gradient(135deg, #FFB6C1, #FFD700);
+}
+.entry-icon[data-v-c8e26b33] {
+  width: 2rem;
+  height: 2rem;
+}
+.entry-content[data-v-c8e26b33] {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.entry-title[data-v-c8e26b33] {
+  font-size: 1rem;
+  font-weight: bold;
+  color: white;
+  display: block;
+}
+.entry-desc[data-v-c8e26b33] {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.9);
+  display: block;
+}
+.entry-arrow[data-v-c8e26b33] {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+/* 成就详情弹窗样式 */
+.achievement-detail-popup[data-v-c8e26b33] {
+  width: 20.3125rem;
+  background: #f6f8f7;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 0.625rem 1.875rem rgba(0, 0, 0, 0.15);
+}
+.popup-header[data-v-c8e26b33] {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.9375rem;
+  background: linear-gradient(135deg, #A8E6CF 0%, #F9F871 100%);
+}
+.popup-title[data-v-c8e26b33] {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0d1b14;
+}
+.popup-close[data-v-c8e26b33] {
+  font-size: 1.25rem;
+  color: #0d1b14;
+  padding: 0.3125rem;
+}
+.popup-content[data-v-c8e26b33] {
+  padding: 1.25rem;
+}
+.detail-gif-container[data-v-c8e26b33] {
+  text-align: center;
+  margin-bottom: 0.9375rem;
+}
+.detail-gif[data-v-c8e26b33] {
+  width: 6.25rem;
+  height: 6.25rem;
+  border-radius: 0.625rem;
+}
+.detail-emoji[data-v-c8e26b33] {
+  font-size: 3.75rem;
+}
+.detail-info[data-v-c8e26b33] {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+.detail-name[data-v-c8e26b33] {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #0d1b14;
+  margin-bottom: 0.46875rem;
+}
+.detail-desc[data-v-c8e26b33] {
+  display: block;
+  font-size: 0.875rem;
+  color: #5D5D5D;
+  line-height: 1.5;
+  margin-bottom: 0.78125rem;
+}
+.detail-progress[data-v-c8e26b33] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.625rem;
+}
+.progress-label[data-v-c8e26b33] {
+  font-size: 0.8125rem;
+  color: #5D5D5D;
+  margin-right: 0.46875rem;
+}
+.progress-bar[data-v-c8e26b33] {
+  width: 6.25rem;
+  height: 0.375rem;
+  background: rgba(115, 154, 76, 0.2);
+  border-radius: 0.1875rem;
+  overflow: hidden;
+  margin-right: 0.46875rem;
+}
+.progress-fill[data-v-c8e26b33] {
+  height: 100%;
+  background: linear-gradient(90deg, #A8E6CF 0%, #8af5bf 100%);
+  border-radius: 0.1875rem;
+  transition: width 0.3s ease;
+}
+.progress-fill.completed[data-v-c8e26b33] {
+  background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
+}
+.progress-value[data-v-c8e26b33] {
+  font-size: 0.8125rem;
+  color: #739a4c;
+  font-weight: bold;
+}
+.detail-reward[data-v-c8e26b33], .detail-unlock-time[data-v-c8e26b33] {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.46875rem;
+}
+.reward-label[data-v-c8e26b33], .unlock-label[data-v-c8e26b33] {
+  font-size: 0.8125rem;
+  color: #5D5D5D;
+  margin-right: 0.3125rem;
+}
+.reward-value[data-v-c8e26b33] {
+  font-size: 0.8125rem;
+  color: #739a4c;
+  font-weight: bold;
+}
+.unlock-value[data-v-c8e26b33] {
+  font-size: 0.8125rem;
+  color: #0d1b14;
+}
+.popup-actions[data-v-c8e26b33] {
+  display: flex;
+  gap: 0.625rem;
+  justify-content: center;
+}
+.action-btn[data-v-c8e26b33] {
+  flex: 1;
+  padding: 0.625rem 0.9375rem;
+  border-radius: 1.5625rem;
+  font-size: 0.875rem;
+  font-weight: bold;
+  border: none;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+.btn-icon[data-v-c8e26b33] {
+  font-size: 0.875rem;
+}
+.action-btn.primary[data-v-c8e26b33] {
+  background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+  color: #fff;
+  box-shadow: 0 0.25rem 0.625rem rgba(76, 175, 80, 0.3);
+}
+.action-btn.primary[data-v-c8e26b33]:active {
+  transform: scale(0.95);
+  box-shadow: 0 0.125rem 0.3125rem rgba(76, 175, 80, 0.4);
+}
+.action-btn.secondary[data-v-c8e26b33] {
+  background: linear-gradient(135deg, #A8E6CF 0%, #F9F871 100%);
+  color: #0d1b14;
+  box-shadow: 0 0.25rem 0.625rem rgba(0, 0, 0, 0.1);
+}
+.action-btn.secondary[data-v-c8e26b33]:active {
+  transform: scale(0.95);
+  box-shadow: 0 0.125rem 0.3125rem rgba(0, 0, 0, 0.15);
+}
+.action-btn.disabled[data-v-c8e26b33] {
+  background: linear-gradient(135deg, #E0E0E0 0%, #BDBDBD 100%);
+  color: #9E9E9E;
+  box-shadow: none;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.action-btn[data-v-c8e26b33]::after {
+  border: none;
+}
+

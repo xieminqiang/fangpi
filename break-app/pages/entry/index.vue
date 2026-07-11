@@ -70,10 +70,17 @@
                 v-for="item in group.items"
                 :key="item.id"
                 :style="getCardStyle(item)"
-                @click="goToDetail(item)"
               >
+                <!-- 删除按钮（只有"自己放的屁"分类才显示） -->
+                <view 
+                  v-if="item.class_name === '自己放的屁'" 
+                  class="delete-btn"
+                  @click.stop="handleDelete(item)"
+                >
+                  <text class="delete-icon">🗑️</text>
+                </view>
                 <!-- 卡片主体 -->
-                <view class="card-body">
+                <view class="card-body" @click="goToDetail(item)">
                   <!-- 左侧图片 -->
                   <view class="card-image-wrapper">
                     <image
@@ -123,12 +130,21 @@
         <view class="footer-spacer"></view>
       </block>
     </scroll-view>
+
+    <!-- 底部固定区域 -->
+    <view class="bottom-view">
+      <view class="bottom-confirm-wrapper">
+        <button class="bottom-confirm-button" @click="goToCreateFart">
+          <text class="bottom-confirm-text">创建自己的屁</text>
+        </button>
+      </view>
+    </view>
   </view>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { getAudioLibraryFeedAPI } from '@/src/api/audio.js'
+import { getAudioLibraryFeedAPI, deleteAudioLibraryAPI } from '@/src/api/audio.js'
 
 const feed = ref({
   list: [],
@@ -170,21 +186,21 @@ const groupedList = computed(() => {
   }))
   
   // 按分类名称排序（可选，也可以按数量排序）
-  groups.sort((a, b) => {
-    // "声学类屁" 始终排第一位
-    if (a.className === '声学类屁') return -1
-    if (b.className === '声学类屁') return 1
+  // groups.sort((a, b) => {
+  //   // "声学类屁" 始终排第一位
+  //   if (a.className === '声学类屁') return -1
+  //   if (b.className === '声学类屁') return 1
     
-    // "其他类屁" 始终排最后
-    if (a.className === '其他类屁') return 1
-    if (b.className === '其他类屁') return -1
+  //   // "其他类屁" 始终排最后
+  //   if (a.className === '其他类屁') return 1
+  //   if (b.className === '其他类屁') return -1
     
-    // 其他分类：优先显示有更多项目的分类
-    if (b.items.length !== a.items.length) {
-      return b.items.length - a.items.length
-    }
-    return a.className.localeCompare(b.className, 'zh-CN')
-  })
+  //   // 其他分类：优先显示有更多项目的分类
+  //   if (b.items.length !== a.items.length) {
+  //     return b.items.length - a.items.length
+  //   }
+  //   return a.className.localeCompare(b.className, 'zh-CN')
+  // })
   
   return groups
 })
@@ -204,6 +220,71 @@ const goToDetail = (item) => {
   const itemData = JSON.stringify(item)
   uni.navigateTo({
     url: `/pages/entry/detail?data=${encodeURIComponent(itemData)}`
+  })
+}
+
+// 跳转到创建自己的屁页面
+const goToCreateFart = () => {
+  uni.navigateTo({
+    url: '/pages/entry/creat'
+  })
+}
+
+// 删除音频
+const handleDelete = async (item) => {
+  // 确认删除
+  uni.showModal({
+    title: '确认删除',
+    content: `确定要删除"${item.name}"吗？删除后无法恢复。`,
+    confirmText: '删除',
+    cancelText: '取消',
+    confirmColor: '#ff3b30',
+    success: async (res) => {
+      if (res.confirm) {
+        try {
+          uni.showLoading({
+            title: '删除中...'
+          })
+          
+          const { data } = await deleteAudioLibraryAPI(item.id)
+          
+          uni.hideLoading()
+          
+          if (data.code === 0) {
+            uni.showToast({
+              title: '删除成功',
+              icon: 'success',
+              duration: 1500
+            })
+            
+            // 从列表中移除该项
+            const index = feed.value.list.findIndex(i => i.id === item.id)
+            if (index !== -1) {
+              feed.value.list.splice(index, 1)
+              feed.value.total--
+              feed.value.empty = feed.value.list.length === 0
+            }
+            
+            // 发送更新事件
+            uni.$emit('audioLibraryUpdated')
+          } else {
+            uni.showToast({
+              title: data.msg || '删除失败',
+              icon: 'none',
+              duration: 2000
+            })
+          }
+        } catch (error) {
+          uni.hideLoading()
+          console.error('删除失败:', error)
+          uni.showToast({
+            title: '删除失败，请重试',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      }
+    }
   })
 }
 
@@ -303,8 +384,25 @@ const onReachBottom = () => {
   loadFeed(true, false)
 }
 
+// 监听音频库更新事件
+const onAudioLibraryUpdated = () => {
+  console.log('收到音频库更新事件，刷新数据')
+  // 重置分页并刷新
+  currentPage.value = 1
+  feed.value.list = []
+  hasMore.value = true
+  loadFeed()
+}
+
 onMounted(() => {
   loadFeed()
+  // 监听音频库更新事件
+  uni.$on('audioLibraryUpdated', onAudioLibraryUpdated)
+})
+
+onUnmounted(() => {
+  // 移除事件监听
+  uni.$off('audioLibraryUpdated', onAudioLibraryUpdated)
 })
 </script>
 
@@ -321,6 +419,7 @@ onMounted(() => {
   flex: 1;
   height: 0; /* 配合 flex: 1 使用，让 scroll-view 正确计算高度 */
   padding: 0 32rpx;
+  padding-bottom: 140rpx; /* 为底部固定区域留出空间 */
   box-sizing: border-box;
 }
 
@@ -548,6 +647,32 @@ onMounted(() => {
   overflow: hidden;
 }
 
+// 删除按钮
+.delete-btn {
+  position: absolute;
+  top: 16rpx;
+  right: 16rpx;
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 59, 48, 0.1);
+  border-radius: 50%;
+  z-index: 10;
+  backdrop-filter: blur(10rpx);
+  transition: all 0.3s ease;
+}
+
+.delete-btn:active {
+  transform: scale(0.9);
+  background: rgba(255, 59, 48, 0.2);
+}
+
+.delete-icon {
+  font-size: 32rpx;
+}
+
 .catalog-card:active {
   transform: translateY(-4rpx);
   box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.12);
@@ -717,6 +842,66 @@ button {
 
 button::after {
   border: none;
+}
+
+/* 底部固定区域 */
+.bottom-view {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 40rpx;
+  padding-bottom: 40rpx;
+  background: rgba(255, 255, 255, 1);
+  border-radius: 40rpx 40rpx 0px 0px;
+  border-top: 1rpx solid rgba(215, 219, 217, 0.5);
+  z-index: 100;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.bottom-confirm-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottom-confirm-button {
+  width: 100%;
+  height: 80rpx;
+  background: linear-gradient(135deg, #FF6B9D 0%, #FF8E9B 100%);
+  border-radius: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(255, 107, 157, 0.3);
+  border: none;
+  line-height: 80rpx;
+  font-size: 0;
+  transition: all 0.3s ease;
+}
+
+.bottom-confirm-button::after {
+  border: none;
+}
+
+.bottom-confirm-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.bottom-confirm-button:disabled {
+  opacity: 0.6;
+}
+
+.bottom-confirm-text {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: 500;
 }
 </style>
 

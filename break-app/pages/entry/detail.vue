@@ -52,11 +52,22 @@
 
         <!-- 信息卡片 -->
         <view class="info-card">
-          <!-- 分类标签 -->
+          <!-- 分类标签和删除按钮 -->
           <view class="class-section" v-if="itemData.class_name">
-            <view class="class-badge-large">
-              <text class="class-icon">📚</text>
-              <text class="class-name">{{ itemData.class_name }}</text>
+            <view class="class-header">
+              <view class="class-badge-large">
+                <text class="class-icon">📚</text>
+                <text class="class-name">{{ itemData.class_name }}</text>
+              </view>
+              <!-- 删除按钮（只有"自己放的屁"分类才显示） -->
+              <view 
+                v-if="itemData.class_name === '自己放的屁'" 
+                class="delete-btn"
+                @click="handleDelete"
+              >
+                <text class="delete-icon">🗑️</text>
+                <text class="delete-text">删除</text>
+              </view>
             </view>
           </view>
 
@@ -73,7 +84,7 @@
 
           <!-- 标签区域 -->
           <view class="tags-section" v-if="itemData.tags && itemData.tags.length">
-            <text class="tags-label">标签分类</text>
+        
             <view class="tags-list">
               <view class="tag-item" v-for="tag in itemData.tags" :key="tag">
                 <text class="tag-text">{{ tag }}</text>
@@ -99,6 +110,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { deleteAudioLibraryAPI } from '@/src/api/audio.js'
 
 const loading = ref(true)
 const itemData = ref(null)
@@ -320,6 +332,65 @@ const goBack = () => {
   uni.navigateBack()
 }
 
+// 删除音频
+const handleDelete = async () => {
+  if (!itemData.value) {
+    return
+  }
+  
+  // 确认删除
+  uni.showModal({
+    title: '确认删除',
+    content: `确定要删除"${itemData.value.name}"吗？删除后无法恢复。`,
+    confirmText: '删除',
+    cancelText: '取消',
+    confirmColor: '#ff3b30',
+    success: async (res) => {
+      if (res.confirm) {
+        try {
+          uni.showLoading({
+            title: '删除中...'
+          })
+          
+          const { data } = await deleteAudioLibraryAPI(itemData.value.id)
+          
+          uni.hideLoading()
+          
+          if (data.code === 0) {
+            uni.showToast({
+              title: '删除成功',
+              icon: 'success',
+              duration: 1500
+            })
+            
+            // 发送更新事件，通知列表页刷新
+            uni.$emit('audioLibraryUpdated')
+            
+            // 延迟返回，让用户看到成功提示
+            setTimeout(() => {
+              goBack()
+            }, 1500)
+          } else {
+            uni.showToast({
+              title: data.msg || '删除失败',
+              icon: 'none',
+              duration: 2000
+            })
+          }
+        } catch (error) {
+          uni.hideLoading()
+          console.error('删除失败:', error)
+          uni.showToast({
+            title: '删除失败，请重试',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      }
+    }
+  })
+}
+
 // 页面卸载时清理音频资源
 onUnmounted(() => {
   destroyAudio()
@@ -426,6 +497,13 @@ onUnmounted(() => {
   margin-bottom: 32rpx;
 }
 
+.class-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
 .class-badge-large {
   display: inline-flex;
   align-items: center;
@@ -434,6 +512,34 @@ onUnmounted(() => {
   background: linear-gradient(135deg, rgba(158, 135, 71, 0.12) 0%, rgba(158, 135, 71, 0.06) 100%);
   border-radius: 24rpx;
   border: 2rpx solid rgba(158, 135, 71, 0.2);
+  flex: 1;
+}
+
+// 删除按钮
+.delete-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 24rpx;
+  background: rgba(255, 59, 48, 0.1);
+  border-radius: 24rpx;
+  border: 2rpx solid rgba(255, 59, 48, 0.2);
+  transition: all 0.3s ease;
+}
+
+.delete-btn:active {
+  transform: scale(0.95);
+  background: rgba(255, 59, 48, 0.2);
+}
+
+.delete-icon {
+  font-size: 28rpx;
+}
+
+.delete-text {
+  font-size: 24rpx;
+  color: #ff3b30;
+  font-weight: 600;
 }
 
 .class-icon {

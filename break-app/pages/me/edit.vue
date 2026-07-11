@@ -3,7 +3,6 @@
     <scroll-view class="edit-scroll" scroll-y="true">
       <!-- 头部装饰 -->
       <view class="header-decoration">
-        <text class="header-title">编辑资料</text>
         <text class="header-subtitle">完善你的个人信息</text>
       </view>
 
@@ -13,16 +12,14 @@
         <view class="form-section">
           <view class="section-label">头像</view>
           <view class="avatar-section">
-            <view class="avatar-wrapper" @click="chooseAvatar">
-              <image 
-                :src="avatarUrl || defaultAvatar" 
-                class="avatar-image" 
-                mode="aspectFill"
-              />
-              <view class="avatar-mask">
-                <text class="mask-icon">📷</text>
-                <text class="mask-text">更换头像</text>
-              </view>
+            <view class="avatar-wrapper">
+              <button class="btn-normal" open-type="chooseAvatar" @chooseavatar="onChooseAvatar">
+                <image 
+                  :src="avatarUrl || defaultAvatar" 
+                  class="avatar-image" 
+                  mode="aspectFill"
+                />
+              </button>
             </view>
             <text class="avatar-tip">点击头像可以更换</text>
           </view>
@@ -106,24 +103,11 @@ const loadUserInfo = async () => {
   }
 }
 
-// 选择头像
-const chooseAvatar = () => {
-  uni.chooseImage({
-    count: 1,
-    sizeType: ['compressed'],
-    sourceType: ['album', 'camera'],
-    success: async (res) => {
-      const tempFilePath = res.tempFilePaths[0]
-      await uploadAvatar(tempFilePath)
-    },
-    fail: (err) => {
-      console.error('选择图片失败:', err)
-      uni.showToast({
-        title: '选择图片失败',
-        icon: 'none'
-      })
-    }
-  })
+// 选择微信头像
+const onChooseAvatar = ({ detail }) => {
+  if (detail.avatarUrl) {
+    uploadAvatar(detail.avatarUrl)
+  }
 }
 
 // 上传头像
@@ -316,45 +300,34 @@ onShow(() => {
   position: relative;
   width: 200rpx;
   height: 200rpx;
+}
+
+.btn-normal {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  outline: none;
+  box-shadow: none;
   border-radius: 50%;
   overflow: hidden;
-  border: 6rpx solid white;
-  box-shadow: 0 8rpx 16rpx rgba(0, 0, 0, 0.15);
+  width: 200rpx;
+  height: 200rpx;
+  position: relative;
+  display: block;
+}
+
+.btn-normal::after {
+  border: none;
 }
 
 .avatar-image {
-  width: 100%;
-  height: 100%;
-}
-
-.avatar-mask {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.avatar-wrapper:active .avatar-mask {
-  opacity: 1;
-}
-
-.mask-icon {
-  font-size: 48rpx;
-  margin-bottom: 8rpx;
-}
-
-.mask-text {
-  font-size: 24rpx;
-  color: white;
-  font-weight: 500;
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 50%;
+  border: 6rpx solid white;
+  box-shadow: 0 8rpx 16rpx rgba(0, 0, 0, 0.15);
 }
 
 .avatar-tip {

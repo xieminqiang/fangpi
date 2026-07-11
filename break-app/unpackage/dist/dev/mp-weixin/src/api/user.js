@@ -50,10 +50,33 @@ const updateUserInfoAPI = (data) => {
     }
   });
 };
+const updateUserPointsAPI = (data) => {
+  return src_util_http.http({
+    method: "POST",
+    url: "/wxuser/updateUserPoints",
+    data: {
+      points: data.points,
+      pointsType: data.pointsType,
+      remark: data.remark || ""
+    }
+  });
+};
+const getPointsRecordsAPI = (params) => {
+  return src_util_http.http({
+    method: "GET",
+    url: "/wxuser/getPointsRecords",
+    data: {
+      page: params.page || 1,
+      pageSize: params.pageSize || 20
+    }
+  });
+};
+exports.getPointsRecordsAPI = getPointsRecordsAPI;
 exports.getUserInfoAPI = getUserInfoAPI;
 exports.openidLoginAPI = openidLoginAPI;
 exports.setUserAudioUrlAPI = setUserAudioUrlAPI;
 exports.updateUserInfoAPI = updateUserInfoAPI;
+exports.updateUserPointsAPI = updateUserPointsAPI;
 exports.wxLoginAPI = wxLoginAPI;
 exports.wxQuickLoginAPI = wxQuickLoginAPI;
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/src/api/user.js.map

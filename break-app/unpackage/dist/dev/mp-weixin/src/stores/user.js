@@ -40,6 +40,11 @@ const useUserStore = common_vendor.defineStore("user", {
       var _a;
       return ((_a = state.userInfo) == null ? void 0 : _a.experience) || 0;
     },
+    // 获取屁币
+    points: (state) => {
+      var _a;
+      return ((_a = state.userInfo) == null ? void 0 : _a.points) || 0;
+    },
     // 判断是否已登录
     isLogin: (state) => {
       var _a;
@@ -51,13 +56,13 @@ const useUserStore = common_vendor.defineStore("user", {
     // 设置用户信息
     setUserInfo(userInfo) {
       this.userInfo = userInfo;
-      common_vendor.index.__f__("log", "at src/stores/user.js:33", "保存用户信息:", this.userInfo);
+      common_vendor.index.__f__("log", "at src/stores/user.js:35", "保存用户信息:", this.userInfo);
     },
     // 设置 Token
     setToken(token, expireTime) {
       this.token = token;
       this.tokenExpireTime = expireTime;
-      common_vendor.index.__f__("log", "at src/stores/user.js:40", "保存Token:", token);
+      common_vendor.index.__f__("log", "at src/stores/user.js:42", "保存Token:", token);
     },
     // 设置登录信息（用户信息 + Token）
     setLoginInfo(data) {
@@ -65,7 +70,7 @@ const useUserStore = common_vendor.defineStore("user", {
         this.setUserInfo(data.user);
         if (data.user.openid) {
           this.openid = data.user.openid;
-          common_vendor.index.__f__("log", "at src/stores/user.js:50", "保存 openid:", this.openid);
+          common_vendor.index.__f__("log", "at src/stores/user.js:52", "保存 openid:", this.openid);
         }
       }
       if (data.token) {
@@ -78,7 +83,7 @@ const useUserStore = common_vendor.defineStore("user", {
       this.token = "";
       this.tokenExpireTime = 0;
       this.openid = "";
-      common_vendor.index.__f__("log", "at src/stores/user.js:64", "已清除用户信息");
+      common_vendor.index.__f__("log", "at src/stores/user.js:66", "已清除用户信息");
     },
     // 更新用户部分信息
     updateUserInfo(updates) {
@@ -86,7 +91,7 @@ const useUserStore = common_vendor.defineStore("user", {
         ...this.userInfo,
         ...updates
       };
-      common_vendor.index.__f__("log", "at src/stores/user.js:73", "更新用户信息:", updates);
+      common_vendor.index.__f__("log", "at src/stores/user.js:75", "更新用户信息:", updates);
     }
   },
   // 持久化配置

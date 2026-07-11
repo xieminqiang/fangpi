@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
+const src_api_audio = require("../../src/api/audio.js");
 const _sfc_main = {
   __name: "detail",
   setup(__props) {
@@ -17,7 +18,7 @@ const _sfc_main = {
           const decodedData = decodeURIComponent(options.data);
           itemData.value = JSON.parse(decodedData);
         } catch (error) {
-          common_vendor.index.__f__("error", "at pages/entry/detail.vue:119", "解析数据失败:", error);
+          common_vendor.index.__f__("error", "at pages/entry/detail.vue:131", "解析数据失败:", error);
           itemData.value = null;
         }
       } else {
@@ -42,7 +43,7 @@ const _sfc_main = {
             isPlaying.value = false;
           });
           innerAudioContext.onError((err) => {
-            common_vendor.index.__f__("error", "at pages/entry/detail.vue:149", "音频播放错误:", err);
+            common_vendor.index.__f__("error", "at pages/entry/detail.vue:161", "音频播放错误:", err);
             isPlaying.value = false;
             let errorMsg = "音频播放失败";
             if (err && typeof err === "object" && err.errMsg) {
@@ -65,12 +66,12 @@ const _sfc_main = {
                 innerAudioContext.destroy();
               }
             } catch (e) {
-              common_vendor.index.__f__("error", "at pages/entry/detail.vue:175", "清理音频上下文失败:", e);
+              common_vendor.index.__f__("error", "at pages/entry/detail.vue:187", "清理音频上下文失败:", e);
             }
             innerAudioContext = null;
           });
         } catch (error) {
-          common_vendor.index.__f__("error", "at pages/entry/detail.vue:180", "创建音频上下文失败:", error);
+          common_vendor.index.__f__("error", "at pages/entry/detail.vue:192", "创建音频上下文失败:", error);
           common_vendor.index.showToast({
             title: "音频初始化失败",
             icon: "none",
@@ -116,7 +117,7 @@ const _sfc_main = {
             isPlaying.value = false;
           }
         } catch (error) {
-          common_vendor.index.__f__("error", "at pages/entry/detail.vue:233", "暂停音频失败:", error);
+          common_vendor.index.__f__("error", "at pages/entry/detail.vue:245", "暂停音频失败:", error);
           isPlaying.value = false;
         }
         return;
@@ -139,7 +140,7 @@ const _sfc_main = {
               innerAudioContext.play();
             }
           } catch (playError) {
-            common_vendor.index.__f__("error", "at pages/entry/detail.vue:265", "播放音频失败:", playError);
+            common_vendor.index.__f__("error", "at pages/entry/detail.vue:277", "播放音频失败:", playError);
             isPlaying.value = false;
             common_vendor.index.showToast({
               title: "播放失败，请稍后重试",
@@ -151,13 +152,13 @@ const _sfc_main = {
                 innerAudioContext.destroy();
               }
             } catch (e) {
-              common_vendor.index.__f__("error", "at pages/entry/detail.vue:278", "清理音频上下文失败:", e);
+              common_vendor.index.__f__("error", "at pages/entry/detail.vue:290", "清理音频上下文失败:", e);
             }
             innerAudioContext = null;
           }
         }, 100);
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/entry/detail.vue:284", "设置音频源失败:", error);
+        common_vendor.index.__f__("error", "at pages/entry/detail.vue:296", "设置音频源失败:", error);
         isPlaying.value = false;
         common_vendor.index.showToast({
           title: "播放失败，请稍后重试",
@@ -169,7 +170,7 @@ const _sfc_main = {
             innerAudioContext.destroy();
           }
         } catch (e) {
-          common_vendor.index.__f__("error", "at pages/entry/detail.vue:297", "清理音频上下文失败:", e);
+          common_vendor.index.__f__("error", "at pages/entry/detail.vue:309", "清理音频上下文失败:", e);
         }
         innerAudioContext = null;
       }
@@ -180,7 +181,7 @@ const _sfc_main = {
           innerAudioContext.stop();
           innerAudioContext.destroy();
         } catch (e) {
-          common_vendor.index.__f__("error", "at pages/entry/detail.vue:310", "销毁音频上下文失败:", e);
+          common_vendor.index.__f__("error", "at pages/entry/detail.vue:322", "销毁音频上下文失败:", e);
         }
         innerAudioContext = null;
       }
@@ -189,6 +190,54 @@ const _sfc_main = {
     const goBack = () => {
       destroyAudio();
       common_vendor.index.navigateBack();
+    };
+    const handleDelete = async () => {
+      if (!itemData.value) {
+        return;
+      }
+      common_vendor.index.showModal({
+        title: "确认删除",
+        content: `确定要删除"${itemData.value.name}"吗？删除后无法恢复。`,
+        confirmText: "删除",
+        cancelText: "取消",
+        confirmColor: "#ff3b30",
+        success: async (res) => {
+          if (res.confirm) {
+            try {
+              common_vendor.index.showLoading({
+                title: "删除中..."
+              });
+              const { data } = await src_api_audio.deleteAudioLibraryAPI(itemData.value.id);
+              common_vendor.index.hideLoading();
+              if (data.code === 0) {
+                common_vendor.index.showToast({
+                  title: "删除成功",
+                  icon: "success",
+                  duration: 1500
+                });
+                common_vendor.index.$emit("audioLibraryUpdated");
+                setTimeout(() => {
+                  goBack();
+                }, 1500);
+              } else {
+                common_vendor.index.showToast({
+                  title: data.msg || "删除失败",
+                  icon: "none",
+                  duration: 2e3
+                });
+              }
+            } catch (error) {
+              common_vendor.index.hideLoading();
+              common_vendor.index.__f__("error", "at pages/entry/detail.vue:382", "删除失败:", error);
+              common_vendor.index.showToast({
+                title: "删除失败，请重试",
+                icon: "none",
+                duration: 2e3
+              });
+            }
+          }
+        }
+      });
     };
     common_vendor.onUnmounted(() => {
       destroyAudio();
@@ -213,28 +262,31 @@ const _sfc_main = {
         j: common_vendor.o(($event) => !isPlaying.value && togglePlay())
       }) : {}, {
         k: itemData.value.class_name
-      }, itemData.value.class_name ? {
-        l: common_vendor.t(itemData.value.class_name)
-      } : {}, {
-        m: common_vendor.t(itemData.value.name),
-        n: itemData.value.badge
+      }, itemData.value.class_name ? common_vendor.e({
+        l: common_vendor.t(itemData.value.class_name),
+        m: itemData.value.class_name === "自己放的屁"
+      }, itemData.value.class_name === "自己放的屁" ? {
+        n: common_vendor.o(handleDelete)
+      } : {}) : {}, {
+        o: common_vendor.t(itemData.value.name),
+        p: itemData.value.badge
       }, itemData.value.badge ? {
-        o: common_vendor.t(itemData.value.badge)
+        q: common_vendor.t(itemData.value.badge)
       } : {}, {
-        p: itemData.value.description
+        r: itemData.value.description
       }, itemData.value.description ? {
-        q: common_vendor.t(itemData.value.description)
+        s: common_vendor.t(itemData.value.description)
       } : {}, {
-        r: itemData.value.tags && itemData.value.tags.length
+        t: itemData.value.tags && itemData.value.tags.length
       }, itemData.value.tags && itemData.value.tags.length ? {
-        s: common_vendor.f(itemData.value.tags, (tag, k0, i0) => {
+        v: common_vendor.f(itemData.value.tags, (tag, k0, i0) => {
           return {
             a: common_vendor.t(tag),
             b: tag
           };
         })
       } : {}) : {
-        t: common_vendor.o(goBack)
+        w: common_vendor.o(goBack)
       }, {
         b: itemData.value
       });

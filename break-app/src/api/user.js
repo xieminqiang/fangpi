@@ -116,3 +116,75 @@ export const updateUserInfoAPI = (data) => {
     }
   })
 }
+
+/**
+ * 根据用户ID获取用户信息（公开接口，用于邀请功能）
+ * @param {number} id - 用户ID
+ * @returns {Promise} 用户信息（包含id、nickname、avatar）
+ */
+export const getUserInfoByIdAPI = (id) => {
+  return http({
+    method: 'GET',
+    url: `/wxuser/getUserInfoById?id=${id}`
+  })
+}
+
+/**
+ * 更新用户屁币
+ * @param {Object} data - 屁币信息 {points: number, pointsType: number, remark: string}
+ * @param {number} data.points - 屁币数量（正数）
+ * @param {number} data.pointsType - 屁币类型：1-增加屁币，2-扣除屁币
+ * @param {string} data.remark - 备注说明
+ * @returns {Promise} 更新后的用户信息
+ */
+export const updateUserPointsAPI = (data) => {
+  return http({
+    method: 'POST',
+    url: '/wxuser/updateUserPoints',
+    data: {
+      points: data.points,
+      pointsType: data.pointsType,
+      remark: data.remark || ''
+    }
+  })
+}
+
+/**
+ * 创建屁币记录
+ * @param {Object} data - 屁币记录信息 {userId: number, points: number, pointsType: number, remark: string}
+ * @param {number} data.userId - 用户ID
+ * @param {number} data.points - 屁币数量
+ * @param {number} data.pointsType - 屁币类型：1-增加屁币，2-扣除屁币
+ * @param {string} data.remark - 备注说明
+ * @returns {Promise} 创建结果
+ */
+export const createPointsRecordAPI = (data) => {
+  return http({
+    method: 'POST',
+    url: '/wxuser/createPointsRecord',
+    data: {
+      userId: data.userId,
+      points: data.points,
+      pointsType: data.pointsType,
+      remark: data.remark || ''
+    }
+  })
+}
+
+/**
+ * 获取屁币记录列表
+ * @param {Object} params - 查询参数 {page: number, pageSize: number}
+ * @param {number} params.page - 页码
+ * @param {number} params.pageSize - 每页数量
+ * @returns {Promise} 屁币记录列表
+ */
+export const getPointsRecordsAPI = (params) => {
+  return http({
+    method: 'GET',
+    url: '/wxuser/getPointsRecords',
+    data: {
+      page: params.page || 1,
+      pageSize: params.pageSize || 20
+    }
+  })
+}

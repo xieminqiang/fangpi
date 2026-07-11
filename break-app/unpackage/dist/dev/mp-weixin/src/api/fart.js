@@ -34,9 +34,47 @@ const makeupFartRecordAPI = (data) => {
     data
   });
 };
+const getLastFartTogetherRecordAPI = () => {
+  return src_util_http.http({
+    method: "GET",
+    url: "/break/together/last"
+  });
+};
+const getFartTogetherRecordByIdAPI = (id) => {
+  return src_util_http.http({
+    method: "GET",
+    url: `/break/together/${id}`
+  });
+};
+const createFartTogetherRecordAPI = (data) => {
+  return src_util_http.http({
+    method: "POST",
+    url: "/break/together",
+    data
+  });
+};
+const updateFartTogetherRecordAPI = (id, data) => {
+  return src_util_http.http({
+    method: "PUT",
+    url: `/break/together/${id}`,
+    data
+  });
+};
+const updateFartTogetherRecordSexAPI = (data) => {
+  return src_util_http.http({
+    method: "POST",
+    url: "/break/together/sex",
+    data
+  });
+};
 exports.createFartRecordAPI = createFartRecordAPI;
+exports.createFartTogetherRecordAPI = createFartTogetherRecordAPI;
+exports.getFartTogetherRecordByIdAPI = getFartTogetherRecordByIdAPI;
+exports.getLastFartTogetherRecordAPI = getLastFartTogetherRecordAPI;
 exports.getStatisticsSummaryAPI = getStatisticsSummaryAPI;
 exports.getTodayRecordsAPI = getTodayRecordsAPI;
 exports.getTrendDataAPI = getTrendDataAPI;
 exports.makeupFartRecordAPI = makeupFartRecordAPI;
+exports.updateFartTogetherRecordAPI = updateFartTogetherRecordAPI;
+exports.updateFartTogetherRecordSexAPI = updateFartTogetherRecordSexAPI;
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/src/api/fart.js.map

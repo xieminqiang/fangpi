@@ -18,16 +18,15 @@
   color: rgba(255, 255, 255, 0.3);
   opacity: 0.5;
 }
+.header-decoration-img.data-v-38a9e170 {
+  position: absolute;
+  opacity: 0.3;
+}
 .decoration-1.data-v-38a9e170 {
   top: -20rpx;
   left: -40rpx;
-  font-size: 180rpx;
-}
-.decoration-2.data-v-38a9e170 {
-  bottom: -30rpx;
-  right: -20rpx;
-  font-size: 150rpx;
-  transform: rotate(15deg);
+  width: 180rpx;
+  height: 180rpx;
 }
 .header-title.data-v-38a9e170 {
   display: block;

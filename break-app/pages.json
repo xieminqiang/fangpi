@@ -22,6 +22,14 @@
 			}
 		},
 		{
+			"path": "pages/index/fart",
+			"style": {
+				"navigationBarTitleText": "",
+		         "navigationBarBackgroundColor": "#FFF2F5"
+				
+			}
+		},
+		{
 			"path": "pages/entry/detail",
 			"style": {
 				"navigationBarTitleText": "屁趣家族成员",
@@ -35,19 +43,19 @@
 				"navigationStyle": "custom"
 			}
 		},
+		
+		{
+			"path": "pages/entry/creat",
+			"style": {
+				"navigationBarTitleText": "创建自己的屁"
+			
+			}
+		},
 		{
 			"path": "pages/me/index",
 			"style": {
 				"navigationBarTitleText": "我的",
 				"navigationStyle": "custom"
-			}
-		},
-		
-		{
-			"path": "pages/me/level",
-			"style": {
-				"navigationBarTitleText": "等级称号"
-		
 			}
 		},
 		{
@@ -60,14 +68,22 @@
 		{
 			"path": "pages/me/edit",
 			"style": {
-				"navigationBarTitleText": ""
+				"navigationBarTitleText": "编辑资料",
+					"navigationBarBackgroundColor": "#E8F5E9"
 			}
 		},
 		{
-			"path": "pages/achievement/achievement",
+			"path": "pages/me/points",
 			"style": {
-				"navigationBarTitleText": "成就档案"
-			
+				"navigationBarTitleText": "我的屁币",
+				"navigationBarBackgroundColor": "#E8F5E9"
+			}
+		},
+		{
+			"path": "pages/me/pointsDetail",
+			"style": {
+				"navigationBarTitleText": "屁币明细",
+				"navigationBarBackgroundColor": "#E8F5E9"
 			}
 		}
 	],
@@ -116,6 +132,38 @@
 			}
 		]
 	},
-	
+	"subPackages": [
+		{
+			"root": "pages/achievement",
+			"name": "achievement",
+			"pages": [
+				{
+					"path": "achievement",
+					"style": {
+						"navigationBarTitleText": "成就档案"
+					}
+				}
+			]
+		},
+		{
+			"root": "pages/profile",
+			"name": "profile",
+			"pages": [
+				{
+					"path": "level",
+					"style": {
+						"navigationBarTitleText": "等级称号"
+					}
+				},
+				{
+					"path": "jz",
+					"style": {
+						"navigationBarTitleText": "",
+						"navigationStyle": "custom"
+					}
+				}
+			]
+		}
+	],
 	"uniIdRouter": {}
 }

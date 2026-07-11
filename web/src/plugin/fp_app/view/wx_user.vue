@@ -22,6 +22,10 @@
                 />
        </el-form-item>
       
+            <el-form-item label="微信用户凭证" prop="openid">
+  <el-input v-model="searchInfo.openid" placeholder="输入微信用户凭证" />
+</el-form-item>
+      
             <el-form-item label="用户昵称" prop="nickname">
   <el-input v-model="searchInfo.nickname" placeholder="输入用户昵称" />
 </el-form-item>
@@ -57,7 +61,10 @@
         <div class="gva-btn-list">
             <el-button  type="primary" icon="plus" @click="openDialog()">新增</el-button>
             <el-button  icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="onDelete">删除</el-button>
-            
+            <el-button  type="success" icon="Picture" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="batchUpdateAvatar">批量修改头像</el-button>
+            <el-button  type="warning" icon="Edit" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="batchUpdateNickname">批量修改昵称</el-button>
+            <!-- <el-button  type="info" icon="Search" style="margin-left: 10px;" @click="validateFartCounts" :loading="validating">手动校验打屁次数</el-button> -->
+            <!-- <el-button  type="warning" icon="Search" style="margin-left: 10px;" @click="showValidateSpecificDialog = true">手动校验指定用户</el-button> -->
         </div>
         <el-table
         ref="multipleTable"
@@ -76,6 +83,13 @@
             <el-table-column align="left" label="微信用户凭证" prop="openid" width="120" />
 
             <el-table-column align="left" label="用户昵称" prop="nickname" width="120" />
+
+            <el-table-column align="left" label="用户类型" prop="userType" width="100">
+              <template #default="scope">
+                <el-tag v-if="(scope.row.userType || 1) === 2" type="danger" size="small">小红书</el-tag>
+                <el-tag v-else type="success" size="small">微信</el-tag>
+              </template>
+            </el-table-column>
 
             <el-table-column label="头像" prop="avatar" width="200">
     <template #default="scope">
@@ -137,10 +151,22 @@
     <el-input v-model="formData.nickname" :clearable="true" placeholder="请输入用户昵称" />
 </el-form-item>
              <el-form-item label="头像:" prop="avatar">
-    <SelectImage
-     v-model="formData.avatar"
-     file-type="image"
-    />
+    <div class="flex items-center gap-2">
+      <SelectImage
+       v-model="formData.avatar"
+       file-type="image"
+      />
+      <el-button 
+        type="primary" 
+        size="small" 
+        icon="refresh" 
+        @click="autoMatchAvatar"
+        :loading="avatarMatching"
+        :disabled="!formData.nickname"
+      >
+        自动匹配
+      </el-button>
+    </div>
 </el-form-item>
              <el-form-item label="手机号:" prop="phone">
     <el-input v-model="formData.phone" :clearable="true" placeholder="请输入手机号" />
@@ -205,6 +231,109 @@
             </el-descriptions>
         </el-drawer>
 
+    <!-- 校验结果对话框 -->
+    <el-dialog
+      v-model="validateDialogVisible"
+      title="打屁次数校验结果"
+      width="80%"
+      :close-on-click-modal="false"
+    >
+      <div v-if="validateResults.length === 0" style="text-align: center; padding: 40px;">
+        <div style="font-size: 48px; color: #67c23a;">✓</div>
+        <p style="margin-top: 20px; color: #67c23a; font-size: 16px;">所有用户的打屁次数和经验值都正确！</p>
+      </div>
+      <el-table
+        v-else
+        :data="validateResults"
+        style="width: 100%"
+        border
+        stripe
+      >
+        <el-table-column prop="userID" label="用户ID" width="100" />
+        <el-table-column prop="nickname" label="用户昵称" width="150" />
+        <el-table-column prop="openid" label="OpenID" width="200" show-overflow-tooltip />
+        <el-table-column prop="totalFarts" label="用户表总数" width="120" align="center" />
+        <el-table-column prop="actualCount" label="实际统计数" width="120" align="center" />
+        <el-table-column prop="difference" label="次数差值" width="120" align="center">
+          <template #default="scope">
+            <span :style="{ color: scope.row.difference > 0 ? '#f56c6c' : scope.row.difference < 0 ? '#67c23a' : '' }">
+              {{ scope.row.difference > 0 ? '+' : '' }}{{ scope.row.difference }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="experience" label="用户表经验值" width="130" align="center" />
+        <el-table-column prop="actualExperience" label="实际经验值" width="130" align="center" />
+        <el-table-column prop="achievementExp" label="成就经验值" width="120" align="center" />
+        <el-table-column prop="experienceDiff" label="经验值差值" width="120" align="center">
+          <template #default="scope">
+            <span :style="{ color: scope.row.experienceDiff > 0 ? '#f56c6c' : scope.row.experienceDiff < 0 ? '#67c23a' : '' }">
+              {{ scope.row.experienceDiff > 0 ? '+' : '' }}{{ scope.row.experienceDiff }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="150" fixed="right">
+          <template #default="scope">
+            <el-button
+              type="primary"
+              link
+              size="small"
+              @click="fixUserFartCount(scope.row)"
+              :loading="fixingUserIds.includes(scope.row.userID)"
+            >
+              修复
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <template #footer>
+        <div style="text-align: right;">
+          <el-button @click="validateDialogVisible = false">关闭</el-button>
+          <el-button
+            v-if="validateResults.length > 0"
+            type="primary"
+            @click="batchFixFartCounts"
+            :loading="batchFixing"
+          >
+            批量修复所有
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 手动校验指定用户对话框 -->
+    <el-dialog
+      v-model="showValidateSpecificDialog"
+      title="手动校验指定用户"
+      width="600px"
+      :close-on-click-modal="false"
+    >
+      <el-form :model="validateSpecificForm" label-width="120px">
+        <el-form-item label="用户ID列表" required>
+          <el-input
+            v-model="validateSpecificForm.userIDs"
+            type="textarea"
+            :rows="4"
+            placeholder="请输入用户ID，多个ID用逗号分隔，例如：156,634,725"
+          />
+          <div style="margin-top: 8px; color: #909399; font-size: 12px;">
+            提示：输入用户ID，用逗号分隔，例如：156,634,725
+          </div>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div style="text-align: right;">
+          <el-button @click="showValidateSpecificDialog = false">取消</el-button>
+          <el-button
+            type="primary"
+            @click="validateSpecificUsers"
+            :loading="validatingSpecific"
+          >
+            开始校验
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -215,8 +344,12 @@ import {
   deleteWxUserByIds,
   updateWxUser,
   findWxUser,
-  getWxUserList
+  getWxUserList,
+  validateFartCounts as validateFartCountsAPI,
+  validateExperience as validateExperienceAPI,
+  validateSpecificUsers as validateSpecificUsersAPI
 } from '@/plugin/fp_app/api/wx_user'
+import { getNicknameTemplateList } from '@/plugin/fp_app/api/nickname_template'
 import { getUrl } from '@/utils/image'
 // 图片选择组件
 import SelectImage from '@/components/selectImage/selectImage.vue'
@@ -235,6 +368,26 @@ defineOptions({
 
 // 提交按钮loading
 const btnLoading = ref(false)
+// 头像匹配loading
+const avatarMatching = ref(false)
+// 校验loading
+const validating = ref(false)
+// 批量修复loading
+const batchFixing = ref(false)
+// 正在修复的用户ID列表
+const fixingUserIds = ref([])
+// 校验结果对话框显示状态
+const validateDialogVisible = ref(false)
+// 校验结果列表
+const validateResults = ref([])
+// 手动校验指定用户对话框显示状态
+const showValidateSpecificDialog = ref(false)
+// 手动校验指定用户loading
+const validatingSpecific = ref(false)
+// 手动校验指定用户表单
+const validateSpecificForm = ref({
+  userIDs: ''
+})
 
 // 控制更多查询条件显示/隐藏状态
 const showAllQuery = ref(false)
@@ -271,11 +424,6 @@ const rule = reactive({
               }
               ],
                phone : [{
-                   required: true,
-                   message: '',
-                   trigger: ['input','blur'],
-               },
-               {
                    whitespace: true,
                    message: '不能只输入空格',
                    trigger: ['input', 'blur'],
@@ -312,13 +460,15 @@ const getTodayDateRange = () => {
 }
 
 const searchInfo = ref({
-  createdAtRange: getTodayDateRange()
+  createdAtRange: getTodayDateRange(),
+  openid: ''
 })
 
 // 重置
 const onReset = () => {
   searchInfo.value = {
-    createdAtRange: getTodayDateRange()
+    createdAtRange: getTodayDateRange(),
+    openid: ''
   }
   getTableData()
 }
@@ -525,6 +675,682 @@ const getDetails = async (row) => {
 const closeDetailShow = () => {
   detailShow.value = false
   detailFrom.value = {}
+}
+
+// 批量修改头像
+const batchUpdateAvatar = async () => {
+  if (multipleSelection.value.length === 0) {
+    ElMessage({
+      type: 'warning',
+      message: '请选择要修改头像的用户'
+    })
+    return
+  }
+
+  // 默认头像URL
+  const defaultAvatarUrl = 'https://sbx-server.oss-cn-shenzhen.aliyuncs.com/fp-wx/uploads/2025-10-17/default_img.png'
+
+  ElMessageBox.confirm(
+    `确定要为选中的 ${multipleSelection.value.length} 个用户批量修改头像吗？\n（仅修改头像为默认头像的用户）`,
+    '提示',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(async () => {
+    btnLoading.value = true
+    try {
+      // 获取昵称模板列表，pageSize设为200
+      const templateRes = await getNicknameTemplateList({
+        page: 1,
+        pageSize: 200
+      })
+
+      if (templateRes.code !== 0) {
+        ElMessage({
+          type: 'error',
+          message: '获取昵称模板失败: ' + templateRes.msg
+        })
+        btnLoading.value = false
+        return
+      }
+
+      const templates = templateRes.data.list || []
+      // 创建昵称名称到图片的映射
+      const nameToImageMap = {}
+      templates.forEach(template => {
+        if (template.name) {
+          nameToImageMap[template.name] = template.image
+        }
+      })
+
+      let successCount = 0
+      let failCount = 0
+      let skipCount = 0
+      const failMessages = []
+
+      // 遍历选中的用户，批量更新头像
+      for (const user of multipleSelection.value) {
+        try {
+          // 检查用户头像是否为默认头像，只有默认头像才修改
+          const userAvatar = user.avatar || ''
+          if (userAvatar !== defaultAvatarUrl) {
+            skipCount++
+            continue
+          }
+
+          // 去掉昵称后四位
+          const nickname = user.nickname || ''
+          let nicknamePrefix = nickname
+          if (nickname.length > 4) {
+            nicknamePrefix = nickname.substring(0, nickname.length - 4)
+          }
+
+          // 查找匹配的模板图片
+          const matchedImage = nameToImageMap[nicknamePrefix]
+
+          if (!matchedImage) {
+            failCount++
+            failMessages.push(`${user.nickname}: 未找到匹配的昵称模板`)
+            continue
+          }
+
+          // 更新用户头像
+          const updateData = {
+            ...user,
+            avatar: matchedImage
+          }
+
+          const res = await updateWxUser(updateData)
+          if (res.code === 0) {
+            successCount++
+          } else {
+            failCount++
+            failMessages.push(`${user.nickname}: ${res.msg || '更新失败'}`)
+          }
+        } catch (error) {
+          failCount++
+          failMessages.push(`${user.nickname}: ${error.message || '更新失败'}`)
+        }
+      }
+
+      // 显示结果
+      let resultMessage = ''
+      if (successCount > 0) {
+        resultMessage = `成功更新 ${successCount} 个用户的头像`
+        if (skipCount > 0) {
+          resultMessage += `，跳过 ${skipCount} 个非默认头像用户`
+        }
+        if (failCount > 0) {
+          resultMessage += `，失败 ${failCount} 个`
+        }
+        ElMessage({
+          type: 'success',
+          message: resultMessage,
+          duration: 5000
+        })
+      } else {
+        if (skipCount > 0) {
+          ElMessage({
+            type: 'info',
+            message: `已跳过 ${skipCount} 个非默认头像用户${failCount > 0 ? `，失败 ${failCount} 个` : ''}`,
+            duration: 5000
+          })
+        }
+      }
+
+      if (failCount > 0 && failMessages.length > 0) {
+        console.error('批量更新头像失败详情:', failMessages)
+        if (successCount === 0) {
+          ElMessage({
+            type: 'warning',
+            message: `更新失败，共 ${failCount} 个用户`,
+            duration: 5000
+          })
+        }
+      }
+
+      // 刷新表格数据
+      getTableData()
+    } catch (error) {
+      ElMessage({
+        type: 'error',
+        message: '批量修改头像失败: ' + error.message
+      })
+    } finally {
+      btnLoading.value = false
+    }
+  }).catch(() => {
+    // 用户取消操作
+  })
+}
+
+// 批量修改昵称
+const batchUpdateNickname = async () => {
+  if (multipleSelection.value.length === 0) {
+    ElMessage({
+      type: 'warning',
+      message: '请选择要修改昵称的用户'
+    })
+    return
+  }
+
+  // 筛选出昵称为"新手屁屁"的用户
+  const targetUsers = multipleSelection.value.filter(user => user.nickname === '新手屁屁')
+
+  if (targetUsers.length === 0) {
+    ElMessage({
+      type: 'warning',
+      message: '选中的用户中没有昵称为"新手屁屁"的用户'
+    })
+    return
+  }
+
+  ElMessageBox.confirm(
+    `确定要为选中的 ${targetUsers.length} 个昵称为"新手屁屁"的用户批量修改昵称和头像吗？`,
+    '提示',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(async () => {
+    btnLoading.value = true
+    try {
+      // 获取昵称模板列表，pageSize设为200
+      const templateRes = await getNicknameTemplateList({
+        page: 1,
+        pageSize: 200
+      })
+
+      if (templateRes.code !== 0) {
+        ElMessage({
+          type: 'error',
+          message: '获取昵称模板失败: ' + templateRes.msg
+        })
+        btnLoading.value = false
+        return
+      }
+
+      const templates = templateRes.data.list || []
+      if (templates.length === 0) {
+        ElMessage({
+          type: 'warning',
+          message: '昵称模板列表为空，无法进行批量修改'
+        })
+        btnLoading.value = false
+        return
+      }
+
+      // 过滤出有效的模板（有名称和图片的）
+      const validTemplates = templates.filter(t => t.name && t.image)
+      if (validTemplates.length === 0) {
+        ElMessage({
+          type: 'warning',
+          message: '没有有效的昵称模板（需要同时有名称和图片）'
+        })
+        btnLoading.value = false
+        return
+      }
+
+      // 实现均匀随机分配：创建模板池，每个模板使用次数尽可能相等
+      // 打乱模板列表以实现随机
+      const shuffledTemplates = [...validTemplates].sort(() => Math.random() - 0.5)
+      
+      // 创建模板池，确保均匀分配
+      const templatePool = []
+      const timesPerTemplate = Math.ceil(targetUsers.length / shuffledTemplates.length)
+      for (let i = 0; i < timesPerTemplate; i++) {
+        // 每次循环都打乱顺序，增加随机性
+        const shuffled = [...shuffledTemplates].sort(() => Math.random() - 0.5)
+        templatePool.push(...shuffled)
+      }
+      // 只取需要的数量
+      const finalTemplatePool = templatePool.slice(0, targetUsers.length)
+
+      // 均匀分配：使用模板池
+      let successCount = 0
+      let failCount = 0
+      const failMessages = []
+
+      for (let i = 0; i < targetUsers.length; i++) {
+        const user = targetUsers[i]
+        try {
+          // 从模板池中获取模板
+          const selectedTemplate = finalTemplatePool[i]
+
+          // 生成新的昵称：模板名称 + 随机后缀（4位字符）
+          const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase()
+          const newNickname = selectedTemplate.name + '_' + randomSuffix
+
+          // 更新用户昵称和头像
+          const updateData = {
+            ...user,
+            nickname: newNickname,
+            avatar: selectedTemplate.image
+          }
+
+          const res = await updateWxUser(updateData)
+          if (res.code === 0) {
+            successCount++
+          } else {
+            failCount++
+            failMessages.push(`${user.nickname}: ${res.msg || '更新失败'}`)
+          }
+        } catch (error) {
+          failCount++
+          failMessages.push(`${user.nickname}: ${error.message || '更新失败'}`)
+        }
+      }
+
+      // 显示结果
+      let resultMessage = ''
+      if (successCount > 0) {
+        resultMessage = `成功更新 ${successCount} 个用户的昵称和头像`
+        if (failCount > 0) {
+          resultMessage += `，失败 ${failCount} 个`
+        }
+        ElMessage({
+          type: 'success',
+          message: resultMessage,
+          duration: 5000
+        })
+      } else {
+        ElMessage({
+          type: 'error',
+          message: `更新失败，共 ${failCount} 个用户`,
+          duration: 5000
+        })
+      }
+
+      if (failCount > 0 && failMessages.length > 0) {
+        console.error('批量更新昵称失败详情:', failMessages)
+      }
+
+      // 刷新表格数据
+      getTableData()
+    } catch (error) {
+      ElMessage({
+        type: 'error',
+        message: '批量修改昵称失败: ' + error.message
+      })
+    } finally {
+      btnLoading.value = false
+    }
+  }).catch(() => {
+    // 用户取消操作
+  })
+}
+
+// 自动匹配头像（编辑表单中使用）
+const autoMatchAvatar = async () => {
+  if (!formData.value.nickname) {
+    ElMessage({
+      type: 'warning',
+      message: '请先输入用户昵称'
+    })
+    return
+  }
+
+  avatarMatching.value = true
+  try {
+    // 获取昵称模板列表，pageSize设为200
+    const templateRes = await getNicknameTemplateList({
+      page: 1,
+      pageSize: 200
+    })
+
+    if (templateRes.code !== 0) {
+      ElMessage({
+        type: 'error',
+        message: '获取昵称模板失败: ' + templateRes.msg
+      })
+      return
+    }
+
+    const templates = templateRes.data.list || []
+    // 创建昵称名称到图片的映射
+    const nameToImageMap = {}
+    templates.forEach(template => {
+      if (template.name) {
+        nameToImageMap[template.name] = template.image
+      }
+    })
+
+    // 去掉昵称后四位
+    const nickname = formData.value.nickname || ''
+    let nicknamePrefix = nickname
+    if (nickname.length > 4) {
+      nicknamePrefix = nickname.substring(0, nickname.length - 4)
+    }
+
+    // 查找匹配的模板图片
+    const matchedImage = nameToImageMap[nicknamePrefix]
+
+    if (!matchedImage) {
+      ElMessage({
+        type: 'warning',
+        message: `未找到匹配的昵称模板（昵称前缀：${nicknamePrefix}）`
+      })
+      return
+    }
+
+    // 自动填充头像
+    formData.value.avatar = matchedImage
+    ElMessage({
+      type: 'success',
+      message: '头像已自动匹配'
+    })
+  } catch (error) {
+    ElMessage({
+      type: 'error',
+      message: '自动匹配头像失败: ' + error.message
+    })
+  } finally {
+    avatarMatching.value = false
+  }
+}
+
+// 手动校验打屁次数（分两步：先校验打屁次数，再校验经验值）
+const validateFartCounts = async () => {
+  validating.value = true
+  try {
+    // 第一步：快速校验打屁次数
+    const res = await validateFartCountsAPI()
+    if (res.code !== 0) {
+      ElMessage({
+        type: 'error',
+        message: res.msg || '校验失败'
+      })
+      return
+    }
+
+    const fartCountResults = res.data || []
+    
+    if (fartCountResults.length === 0) {
+      validateResults.value = []
+      validateDialogVisible.value = true
+      ElMessage({
+        type: 'success',
+        message: '所有用户的打屁次数都正确！'
+      })
+      return
+    }
+
+    // 第二步：对打屁次数不对的用户，校验经验值
+    const userIDs = fartCountResults.map(r => r.userID)
+    const expRes = await validateExperienceAPI(userIDs)
+    
+    if (expRes.code !== 0) {
+      ElMessage({
+        type: 'warning',
+        message: '打屁次数校验完成，但经验值校验失败: ' + (expRes.msg || '未知错误')
+      })
+      // 即使经验值校验失败，也显示打屁次数的结果
+      validateResults.value = fartCountResults
+      validateDialogVisible.value = true
+      return
+    }
+
+    // 合并打屁次数和经验值的结果
+    const expResults = expRes.data || {}
+    validateResults.value = fartCountResults.map(result => {
+      const expData = expResults[result.userID]
+      if (expData) {
+        return {
+          ...result,
+          experience: expData.experience,
+          actualExperience: expData.actualExperience,
+          experienceDiff: expData.experienceDiff,
+          achievementExp: expData.achievementExp
+        }
+      }
+      return result
+    })
+
+    validateDialogVisible.value = true
+    
+    // 统计经验值不对的用户数量
+    const expErrorCount = validateResults.value.filter(r => r.experienceDiff !== 0).length
+    
+    if (expErrorCount > 0) {
+      ElMessage({
+        type: 'warning',
+        message: `发现 ${fartCountResults.length} 个用户的打屁次数不正确，其中 ${expErrorCount} 个用户的经验值也不正确`,
+        duration: 5000
+      })
+    } else {
+      ElMessage({
+        type: 'warning',
+        message: `发现 ${fartCountResults.length} 个用户的打屁次数不正确`,
+        duration: 5000
+      })
+    }
+  } catch (error) {
+    console.error('校验失败:', error)
+    ElMessage({
+      type: 'error',
+      message: '校验失败: ' + (error.message || '未知错误')
+    })
+  } finally {
+    validating.value = false
+  }
+}
+
+// 修复单个用户的打屁次数
+const fixUserFartCount = async (row) => {
+  if (fixingUserIds.value.includes(row.userID)) {
+    return
+  }
+  
+  fixingUserIds.value.push(row.userID)
+  try {
+    // 获取用户信息
+    const userRes = await findWxUser({ ID: row.userID })
+    if (userRes.code !== 0) {
+      ElMessage({
+        type: 'error',
+        message: '获取用户信息失败'
+      })
+      return
+    }
+    
+    const user = userRes.data
+    // 更新用户的 total_farts 和 experience
+    // actualExperience 已经包含了打屁次数 + 成就经验值，应该直接使用
+    // 如果 actualExperience 未定义，则计算：打屁次数 + 成就经验值
+    let finalExperience = row.actualExperience
+    if (finalExperience === undefined || finalExperience === null) {
+      // 如果经验值未校验，则使用打屁次数 + 成就经验值
+      finalExperience = row.actualCount + (row.achievementExp || 0)
+    }
+    const updateData = {
+      ...user,
+      totalFarts: row.actualCount,
+      experience: finalExperience // 使用包含成就经验值的总经验值
+    }
+    
+    const res = await updateWxUser(updateData)
+    if (res.code === 0) {
+      ElMessage({
+        type: 'success',
+        message: `用户 ${row.nickname} 的打屁次数和经验值已修复`
+      })
+      // 从结果列表中移除已修复的用户
+      validateResults.value = validateResults.value.filter(r => r.userID !== row.userID)
+      // 刷新表格数据
+      getTableData()
+    } else {
+      ElMessage({
+        type: 'error',
+        message: res.msg || '修复失败'
+      })
+    }
+  } catch (error) {
+    console.error('修复用户打屁次数失败:', error)
+    ElMessage({
+      type: 'error',
+      message: '修复失败: ' + (error.message || '未知错误')
+    })
+  } finally {
+    fixingUserIds.value = fixingUserIds.value.filter(id => id !== row.userID)
+  }
+}
+
+// 批量修复所有用户的打屁次数
+const batchFixFartCounts = async () => {
+  if (validateResults.value.length === 0) {
+    return
+  }
+  
+  ElMessageBox.confirm(
+    `确定要修复所有 ${validateResults.value.length} 个用户的打屁次数和经验值吗？`,
+    '提示',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(async () => {
+    batchFixing.value = true
+    let successCount = 0
+    let failCount = 0
+    
+    for (const row of validateResults.value) {
+      try {
+        // 获取用户信息
+        const userRes = await findWxUser({ ID: row.userID })
+        if (userRes.code !== 0) {
+          failCount++
+          continue
+        }
+        
+        const user = userRes.data
+        // 更新用户的 total_farts 和 experience
+        // actualExperience 已经包含了打屁次数 + 成就经验值，应该直接使用
+        // 如果 actualExperience 未定义，则计算：打屁次数 + 成就经验值
+        let finalExperience = row.actualExperience
+        if (finalExperience === undefined || finalExperience === null) {
+          // 如果经验值未校验，则使用打屁次数 + 成就经验值
+          finalExperience = row.actualCount + (row.achievementExp || 0)
+        }
+        const updateData = {
+          ...user,
+          totalFarts: row.actualCount,
+          experience: finalExperience // 使用包含成就经验值的总经验值
+        }
+        
+        const res = await updateWxUser(updateData)
+        if (res.code === 0) {
+          successCount++
+        } else {
+          failCount++
+        }
+      } catch (error) {
+        console.error(`修复用户 ${row.userID} 失败:`, error)
+        failCount++
+      }
+    }
+    
+    batchFixing.value = false
+    
+    if (successCount > 0) {
+      ElMessage({
+        type: 'success',
+        message: `成功修复 ${successCount} 个用户${failCount > 0 ? `，失败 ${failCount} 个` : ''}`,
+        duration: 5000
+      })
+      // 清空结果列表
+      validateResults.value = []
+      // 刷新表格数据
+      getTableData()
+    } else {
+      ElMessage({
+        type: 'error',
+        message: `修复失败，共 ${failCount} 个用户`,
+        duration: 5000
+      })
+    }
+  }).catch(() => {
+    // 用户取消操作
+  })
+}
+
+// 手动校验指定用户
+const validateSpecificUsers = async () => {
+  const userIDsStr = validateSpecificForm.value.userIDs.trim()
+  if (!userIDsStr) {
+    ElMessage({
+      type: 'warning',
+      message: '请输入用户ID列表'
+    })
+    return
+  }
+
+  // 解析用户ID列表（支持逗号、空格、换行分隔）
+  const userIDs = userIDsStr
+    .split(/[,\s\n]+/)
+    .map(id => id.trim())
+    .filter(id => id)
+    .map(id => parseInt(id))
+    .filter(id => !isNaN(id) && id > 0)
+
+  if (userIDs.length === 0) {
+    ElMessage({
+      type: 'warning',
+      message: '请输入有效的用户ID（数字）'
+    })
+    return
+  }
+
+  validatingSpecific.value = true
+  try {
+    const res = await validateSpecificUsersAPI(userIDs)
+    if (res.code === 0) {
+      const results = res.data || []
+      if (results.length === 0) {
+        ElMessage({
+          type: 'warning',
+          message: '未找到指定的用户'
+        })
+        return
+      }
+
+      // 显示校验结果
+      validateResults.value = results
+      validateDialogVisible.value = true
+      showValidateSpecificDialog.value = false
+
+      // 统计不对的用户数量
+      const errorCount = results.filter(r => r.difference !== 0 || r.experienceDiff !== 0).length
+      if (errorCount > 0) {
+        ElMessage({
+          type: 'warning',
+          message: `校验完成，发现 ${errorCount} 个用户的数据不正确`,
+          duration: 5000
+        })
+      } else {
+        ElMessage({
+          type: 'success',
+          message: '所有用户的数据都正确！'
+        })
+      }
+    } else {
+      ElMessage({
+        type: 'error',
+        message: res.msg || '校验失败'
+      })
+    }
+  } catch (error) {
+    console.error('校验指定用户失败:', error)
+    ElMessage({
+      type: 'error',
+      message: '校验失败: ' + (error.message || '未知错误')
+    })
+  } finally {
+    validatingSpecific.value = false
+  }
 }
 
 

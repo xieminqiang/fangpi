@@ -16,6 +16,14 @@ var FartRecord = new(fartRecord)
 
 type fartRecord struct{}
 
+// 默认使用东八区时间，避免服务器时区是 UTC 时，0~7 点出现“少一天”的问题
+var cstZone = time.FixedZone("CST", 8*3600)
+
+// nowCST 返回东八区当前时间
+func nowCST() time.Time {
+	return time.Now().In(cstZone)
+}
+
 // CreateFartRecord 创建放屁记录
 func (s *fartRecord) CreateFartRecord(ctx context.Context, record *model.BreakFartRecord) (*CreateFartRecordResponse, error) {
 	// 将纯时间转换为完整的 datetime 格式
@@ -315,13 +323,13 @@ func (s *fartRecord) calculateContinuousDays(userId uint) int {
 		return 0
 	}
 
-	// 计算连续天数
+	// 计算连续天数（按东八区“今天”来算）
 	continuousDays := 0
-	today := time.Now().Format("2006-01-02")
+	today := nowCST().Format("2006-01-02")
 
 	// 从今天开始往前计算
 	for i, date := range checkinDates {
-		expectedDate := time.Now().AddDate(0, 0, -i).Format("2006-01-02")
+		expectedDate := nowCST().AddDate(0, 0, -i).Format("2006-01-02")
 		if date == expectedDate {
 			continuousDays++
 		} else {
@@ -342,7 +350,7 @@ func (s *fartRecord) unlockAchievement(userId uint, achievement model.BreakAchie
 		UserId:          userId,
 		AchievementId:   achievement.ID,
 		AchievementCode: achievement.AchievementCode,
-		UnlockTime:      time.Now(),
+		UnlockTime:      nowCST(),
 		IsViewed:        0,
 	}
 
@@ -399,7 +407,8 @@ func (s *fartRecord) checkLevelUp(userId uint) bool {
 
 // GetTodayRecords 获取今日记录
 func (s *fartRecord) GetTodayRecords(ctx context.Context, userId uint) (*TodayRecordsResponse, error) {
-	today := time.Now().Format("2006-01-02")
+	// 使用东八区日期作为“今天”
+	today := nowCST().Format("2006-01-02")
 
 	var records []model.BreakFartRecord
 	if err := global.GVA_DB.Where("user_id = ? AND fart_date = ?", userId, today).
@@ -450,6 +459,54 @@ func (s *fartRecord) GetTodayRecords(ctx context.Context, userId uint) (*TodayRe
 	return response, nil
 }
 
+// GetTodayLastRecord 获取今日最近一次记录
+func (s *fartRecord) GetTodayLastRecord(ctx context.Context, userId uint) (*LastRecordInfo, error) {
+	// 使用东八区日期作为“今天”
+	today := nowCST().Format("2006-01-02")
+
+	var record model.BreakFartRecord
+	if err := global.GVA_DB.Where("user_id = ? AND fart_date = ?", userId, today).
+		Order("fart_time DESC").
+		First(&record).Error; err != nil {
+		// 如果没有记录，返回 nil（不是错误）
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	// 提取纯时间部分（HH:MM:SS）
+	fartTimeStr := record.FartTime
+	// 如果包含日期部分（可能是完整时间戳），只保留时间部分
+	if len(fartTimeStr) > 8 && (fartTimeStr[10] == 'T' || fartTimeStr[10] == ' ') {
+		// 格式可能是 "2025-10-21T21:19:54+08:00" 或类似格式
+		parts := strings.Split(fartTimeStr, "T")
+		if len(parts) > 1 {
+			// 取T后面的部分，然后去掉时区信息
+			timePart := parts[1]
+			// 去掉 +08:00 或 -08:00 这样的时区后缀
+			if idx := strings.IndexAny(timePart, "+-"); idx > 0 {
+				fartTimeStr = timePart[:idx]
+			} else {
+				fartTimeStr = timePart
+			}
+		}
+	}
+	// 确保只保留 HH:MM:SS 格式
+	if len(fartTimeStr) > 8 {
+		fartTimeStr = fartTimeStr[:8]
+	}
+
+	response := &LastRecordInfo{
+		Id:       record.ID,
+		FartTime: fartTimeStr,
+		FartType: record.FartType,
+		Mood:     record.Mood,
+	}
+
+	return response, nil
+}
+
 // MakeupFartRecordRequest 补卡请求结构体（在api包中定义，这里重新声明用于service层）
 type MakeupFartRecordRequest struct {
 	FartType   string
@@ -464,8 +521,8 @@ func (s *fartRecord) MakeupFartRecordWithDate(ctx context.Context, userId uint, 
 	// 前端只传入时间：fartTime = "HH:mm"
 	// 后端使用当前日期
 
-	// 1. 使用当前日期
-	now := time.Now()
+	// 1. 使用当前日期（东八区）
+	now := nowCST()
 	fartDateStr := now.Format("2006-01-02") // 2025-10-22
 
 	// 2. 处理时间：补充秒数

@@ -103,8 +103,10 @@ service.interceptors.request.use(
       showLoading(config.loadingOption)
     }
     const userStore = useUserStore()
+    // 如果是 FormData，不设置 Content-Type，让浏览器自动设置（包含 boundary）
+    const isFormData = config.data instanceof FormData
     config.headers = {
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       'x-token': userStore.token,
       'x-user-id': userStore.userInfo.ID,
       ...config.headers

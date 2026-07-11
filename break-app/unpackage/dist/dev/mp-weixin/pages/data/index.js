@@ -28,31 +28,69 @@ const _sfc_main = {
       week: { trendData: null, summaryData: null, timestamp: 0 },
       month: { trendData: null, summaryData: null, timestamp: 0 }
     });
-    const trendChartRef = common_vendor.ref(null);
-    const chartLabels = common_vendor.computed(() => {
-      if (!trendData.value)
-        return ["凌晨", "上午", "下午", "晚上"];
-      if (trendData.value.type === "day") {
-        return ["凌晨", "上午", "下午", "晚上"];
-      } else if (trendData.value.type === "week") {
-        return ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
-      } else if (trendData.value.type === "month") {
-        return ["月初", "月中", "月底"];
+    const dayChartRef = common_vendor.ref(null);
+    const weekChartRef = common_vendor.ref(null);
+    const monthChartRef = common_vendor.ref(null);
+    const chartInstances = {
+      day: null,
+      week: null,
+      month: null
+    };
+    const isInitializing = {
+      day: false,
+      week: false,
+      month: false
+    };
+    const isInitialized = {
+      day: false,
+      week: false,
+      month: false
+    };
+    const chartLoading = common_vendor.ref({
+      day: true,
+      week: false,
+      month: false
+    });
+    const getChartData = (periodType) => {
+      const cache = dataCache.value[periodType];
+      if (!cache || !cache.trendData) {
+        if (periodType === "day")
+          return { labels: ["凌晨", "上午", "下午", "晚上"], data: [0, 0, 0, 0] };
+        if (periodType === "week")
+          return { labels: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"], data: [0, 0, 0, 0, 0, 0, 0] };
+        if (periodType === "month")
+          return { labels: ["月初", "月中", "月底"], data: [0, 0, 0] };
+        return { labels: [], data: [] };
       }
-      return [];
+      const trendData2 = cache.trendData;
+      if (periodType === "day") {
+        const tp = trendData2.timePeriodData || {};
+        return {
+          labels: ["凌晨", "上午", "下午", "晚上"],
+          data: [tp.dawn || 0, tp.morning || 0, tp.afternoon || 0, tp.evening || 0]
+        };
+      } else if (periodType === "week") {
+        return {
+          labels: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+          data: trendData2.weekData || [0, 0, 0, 0, 0, 0, 0]
+        };
+      } else if (periodType === "month") {
+        return {
+          labels: ["月初", "月中", "月底"],
+          data: trendData2.monthData || [0, 0, 0]
+        };
+      }
+      return { labels: [], data: [] };
+    };
+    const chartLabels = common_vendor.computed(() => {
+      const typeMap = { "今日": "day", "本周": "week", "本月": "month" };
+      const periodType = typeMap[selectedPeriod.value];
+      return getChartData(periodType).labels;
     });
     const chartData = common_vendor.computed(() => {
-      if (!trendData.value)
-        return [0, 0, 0, 0];
-      if (trendData.value.type === "day") {
-        const tp = trendData.value.timePeriodData || {};
-        return [tp.dawn || 0, tp.morning || 0, tp.afternoon || 0, tp.evening || 0];
-      } else if (trendData.value.type === "week") {
-        return trendData.value.weekData || [];
-      } else if (trendData.value.type === "month") {
-        return trendData.value.monthData || [];
-      }
-      return [];
+      const typeMap = { "今日": "day", "本周": "week", "本月": "month" };
+      const periodType = typeMap[selectedPeriod.value];
+      return getChartData(periodType).data;
     });
     const getChartHeight = () => {
       const systemInfo = common_vendor.index.getSystemInfoSync();
@@ -159,145 +197,287 @@ const _sfc_main = {
       { icon: "💀", top: "50%", left: "50%", size: "80rpx", transform: "translate(-50%, -50%)" },
       { icon: "😖", top: "240rpx", left: "50rpx", size: "48rpx" }
     ]);
-    const chartOption = common_vendor.computed(() => ({
-      grid: {
-        left: "10%",
-        right: "10%",
-        bottom: "15%",
-        top: "10%",
-        containLabel: true
-      },
-      xAxis: {
-        type: "category",
-        boundaryGap: false,
-        data: chartLabels.value,
-        axisLine: {
-          lineStyle: {
-            color: "rgba(138, 245, 191, 0.3)"
+    const ensureDataContinuity = (data) => {
+      if (!data || data.length === 0)
+        return [0];
+      return data.map((val) => val === null || val === void 0 || isNaN(val) ? 0 : Number(val));
+    };
+    const getChartOption = (periodType) => {
+      const { labels, data } = getChartData(periodType);
+      const safeData = ensureDataContinuity(data);
+      const safeLabels = labels.length > 0 ? labels : ["数据"];
+      return {
+        grid: {
+          left: "10%",
+          right: "10%",
+          bottom: "15%",
+          top: "10%",
+          containLabel: true
+        },
+        xAxis: {
+          type: "category",
+          boundaryGap: false,
+          data: safeLabels,
+          axisLine: {
+            lineStyle: {
+              color: "rgba(138, 245, 191, 0.3)"
+            }
+          },
+          axisLabel: {
+            color: "rgba(138, 245, 191, 0.8)",
+            fontSize: 11,
+            fontWeight: "bold"
+          },
+          axisTick: {
+            show: false
           }
         },
-        axisLabel: {
-          color: "rgba(138, 245, 191, 0.8)",
-          fontSize: 11,
-          fontWeight: "bold"
-        },
-        axisTick: {
-          show: false
-        }
-      },
-      yAxis: {
-        type: "value",
-        axisLine: {
-          show: false
-        },
-        axisTick: {
-          show: false
-        },
-        axisLabel: {
-          color: "rgba(138, 245, 191, 0.6)",
-          fontSize: 11
-        },
-        splitLine: {
-          lineStyle: {
-            color: "rgba(138, 245, 191, 0.1)",
-            type: "dashed"
-          }
-        }
-      },
-      series: [{
-        data: chartData.value,
-        type: "line",
-        smooth: true,
-        smoothMonotone: "x",
-        symbol: "none",
-        itemStyle: {
-          color: "#8af5bf",
-          borderColor: "#fff",
-          borderWidth: 2
-        },
-        lineStyle: {
-          color: "#8af5bf",
-          width: 2,
-          shadowColor: "rgba(138, 245, 191, 0.3)",
-          shadowBlur: 8,
-          shadowOffsetY: 3
-        },
-        areaStyle: {
-          color: {
-            type: "linear",
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [
-              { offset: 0, color: "rgba(138, 245, 191, 0.3)" },
-              { offset: 1, color: "rgba(138, 245, 191, 0.05)" }
-            ]
+        yAxis: {
+          type: "value",
+          min: 0,
+          // 确保最小值从0开始，避免区域线折断
+          axisLine: {
+            show: false
+          },
+          axisTick: {
+            show: false
+          },
+          axisLabel: {
+            color: "rgba(138, 245, 191, 0.6)",
+            fontSize: 11
+          },
+          splitLine: {
+            lineStyle: {
+              color: "rgba(138, 245, 191, 0.1)",
+              type: "dashed"
+            }
           }
         },
-        emphasis: {
-          focus: "series",
+        series: [{
+          data: safeData,
+          type: "line",
+          smooth: true,
+          smoothMonotone: "x",
+          symbol: "circle",
+          // 显示数据点，便于调试
+          symbolSize: 6,
+          connectNulls: true,
+          // 连接空值，避免折断
           itemStyle: {
-            color: "#5BCFA0",
+            color: "#8af5bf",
             borderColor: "#fff",
-            borderWidth: 3,
-            shadowBlur: 10,
-            shadowColor: "rgba(138, 245, 191, 0.8)"
+            borderWidth: 2
+          },
+          lineStyle: {
+            color: "#8af5bf",
+            width: 2,
+            shadowColor: "rgba(138, 245, 191, 0.3)",
+            shadowBlur: 8,
+            shadowOffsetY: 3
+          },
+          areaStyle: {
+            color: {
+              type: "linear",
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [
+                { offset: 0, color: "rgba(138, 245, 191, 0.3)" },
+                { offset: 1, color: "rgba(138, 245, 191, 0.05)" }
+              ]
+            }
+          },
+          emphasis: {
+            focus: "series",
+            itemStyle: {
+              color: "#5BCFA0",
+              borderColor: "#fff",
+              borderWidth: 3,
+              shadowBlur: 10,
+              shadowColor: "rgba(138, 245, 191, 0.8)"
+            }
           }
-        }
-      }]
-    }));
-    const initChart = async () => {
+        }]
+      };
+    };
+    common_vendor.computed(() => {
+      const typeMap = { "今日": "day", "本周": "week", "本月": "month" };
+      const periodType = typeMap[selectedPeriod.value];
+      return getChartOption(periodType);
+    });
+    const updateChart = async (periodType) => {
+      if (isInitializing[periodType]) {
+        return;
+      }
+      const instance = chartInstances[periodType];
+      if (!instance) {
+        await initChart(periodType);
+        return;
+      }
+      try {
+        await common_vendor.nextTick$1();
+        const option = getChartOption(periodType);
+        instance.setOption(option, {
+          notMerge: false,
+          // 合并配置，保留动画等状态
+          lazyUpdate: false
+          // 立即更新
+        });
+        setTimeout(() => {
+          if (chartInstances[periodType]) {
+            chartInstances[periodType].resize();
+          }
+        }, 150);
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/data/index.vue:530", `更新${periodType}图表失败：`, error);
+        chartInstances[periodType] = null;
+        isInitialized[periodType] = false;
+        await initChart(periodType);
+      }
+    };
+    const initChart = async (periodType) => {
+      if (isInitialized[periodType] && chartInstances[periodType]) {
+        await updateChart(periodType);
+        return;
+      }
+      if (isInitializing[periodType]) {
+        return;
+      }
+      isInitializing[periodType] = true;
       await common_vendor.nextTick$1();
+      const { data } = getChartData(periodType);
+      if (!data || data.length === 0) {
+        common_vendor.index.__f__("warn", "at pages/data/index.vue:562", `${periodType}图表数据未准备好，延迟初始化`);
+        isInitializing[periodType] = false;
+        setTimeout(() => {
+          if (!isInitialized[periodType]) {
+            chartLoading.value[periodType] = false;
+          }
+        }, 3e3);
+        setTimeout(() => initChart(periodType), 300);
+        return;
+      }
       setTimeout(async () => {
-        if (!trendChartRef.value) {
-          common_vendor.index.__f__("warn", "at pages/data/index.vue:402", "图表 ref 未找到");
+        const chartRef = periodType === "day" ? dayChartRef.value : periodType === "week" ? weekChartRef.value : monthChartRef.value;
+        if (!chartRef) {
+          common_vendor.index.__f__("warn", "at pages/data/index.vue:581", `${periodType}图表 ref 未找到`);
+          isInitializing[periodType] = false;
+          chartLoading.value[periodType] = false;
           return;
         }
         try {
-          const myChart = await trendChartRef.value.init(echarts, (chart) => {
-            common_vendor.index.__f__("log", "at pages/data/index.vue:408", "图表实例创建成功", chart);
+          const myChart = await chartRef.init(echarts, (chart) => {
+            common_vendor.index.__f__("log", "at pages/data/index.vue:590", `${periodType}图表实例创建成功`, chart);
           });
           if (myChart) {
-            myChart.setOption(chartOption.value);
-            common_vendor.index.__f__("log", "at pages/data/index.vue:414", "图表初始化成功");
-            setTimeout(() => {
-              myChart.resize();
-            }, 100);
-            common_vendor.index.onWindowResize(() => {
-              setTimeout(() => {
-                myChart.resize();
-              }, 100);
+            chartInstances[periodType] = myChart;
+            isInitialized[periodType] = true;
+            isInitializing[periodType] = false;
+            const option = getChartOption(periodType);
+            myChart.setOption(option, {
+              notMerge: true
+              // 首次初始化不合并
             });
+            common_vendor.index.__f__("log", "at pages/data/index.vue:606", `${periodType}图表初始化成功`);
+            chartLoading.value[periodType] = false;
+            setTimeout(() => {
+              if (chartInstances[periodType]) {
+                chartInstances[periodType].resize();
+              }
+            }, 200);
+            common_vendor.index.onWindowResize(() => {
+              if (chartInstances[periodType]) {
+                setTimeout(() => {
+                  chartInstances[periodType].resize();
+                }, 100);
+              }
+            });
+          } else {
+            isInitializing[periodType] = false;
           }
         } catch (error) {
-          common_vendor.index.__f__("error", "at pages/data/index.vue:429", "图表初始化失败：", error);
+          common_vendor.index.__f__("error", "at pages/data/index.vue:630", `${periodType}图表初始化失败：`, error);
+          chartInstances[periodType] = null;
+          isInitialized[periodType] = false;
+          isInitializing[periodType] = false;
+          chartLoading.value[periodType] = false;
         }
-      }, 800);
+      }, 500);
     };
+    const updateTimers = {
+      day: null,
+      week: null,
+      month: null
+    };
+    common_vendor.watch(selectedPeriod, async (newPeriod) => {
+      const typeMap = { "今日": "day", "本周": "week", "本月": "month" };
+      const periodType = typeMap[newPeriod];
+      const cache = dataCache.value[periodType];
+      if (!cache || !cache.trendData) {
+        return;
+      }
+      if (!isInitialized[periodType]) {
+        chartLoading.value[periodType] = true;
+        await initChart(periodType);
+      } else {
+        await updateChart(periodType);
+      }
+    });
+    common_vendor.watch(() => dataCache.value, () => {
+      Object.keys(chartInstances).forEach((periodType) => {
+        if (isInitialized[periodType] && chartInstances[periodType]) {
+          if (updateTimers[periodType]) {
+            clearTimeout(updateTimers[periodType]);
+          }
+          updateTimers[periodType] = setTimeout(() => {
+            updateChart(periodType);
+            updateTimers[periodType] = null;
+          }, 100);
+        }
+      });
+    }, { deep: true });
     common_vendor.onMounted(() => {
       const userStore = src_stores_user.useUserStore();
       if (userStore.token) {
-        common_vendor.index.__f__("log", "at pages/data/index.vue:440", "已有 token，直接加载数据");
+        common_vendor.index.__f__("log", "at pages/data/index.vue:694", "已有 token，直接加载数据");
         loadData();
       } else {
-        common_vendor.index.__f__("log", "at pages/data/index.vue:444", "暂无 token，等待登录完成...");
+        common_vendor.index.__f__("log", "at pages/data/index.vue:698", "暂无 token，等待登录完成...");
       }
-      initChart();
       common_vendor.index.$on("loginSuccess", onLoginSuccess);
       common_vendor.index.$on("fartRecordAdded", () => {
-        common_vendor.index.__f__("log", "at pages/data/index.vue:455", "收到放屁记录添加事件，刷新数据");
+        common_vendor.index.__f__("log", "at pages/data/index.vue:706", "收到放屁记录添加事件，刷新数据");
         clearAllCache();
         loadData(true);
       });
     });
     const onLoginSuccess = () => {
-      common_vendor.index.__f__("log", "at pages/data/index.vue:463", "收到 loginSuccess 事件，开始加载数据");
+      common_vendor.index.__f__("log", "at pages/data/index.vue:714", "收到 loginSuccess 事件，开始加载数据");
       loadData();
     };
     common_vendor.onUnmounted(() => {
       common_vendor.index.$off("loginSuccess", onLoginSuccess);
       common_vendor.index.$off("fartRecordAdded");
+      Object.keys(updateTimers).forEach((periodType) => {
+        if (updateTimers[periodType]) {
+          clearTimeout(updateTimers[periodType]);
+          updateTimers[periodType] = null;
+        }
+      });
+      Object.keys(chartInstances).forEach((periodType) => {
+        if (chartInstances[periodType]) {
+          chartInstances[periodType].dispose && chartInstances[periodType].dispose();
+          chartInstances[periodType] = null;
+        }
+        isInitialized[periodType] = false;
+        isInitializing[periodType] = false;
+      });
+      chartLoading.value = {
+        day: true,
+        week: false,
+        month: false
+      };
     });
     const isCacheValid = (statType) => {
       const cache = dataCache.value[statType];
@@ -309,7 +489,7 @@ const _sfc_main = {
       const cache = dataCache.value[statType];
       trendData.value = cache.trendData;
       summaryData.value = cache.summaryData;
-      common_vendor.index.__f__("log", "at pages/data/index.vue:485", `从缓存加载${statType}数据`);
+      common_vendor.index.__f__("log", "at pages/data/index.vue:761", `从缓存加载${statType}数据`);
     };
     const saveToCache = (statType, trendDataValue, summaryDataValue) => {
       dataCache.value[statType] = {
@@ -317,7 +497,7 @@ const _sfc_main = {
         summaryData: summaryDataValue,
         timestamp: Date.now()
       };
-      common_vendor.index.__f__("log", "at pages/data/index.vue:495", `保存${statType}数据到缓存`);
+      common_vendor.index.__f__("log", "at pages/data/index.vue:771", `保存${statType}数据到缓存`);
     };
     const clearAllCache = () => {
       dataCache.value = {
@@ -325,7 +505,7 @@ const _sfc_main = {
         week: { trendData: null, summaryData: null, timestamp: 0 },
         month: { trendData: null, summaryData: null, timestamp: 0 }
       };
-      common_vendor.index.__f__("log", "at pages/data/index.vue:505", "清除所有数据缓存");
+      common_vendor.index.__f__("log", "at pages/data/index.vue:781", "清除所有数据缓存");
     };
     const loadData = async (forceRefresh = false) => {
       try {
@@ -333,7 +513,13 @@ const _sfc_main = {
         const statType = typeMap[selectedPeriod.value];
         if (!forceRefresh && isCacheValid(statType)) {
           loadFromCache(statType);
-          initChart();
+          await common_vendor.nextTick$1();
+          if (!isInitialized[statType]) {
+            chartLoading.value[statType] = true;
+            await initChart(statType);
+          } else {
+            updateChart(statType);
+          }
           return;
         }
         const [trendRes, summaryRes] = await Promise.all([
@@ -345,20 +531,26 @@ const _sfc_main = {
         if (trendRes.data.code === 0) {
           newTrendData = trendRes.data.data;
           trendData.value = newTrendData;
-          common_vendor.index.__f__("log", "at pages/data/index.vue:537", "趋势数据:", newTrendData);
+          common_vendor.index.__f__("log", "at pages/data/index.vue:821", "趋势数据:", newTrendData);
         }
         if (summaryRes.data.code === 0) {
           newSummaryData = summaryRes.data.data;
           summaryData.value = newSummaryData;
-          common_vendor.index.__f__("log", "at pages/data/index.vue:543", "统计小结:", newSummaryData);
+          common_vendor.index.__f__("log", "at pages/data/index.vue:827", "统计小结:", newSummaryData);
         }
         if (newTrendData && newSummaryData) {
           saveToCache(statType, newTrendData, newSummaryData);
         }
         common_vendor.index.hideLoading();
-        initChart();
+        await common_vendor.nextTick$1();
+        if (!isInitialized[statType]) {
+          chartLoading.value[statType] = true;
+          await initChart(statType);
+        } else {
+          updateChart(statType);
+        }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/data/index.vue:556", "加载数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/data/index.vue:848", "加载数据失败:", error);
         common_vendor.index.hideLoading();
         common_vendor.index.showToast({ title: "加载失败", icon: "none" });
       }
@@ -379,7 +571,7 @@ const _sfc_main = {
       loadData: (forceRefresh = true) => loadData(forceRefresh)
     });
     return (_ctx, _cache) => {
-      return {
+      return common_vendor.e({
         a: common_vendor.o(onPeriodChange),
         b: common_vendor.p({
           list: periods.value,
@@ -396,22 +588,46 @@ const _sfc_main = {
             c: index
           };
         }),
-        d: common_vendor.sr(trendChartRef, "af28c7f4-1", {
-          "k": "trendChartRef"
+        d: chartLoading.value.day
+      }, chartLoading.value.day ? {} : {}, {
+        e: common_vendor.sr(dayChartRef, "af28c7f4-1", {
+          "k": "dayChartRef"
         }),
-        e: common_vendor.p({
+        f: common_vendor.p({
           ["custom-style"]: chartStyle.value,
           type: "2d",
           ["is-disable-scroll"]: false
         }),
-        f: common_assets._imports_1$2,
-        g: common_vendor.t(selectedPeriod.value),
-        h: common_vendor.t(totalCount.value),
-        i: common_vendor.t(mostCommonType.value),
-        j: common_vendor.t(averageSmell.value),
-        k: common_vendor.t(mostCommonMood.value.name),
-        l: common_vendor.t(mostCommonMood.value.emoji)
-      };
+        g: selectedPeriod.value === "今日",
+        h: chartLoading.value.week
+      }, chartLoading.value.week ? {} : {}, {
+        i: common_vendor.sr(weekChartRef, "af28c7f4-2", {
+          "k": "weekChartRef"
+        }),
+        j: common_vendor.p({
+          ["custom-style"]: chartStyle.value,
+          type: "2d",
+          ["is-disable-scroll"]: false
+        }),
+        k: selectedPeriod.value === "本周",
+        l: chartLoading.value.month
+      }, chartLoading.value.month ? {} : {}, {
+        m: common_vendor.sr(monthChartRef, "af28c7f4-3", {
+          "k": "monthChartRef"
+        }),
+        n: common_vendor.p({
+          ["custom-style"]: chartStyle.value,
+          type: "2d",
+          ["is-disable-scroll"]: false
+        }),
+        o: selectedPeriod.value === "本月",
+        p: common_assets._imports_1$2,
+        q: common_vendor.t(selectedPeriod.value),
+        r: common_vendor.t(totalCount.value),
+        s: common_vendor.t(mostCommonType.value),
+        t: common_vendor.t(averageSmell.value),
+        v: common_vendor.t(mostCommonMood.value.name)
+      });
     };
   }
 };

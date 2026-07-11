@@ -1,0 +1,103 @@
+/**
+ * 这里是uni-app内置的常用样式变量
+ *
+ * uni-app 官方扩展插件及插件市场（https://ext.dcloud.net.cn）上很多三方插件均使用了这些样式变量
+ * 如果你是插件开发者，建议你使用scss预处理，并在插件代码中直接使用这些变量（无需 import 这个文件），方便用户通过搭积木的方式开发整体风格一致的App
+ *
+ */
+/**
+ * 如果你是App开发者（插件使用者），你可以通过修改这些变量来定制自己的插件主题，实现自定义主题功能
+ *
+ * 如果你的项目同样使用了scss预处理，你也可以直接在你的 scss 代码中使用如下变量，同时无需 import 这个文件
+ */
+/* 颜色变量 */
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+/* uview-plus 主题变量 */
+/* 项目主题变量 */
+.login-container[data-v-d08ef7d4] {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  position: relative;
+}
+.status-bar[data-v-d08ef7d4] {
+  width: 100%;
+  background-color: #FFFFFF;
+}
+.main-content[data-v-d08ef7d4] {
+  width: 100%;
+  min-height: calc(100vh - var(--status-bar-height));
+  padding: 0 1.875rem;
+  box-sizing: border-box;
+}
+.logo-section[data-v-d08ef7d4] {
+  margin-top: 3.75rem;
+  margin-bottom: 5rem;
+}
+.logo-section .logo-image[data-v-d08ef7d4] {
+  width: 6.25rem;
+  height: 6.25rem;
+  border-radius: 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.1);
+}
+.logo-section .app-name[data-v-d08ef7d4] {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #26BF6E;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.0625rem;
+}
+.logo-section .app-slogan[data-v-d08ef7d4] {
+  font-size: 0.875rem;
+  color: #999999;
+  letter-spacing: 0.03125rem;
+}
+.login-section[data-v-d08ef7d4] {
+  width: 100%;
+}
+.login-section .phone-login-btn[data-v-d08ef7d4] {
+  width: 100%;
+  height: 2.75rem;
+  background: linear-gradient(135deg, #26BF6E 0%, #20A55A 100%);
+  border-radius: 1.375rem;
+  border: none;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(38, 191, 110, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+.login-section .phone-login-btn[data-v-d08ef7d4]::after {
+  border: none;
+}
+.login-section .phone-login-btn .btn-text[data-v-d08ef7d4] {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #FFFFFF;
+  letter-spacing: 0.03125rem;
+}
+.login-section .phone-login-btn[data-v-d08ef7d4]:active {
+  transform: translateY(0.0625rem);
+  box-shadow: 0 0.125rem 0.5rem rgba(38, 191, 110, 0.4);
+}
+.login-section .privacy-text[data-v-d08ef7d4] {
+  font-size: 0.75rem;
+  color: #999999;
+  text-align: center;
+  line-height: 1.6;
+}
+.login-section .privacy-text .privacy-link[data-v-d08ef7d4] {
+  color: #26BF6E;
+  text-decoration: underline;
+}

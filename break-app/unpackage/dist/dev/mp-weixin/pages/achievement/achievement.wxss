@@ -61,15 +61,15 @@ button.data-v-127b3c96::after {
   color: rgba(255, 255, 255, 0.2);
   opacity: 0.5;
 }
-.decoration-1.data-v-127b3c96 {
-  top: -32rpx;
-  left: -64rpx;
-  font-size: 200rpx;
+.decoration-img.data-v-127b3c96 {
+  position: absolute;
+  opacity: 0.3;
 }
 .decoration-2.data-v-127b3c96 {
   bottom: -64rpx;
   right: -32rpx;
-  font-size: 160rpx;
+  width: 160rpx;
+  height: 160rpx;
   transform: rotate(12deg);
 }
 .page-subtitle.data-v-127b3c96 {
@@ -452,10 +452,13 @@ button.data-v-127b3c96::after {
 }
 .loading-container .loading-spinner.data-v-127b3c96 {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-.loading-container .loading-spinner .loading-emoji.data-v-127b3c96 {
-  display: block;
-  font-size: 80rpx;
+.loading-container .loading-spinner .loading-img.data-v-127b3c96 {
+  width: 80rpx;
+  height: 80rpx;
   margin-bottom: 20rpx;
   animation: spin-127b3c96 2s linear infinite;
 }

@@ -107,3 +107,49 @@ export const getWxUserPublic = () => {
     method: 'get',
   })
 }
+
+// @Tags WxUser
+// @Summary 校验打屁次数
+// @Security ApiKeyAuth
+// @Accept application/json
+// @Produce application/json
+// @Success 200 {object} response.Response{data=Array,msg=string} "校验成功"
+// @Router /wxuser/validateFartCounts [get]
+export const validateFartCounts = () => {
+  return service({
+    url: '/wxuser/validateFartCounts',
+    method: 'get',
+  })
+}
+
+// @Tags WxUser
+// @Summary 校验经验值
+// @Security ApiKeyAuth
+// @Accept application/json
+// @Produce application/json
+// @Param userIDs body Array true "用户ID列表"
+// @Success 200 {object} response.Response{data=Object,msg=string} "校验成功"
+// @Router /wxuser/validateExperience [post]
+export const validateExperience = (userIDs) => {
+  return service({
+    url: '/wxuser/validateExperience',
+    method: 'post',
+    data: userIDs
+  })
+}
+
+// @Tags WxUser
+// @Summary 校验指定用户的打屁次数和经验值
+// @Security ApiKeyAuth
+// @Accept application/json
+// @Produce application/json
+// @Param userIDs body Array true "用户ID列表"
+// @Success 200 {object} response.Response{data=Array,msg=string} "校验成功"
+// @Router /wxuser/validateSpecificUsers [post]
+export const validateSpecificUsers = (userIDs) => {
+  return service({
+    url: '/wxuser/validateSpecificUsers',
+    method: 'post',
+    data: userIDs
+  })
+}

@@ -2,8 +2,7 @@
   <scroll-view class="ai-fx-container" scroll-y="true">
     <!-- Header -->
     <view class="header-section">
-      <view class="header-decoration decoration-1">💨</view>
-      <view class="header-decoration decoration-2">✨</view>
+      <image class="header-decoration-img decoration-1" src="/static/emj/wusheng.png" mode="aspectFit"></image>
       <text class="header-title">智能肠道健康分析</text>
       <text class="header-subtitle">基于你的记录数据生成</text>
     </view>
@@ -95,13 +94,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { getAiPersonalityReviewAPI } from '@/src/api/ai.js'
+import { updateUserPointsAPI, getUserInfoAPI } from '@/src/api/user.js'
 import { useUserStore } from '@/src/stores/user.js'
 
 const userStore = useUserStore()
-
-// 缓存配置
-const CACHE_KEY = 'ai_analysis_cache'
-const CACHE_EXPIRE_TIME = 60 * 60 * 1000 // 1小时缓存时间（单位：毫秒）
 
 // 数据状态
 const isLoading = ref(true)
@@ -110,43 +106,6 @@ const patencyIndex = ref(0)
 const airflowActivity = ref(0)
 const reviewText = ref('')
 const healthAdvice = ref([])
-
-// 获取缓存数据
-const getCacheData = () => {
-  try {
-    const cacheStr = uni.getStorageSync(CACHE_KEY)
-    if (!cacheStr) return null
-    
-    const cache = JSON.parse(cacheStr)
-    const now = Date.now()
-    
-    // 检查缓存是否过期
-    if (now - cache.timestamp > CACHE_EXPIRE_TIME) {
-      // 缓存已过期，清除缓存
-      uni.removeStorageSync(CACHE_KEY)
-      return null
-    }
-    
-    return cache.data
-  } catch (error) {
-    console.error('读取缓存失败:', error)
-    return null
-  }
-}
-
-// 保存缓存数据
-const saveCacheData = (data) => {
-  try {
-    const cache = {
-      timestamp: Date.now(),
-      data: data
-    }
-    uni.setStorageSync(CACHE_KEY, JSON.stringify(cache))
-    console.log('缓存已保存')
-  } catch (error) {
-    console.error('保存缓存失败:', error)
-  }
-}
 
 // 应用数据到页面
 const applyDataToPage = (data) => {
@@ -166,19 +125,7 @@ const applyDataToPage = (data) => {
 }
 
 // 加载智能分析数据
-const loadAiAnalysis = async (useCache = true) => {
-  // 先尝试从缓存加载
-  if (useCache) {
-    const cachedData = getCacheData()
-    if (cachedData) {
-      console.log('使用缓存数据')
-      applyDataToPage(cachedData)
-      isLoading.value = false
-      return
-    }
-  }
-  
-  // 缓存不存在或已过期，调用接口
+const loadAiAnalysis = async () => {
   isLoading.value = true
   try {
     const response = await getAiPersonalityReviewAPI()
@@ -188,10 +135,10 @@ const loadAiAnalysis = async (useCache = true) => {
       // 应用数据到页面
       applyDataToPage(data)
       
-      // 保存到缓存
-      saveCacheData(data)
-      
       console.log('智能分析数据已加载:', data)
+      
+      // 接口调用成功，扣除15屁币
+      await deductPoints()
     }
   } catch (error) {
     console.error('获取智能分析失败:', error)
@@ -201,6 +148,42 @@ const loadAiAnalysis = async (useCache = true) => {
     })
   } finally {
     isLoading.value = false
+  }
+}
+
+// 扣除屁币
+const deductPoints = async () => {
+  try {
+    const currentPoints = userStore.points || 0
+    // 检查屁币是否足够
+    if (currentPoints < 15) {
+      console.log('屁币不足15，跳过扣除')
+      return
+    }
+    
+    const { data } = await updateUserPointsAPI({
+      points: 15,
+      pointsType: 2, // 2代表扣除屁币
+      remark: '使用智能肠道健康分析'
+    })
+    
+    if (data.code === 0) {
+      console.log('屁币扣除成功，当前屁币:', data.data.points)
+      // 更新store中的用户信息
+      userStore.setUserInfo(data.data)
+      
+      // 显示扣除提示
+      uni.showToast({
+        title: `已扣除15屁币，当前屁币：${data.data.points}`,
+        icon: 'none',
+        duration: 2000
+      })
+    } else {
+      console.error('屁币扣除失败:', data.msg)
+    }
+  } catch (error) {
+    console.error('扣除屁币失败:', error)
+    // 扣除失败不影响页面显示，只记录日志
   }
 }
 
@@ -214,8 +197,7 @@ const getHealthClass = (score) => {
 
 onMounted(() => {
   if (userStore.token) {
-    // 优先使用缓存，如果缓存不存在或过期才调用接口
-    loadAiAnalysis(true)
+    loadAiAnalysis()
   } else {
     uni.showToast({
       title: '请先登录',
@@ -227,9 +209,9 @@ onMounted(() => {
   }
 })
 
-// 页面显示时刷新缓存（可选，如果需要强制刷新可以调用）
+// 刷新数据
 const refreshData = () => {
-  loadAiAnalysis(false) // 不使用缓存，强制刷新
+  loadAiAnalysis()
 }
 </script>
 
@@ -255,17 +237,16 @@ const refreshData = () => {
   opacity: 0.5;
 }
 
+.header-decoration-img {
+  position: absolute;
+  opacity: 0.3;
+}
+
 .decoration-1 {
   top: -20rpx;
   left: -40rpx;
-  font-size: 180rpx;
-}
-
-.decoration-2 {
-  bottom: -30rpx;
-  right: -20rpx;
-  font-size: 150rpx;
-  transform: rotate(15deg);
+  width: 180rpx;
+  height: 180rpx;
 }
 
 .header-title {

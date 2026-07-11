@@ -3,13 +3,32 @@
     "pages/index/index",
     "pages/login/index",
     "pages/entry/index",
+    "pages/index/fart",
     "pages/entry/detail",
     "pages/data/index",
+    "pages/entry/creat",
     "pages/me/index",
-    "pages/me/level",
     "pages/me/aiFx",
     "pages/me/edit",
-    "pages/achievement/achievement"
+    "pages/me/points",
+    "pages/me/pointsDetail"
+  ],
+  "subPackages": [
+    {
+      "root": "pages/achievement",
+      "pages": [
+        "achievement"
+      ],
+      "name": "achievement"
+    },
+    {
+      "root": "pages/profile",
+      "pages": [
+        "level",
+        "jz"
+      ],
+      "name": "profile"
+    }
   ],
   "window": {
     "navigationBarTextStyle": "black",

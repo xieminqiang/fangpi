@@ -99,14 +99,14 @@ const handleSmartLogin = async () => {
 // 应用启动时执行
 onLaunch(() => {
   console.log('App Launch')
-  handleSmartLogin()
-
+  // handleSmartLogin()
+   handleSmartLogin()
 })
 
 // 应用显示时执行
 onShow(() => {
   console.log('App Show')
-
+   
 })
 
 // 应用隐藏时执行

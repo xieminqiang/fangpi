@@ -1,0 +1,382 @@
+
+.level-page[data-v-157e7739] {
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+.level-container[data-v-157e7739] {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(180deg, #A8E6CF 0%, #FFFACD 100%);
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+/* 当前等级卡片 */
+.current-level-card[data-v-157e7739] {
+  background: linear-gradient(135deg, #FFD3B6, #FFC3A0);
+  border-radius: 1rem;
+  padding: 1.5rem 1rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+.card-decoration[data-v-157e7739] {
+  position: absolute;
+  font-size: 3.75rem;
+  opacity: 0.2;
+}
+.card-decoration.decoration-1[data-v-157e7739] {
+  top: -0.9375rem;
+  left: -0.9375rem;
+}
+.card-decoration.decoration-2[data-v-157e7739] {
+  bottom: -0.9375rem;
+  right: -0.9375rem;
+  transform: rotate(15deg);
+}
+.current-level-content[data-v-157e7739] {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+.current-level-image-wrapper[data-v-157e7739] {
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: 0.625rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.current-level-image[data-v-157e7739] {
+  width: 100%;
+  height: 100%;
+  border-radius: 0.625rem;
+}
+.level-desc[data-v-157e7739] {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.3125rem;
+}
+.level-name-current[data-v-157e7739] {
+  display: block;
+  font-size: 1.375rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 1rem;
+}
+.stats-section[data-v-157e7739] {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+.stat-item[data-v-157e7739] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 0.625rem;
+  padding: 0.625rem 1rem;
+  -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
+  min-width: 4.375rem;
+}
+.stat-label[data-v-157e7739] {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+.stat-value[data-v-157e7739] {
+  font-size: 1.125rem;
+  color: white;
+  font-weight: bold;
+}
+
+/* 区块标题 */
+.section-header[data-v-157e7739] {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding: 0 0.25rem;
+}
+.section-title[data-v-157e7739] {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #5D5D5D;
+}
+.section-subtitle[data-v-157e7739] {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+/* 等级列表 */
+.level-list[data-v-157e7739] {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+/* 空状态 */
+.empty-state[data-v-157e7739] {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 0.75rem;
+  padding: 2.5rem 1.25rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.625rem;
+}
+.empty-emoji[data-v-157e7739] {
+  font-size: 3.125rem;
+  opacity: 0.5;
+}
+.empty-text[data-v-157e7739] {
+  font-size: 0.875rem;
+  color: #999;
+}
+.level-item[data-v-157e7739] {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 0.125rem 0.375rem rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+}
+.level-item-current[data-v-157e7739] {
+  background: linear-gradient(135deg, #A8E6CF, #8af5bf);
+  box-shadow: 0 0.25rem 0.625rem rgba(168, 230, 207, 0.4);
+}
+.level-item-unlocked[data-v-157e7739] {
+  background: white;
+}
+.level-item-locked[data-v-157e7739] {
+  background: #f5f5f5;
+  opacity: 0.7;
+}
+
+/* 等级序号 */
+.level-number[data-v-157e7739] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: rgba(93, 93, 93, 0.1);
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+}
+.level-item-current .level-number[data-v-157e7739] {
+  background: rgba(255, 255, 255, 0.3);
+}
+.number-text[data-v-157e7739] {
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #5D5D5D;
+}
+.level-item-current .number-text[data-v-157e7739] {
+  color: white;
+}
+
+/* 等级图标 */
+.level-icon-wrapper[data-v-157e7739] {
+  position: relative;
+  flex-shrink: 0;
+}
+.level-image-container[data-v-157e7739] {
+  width: 3.125rem;
+  height: 3.125rem;
+  border-radius: 0.625rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.5);
+}
+.level-emoji-container[data-v-157e7739] {
+  width: 3.125rem;
+  height: 3.125rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 0.125rem 0.375rem rgba(0, 0, 0, 0.1);
+}
+.level-image[data-v-157e7739] {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.level-bg-0[data-v-157e7739] {
+  background: linear-gradient(135deg, #FFD3B6, #FFC3A0);
+}
+.level-bg-1[data-v-157e7739] {
+  background: linear-gradient(135deg, #A8E6CF, #8af5bf);
+}
+.level-bg-2[data-v-157e7739] {
+  background: linear-gradient(135deg, #FFFACD, #ffd966);
+}
+.level-bg-3[data-v-157e7739] {
+  background: linear-gradient(135deg, #D4A5FF, #B794F6);
+}
+.level-emoji[data-v-157e7739] {
+  font-size: 1.875rem;
+}
+
+/* 标记 */
+.current-badge[data-v-157e7739] {
+  position: absolute;
+  top: -0.3125rem;
+  right: -0.3125rem;
+  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+  padding: 0.1875rem 0.5rem;
+  border-radius: 0.625rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(255, 107, 107, 0.3);
+}
+.current-badge-text[data-v-157e7739] {
+  font-size: 0.625rem;
+  color: white;
+  font-weight: bold;
+}
+.unlocked-badge[data-v-157e7739] {
+  position: absolute;
+  top: -0.3125rem;
+  right: -0.3125rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  background: linear-gradient(135deg, #4CAF50, #8BC34A);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0.125rem 0.25rem rgba(76, 175, 80, 0.3);
+}
+.unlocked-icon[data-v-157e7739] {
+  font-size: 0.75rem;
+  color: white;
+  font-weight: bold;
+}
+.locked-overlay[data-v-157e7739] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.locked-icon[data-v-157e7739] {
+  font-size: 1.25rem;
+}
+
+/* 等级信息 */
+.level-info[data-v-157e7739] {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+.level-name[data-v-157e7739] {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #5D5D5D;
+}
+.level-item-current .level-name[data-v-157e7739] {
+  color: white;
+}
+.level-requirements[data-v-157e7739] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.requirement-item[data-v-157e7739] {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(93, 93, 93, 0.05);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+}
+.level-item-current .requirement-item[data-v-157e7739] {
+  background: rgba(255, 255, 255, 0.2);
+}
+.requirement-icon[data-v-157e7739] {
+  font-size: 0.75rem;
+}
+.requirement-text[data-v-157e7739] {
+  font-size: 0.6875rem;
+  color: #666;
+}
+.level-item-current .requirement-text[data-v-157e7739] {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 状态标签 */
+.level-status[data-v-157e7739] {
+  flex-shrink: 0;
+}
+.status-tag[data-v-157e7739] {
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.625rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.status-current[data-v-157e7739] {
+  background: rgba(255, 255, 255, 0.3);
+}
+.status-unlocked[data-v-157e7739] {
+  background: rgba(76, 175, 80, 0.1);
+}
+.status-locked[data-v-157e7739] {
+  background: rgba(0, 0, 0, 0.05);
+}
+.status-text[data-v-157e7739] {
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+.status-current .status-text[data-v-157e7739] {
+  color: white;
+}
+.status-unlocked .status-text[data-v-157e7739] {
+  color: #4CAF50;
+}
+.status-locked .status-text[data-v-157e7739] {
+  color: #999;
+}
+
+/* 底部提示 */
+.bottom-tips[data-v-157e7739] {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 0.625rem;
+  padding: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
+  margin-bottom: 1rem;
+}
+.tip-icon[data-v-157e7739] {
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+.tip-text[data-v-157e7739] {
+  font-size: 0.75rem;
+  color: #666;
+  line-height: 1.6;
+  flex: 1;
+}

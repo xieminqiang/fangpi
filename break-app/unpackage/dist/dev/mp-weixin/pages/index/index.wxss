@@ -135,6 +135,11 @@ button.data-v-1cf27b2a::after {
 .emoji.data-v-1cf27b2a {
   font-size: 60rpx;
 }
+.stat-mood-icon.data-v-1cf27b2a {
+  width: 80rpx;
+  height: 80rpx;
+  margin-top: 8rpx;
+}
 .stat-value-small.data-v-1cf27b2a {
   color: #0d1b14;
   font-size: 32rpx;
@@ -149,8 +154,8 @@ button.data-v-1cf27b2a::after {
   z-index: 10;
 }
 .fart-gif.data-v-1cf27b2a {
-  width: 320rpx;
-  height: 320rpx;
+  width: 260rpx;
+  height: 260rpx;
   border-radius: 16rpx;
   transition: all 0.3s ease;
 }
@@ -163,7 +168,7 @@ button.data-v-1cf27b2a::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32rpx 64rpx 64rpx 64rpx;
+  padding: 24rpx 64rpx 48rpx 64rpx;
   z-index: 10;
 }
 .main-button.data-v-1cf27b2a {
@@ -171,21 +176,110 @@ button.data-v-1cf27b2a::after {
   width: 200rpx;
   height: 200rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, #FFD3B6 0%, #FFB6C1 100%);
+  /* 恢复原来的渐变背景色，叠加毛玻璃效果 */
+  background: linear-gradient(135deg, rgba(255, 211, 182, 0.95) 0%, rgba(255, 182, 193, 0.95) 100%);
+  backdrop-filter: blur(15rpx);
+  -webkit-backdrop-filter: blur(15rpx);
+  /* 轻盈的立体感边框 */
+  border: 1.5rpx solid rgba(255, 255, 255, 0.5);
+  /* 轻盈的阴影 - 更柔和 */
+  box-shadow: 0 0 20rpx rgba(255, 182, 193, 0.25), 0 8rpx 24rpx rgba(0, 0, 0, 0.08), 0 4rpx 12rpx rgba(0, 0, 0, 0.05), inset 0 1rpx 4rpx rgba(255, 255, 255, 0.6), inset 0 -1rpx 4rpx rgba(255, 182, 193, 0.15);
   color: #5c3a21;
-  font-size: 40rpx;
-  font-weight: bold;
+  font-size: 36rpx;
   letter-spacing: 0.3rpx;
-  box-shadow: 0 20rpx 50rpx rgba(0, 0, 0, 0.08);
-  border: none;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* 动态模糊动画 - 更柔和 */
+  animation: glassBlur-1cf27b2a 4s ease-in-out infinite;
+  overflow: visible;
 }
+
+/* 微妙的呼吸效果 - 通过伪元素实现，不影响按下效果 */
+.main-button.data-v-1cf27b2a::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 60%);
+  opacity: 0.4;
+  animation: gentleBreath-1cf27b2a 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 微妙的呼吸效果 - 增加情绪价值 */
+@keyframes gentleBreath-1cf27b2a {
+0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+}
+50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+}
+}
+/* 背景光晕效果 - 更柔和轻盈 */
+.main-button.data-v-1cf27b2a::before {
+  content: "";
+  position: absolute;
+  top: -15rpx;
+  left: -15rpx;
+  right: -15rpx;
+  bottom: -15rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 182, 193, 0.15) 0%, rgba(255, 211, 182, 0.1) 50%, transparent 75%);
+  opacity: 0.5;
+  z-index: -1;
+  animation: glowPulse-1cf27b2a 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 光晕脉冲动画 - 更柔和 */
+@keyframes glowPulse-1cf27b2a {
+0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+}
+50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+}
+}
+/* 毛玻璃模糊动态更新动画 - 轻盈柔和 */
+@keyframes glassBlur-1cf27b2a {
+0%, 100% {
+    backdrop-filter: blur(15rpx);
+    -webkit-backdrop-filter: blur(15rpx);
+    box-shadow: 0 0 20rpx rgba(255, 182, 193, 0.25), 0 8rpx 24rpx rgba(0, 0, 0, 0.08), 0 4rpx 12rpx rgba(0, 0, 0, 0.05), inset 0 1rpx 4rpx rgba(255, 255, 255, 0.6), inset 0 -1rpx 4rpx rgba(255, 182, 193, 0.15);
+}
+50% {
+    backdrop-filter: blur(18rpx);
+    -webkit-backdrop-filter: blur(18rpx);
+    box-shadow: 0 0 25rpx rgba(255, 182, 193, 0.3), 0 10rpx 28rpx rgba(0, 0, 0, 0.1), 0 5rpx 14rpx rgba(0, 0, 0, 0.06), inset 0 1rpx 5rpx rgba(255, 255, 255, 0.7), inset 0 -1rpx 5rpx rgba(255, 182, 193, 0.18);
+}
+}
+/* 按下时的塌陷效果 - 轻盈解压 */
 .main-button.data-v-1cf27b2a:active {
+  transform: translateY(6rpx) scale(0.97);
+  /* 阴影几乎消失 - 解压感 */
+  box-shadow: 0 0 8rpx rgba(255, 182, 193, 0.15), 0 2rpx 8rpx rgba(0, 0, 0, 0.05), inset 0 1rpx 3rpx rgba(255, 255, 255, 0.5), inset 0 -1rpx 3rpx rgba(255, 182, 193, 0.1);
+  /* 按下时减少模糊 */
+  backdrop-filter: blur(12rpx);
+  -webkit-backdrop-filter: blur(12rpx);
+  transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 按下时光晕收缩 - 更柔和 */
+.main-button.data-v-1cf27b2a:active::before {
+  opacity: 0.25;
   transform: scale(0.95);
+  transition: all 0.12s ease;
 }
 .button-emoji.data-v-1cf27b2a {
   position: absolute;
@@ -193,8 +287,204 @@ button.data-v-1cf27b2a::after {
   opacity: 0.4;
   animation: float-1cf27b2a 4s ease-in-out infinite;
 }
+
+/* 按钮图标样式 */
+.button-icon.data-v-1cf27b2a {
+  width: 60rpx;
+  height: 60rpx;
+  margin-top: 10rpx;
+  z-index: 2;
+  position: relative;
+  opacity: 0.95;
+  transition: all 0.3s ease;
+  /* 柔和的阴影效果 */
+  filter: drop-shadow(0 2rpx 4rpx rgba(200, 90, 107, 0.15)) drop-shadow(0 1rpx 2rpx rgba(255, 255, 255, 0.3));
+}
+
+/* 按下时图标效果 - 与文字同步 */
+.main-button:active .button-icon.data-v-1cf27b2a {
+  transform: scale(0.96);
+  opacity: 0.9;
+  filter: drop-shadow(0 1rpx 2rpx rgba(200, 90, 107, 0.1)) drop-shadow(0 0rpx 1rpx rgba(255, 255, 255, 0.2));
+}
 .button-text.data-v-1cf27b2a {
-  z-index: 1;
+  z-index: 2;
+  position: relative;
+  margin-top: -10rpx;
+  /* 文字颜色 - 与背景色协调的深粉色，与背景的粉色部分呼应 */
+  color: #C85A6B;
+  /* 轻盈的文字阴影 - 增加层次感 */
+  text-shadow: 0 1rpx 4rpx rgba(200, 90, 107, 0.25), 0 0rpx 2rpx rgba(255, 255, 255, 0.6);
+  transition: all 0.3s ease;
+  font-weight: 600;
+  letter-spacing: 0.5rpx;
+}
+
+/* H5环境下的文字渐变效果 - 与背景色协调的渐变 */
+/* 按下时文字效果 - 轻盈反馈 */
+.main-button:active .button-text.data-v-1cf27b2a {
+  transform: scale(0.96);
+  opacity: 0.9;
+  text-shadow: 0 0rpx 2rpx rgba(200, 90, 107, 0.15), 0 0rpx 1rpx rgba(255, 255, 255, 0.4);
+}
+
+/* 功能按钮组容器 */
+.function-buttons-container.data-v-1cf27b2a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40rpx;
+  margin-top: 60rpx;
+  z-index: 10;
+}
+
+/* 功能按钮样式 - 白色毛玻璃风格，轻盈美观 */
+.function-button.data-v-1cf27b2a {
+  position: relative;
+  width: 130rpx;
+  height: 130rpx;
+  border-radius: 50%;
+  /* 白色毛玻璃背景 */
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20rpx);
+  -webkit-backdrop-filter: blur(20rpx);
+  /* 精致的立体感边框 */
+  border: 2rpx solid rgba(255, 255, 255, 0.8);
+  /* 轻盈优雅的阴影 */
+  box-shadow: 0 0 20rpx rgba(255, 182, 193, 0.15), 0 6rpx 20rpx rgba(0, 0, 0, 0.08), 0 3rpx 10rpx rgba(0, 0, 0, 0.05), inset 0 2rpx 6rpx rgba(255, 255, 255, 0.9), inset 0 -1rpx 4rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* 动态模糊动画 - 更柔和 */
+  animation: glassBlurWhite-1cf27b2a 4s ease-in-out infinite;
+  overflow: visible;
+}
+
+/* 功能按钮的白色毛玻璃模糊动画 */
+@keyframes glassBlurWhite-1cf27b2a {
+0%, 100% {
+    backdrop-filter: blur(20rpx);
+    -webkit-backdrop-filter: blur(20rpx);
+    box-shadow: 0 0 20rpx rgba(255, 182, 193, 0.15), 0 6rpx 20rpx rgba(0, 0, 0, 0.08), 0 3rpx 10rpx rgba(0, 0, 0, 0.05), inset 0 2rpx 6rpx rgba(255, 255, 255, 0.9), inset 0 -1rpx 4rpx rgba(0, 0, 0, 0.05);
+}
+50% {
+    backdrop-filter: blur(24rpx);
+    -webkit-backdrop-filter: blur(24rpx);
+    box-shadow: 0 0 25rpx rgba(255, 182, 193, 0.2), 0 8rpx 24rpx rgba(0, 0, 0, 0.1), 0 4rpx 12rpx rgba(0, 0, 0, 0.06), inset 0 2rpx 8rpx rgba(255, 255, 255, 0.95), inset 0 -1rpx 5rpx rgba(0, 0, 0, 0.06);
+}
+}
+/* 功能按钮背景光晕效果 - 白色主题 */
+.function-button.data-v-1cf27b2a::before {
+  content: "";
+  position: absolute;
+  top: -12rpx;
+  left: -12rpx;
+  right: -12rpx;
+  bottom: -12rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 182, 193, 0.1) 0%, rgba(255, 211, 182, 0.06) 50%, transparent 75%);
+  opacity: 0.5;
+  z-index: -1;
+  animation: glowPulseWhite-1cf27b2a 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 功能按钮光晕脉冲动画 - 白色主题 */
+@keyframes glowPulseWhite-1cf27b2a {
+0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+}
+50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+}
+}
+/* 功能按钮呼吸效果 - 白色主题 */
+.function-button.data-v-1cf27b2a::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4) 0%, transparent 65%);
+  opacity: 0.4;
+  animation: gentleBreathWhite-1cf27b2a 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 功能按钮呼吸动画 - 白色主题 */
+@keyframes gentleBreathWhite-1cf27b2a {
+0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+}
+50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+}
+}
+/* 功能按钮图标样式 */
+.function-button-icon.data-v-1cf27b2a {
+  width: 52rpx;
+  height: 52rpx;
+  margin-bottom: 16rpx;
+  z-index: 2;
+  position: relative;
+  opacity: 0.95;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 1rpx 2rpx rgba(200, 90, 107, 0.15));
+}
+
+/* 按下时图标效果 */
+.function-button:active .function-button-icon.data-v-1cf27b2a {
+  transform: scale(0.95);
+  opacity: 0.9;
+}
+
+/* 功能按钮文字样式 - 白色主题优化 */
+.function-button-text.data-v-1cf27b2a {
+  z-index: 2;
+  position: relative;
+  font-size: 20rpx;
+  color: #C85A6B;
+  font-weight: 600;
+  letter-spacing: 0.3rpx;
+  text-shadow: 0 1rpx 3rpx rgba(200, 90, 107, 0.2), 0 0rpx 1rpx rgba(255, 255, 255, 0.6);
+  transition: all 0.3s ease;
+  line-height: 1.2;
+  text-align: center;
+}
+
+/* H5环境下的功能按钮文字渐变效果 */
+/* 功能按钮按下时的塌陷效果 - 白色主题 */
+.function-button.data-v-1cf27b2a:active {
+  transform: translateY(5rpx) scale(0.97);
+  /* 阴影几乎消失 - 解压感 */
+  box-shadow: 0 0 8rpx rgba(255, 182, 193, 0.1), 0 2rpx 6rpx rgba(0, 0, 0, 0.05), inset 0 1rpx 3rpx rgba(255, 255, 255, 0.7), inset 0 -1rpx 3rpx rgba(0, 0, 0, 0.03);
+  /* 按下时减少模糊 */
+  backdrop-filter: blur(16rpx);
+  -webkit-backdrop-filter: blur(16rpx);
+  transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 按下时光晕收缩 */
+.function-button.data-v-1cf27b2a:active::before {
+  opacity: 0.25;
+  transform: scale(0.95);
+  transition: all 0.12s ease;
+}
+
+/* 按下时文字效果 */
+.function-button:active .function-button-text.data-v-1cf27b2a {
+  transform: scale(0.96);
+  opacity: 0.9;
+  text-shadow: 0 0rpx 2rpx rgba(200, 90, 107, 0.2), 0 0rpx 1rpx rgba(255, 255, 255, 0.6);
 }
 .popup-content.data-v-1cf27b2a {
   background: #f6f8f7;
@@ -248,6 +538,17 @@ button.data-v-1cf27b2a::after {
   padding-bottom: 20rpx;
   border-bottom: 1rpx solid rgba(115, 154, 76, 0.2);
 }
+.popup-gif-container.data-v-1cf27b2a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.popup-gif.data-v-1cf27b2a {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 16rpx;
+}
 .popup-title.data-v-1cf27b2a {
   color: #0d1b14;
   font-size: 28rpx;
@@ -288,6 +589,10 @@ button.data-v-1cf27b2a::after {
   background: #fffbfa;
   border-radius: 50rpx;
   padding: 8rpx;
+  box-sizing: border-box;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
   align-items: center;
   width: 100%;
@@ -353,6 +658,12 @@ button.data-v-1cf27b2a::after {
   margin-right: 20rpx;
   display: inline-block;
 }
+.switch-emoji-img.data-v-1cf27b2a {
+  width: 48rpx;
+  height: 48rpx;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
 .switch-option.selected .switch-text.data-v-1cf27b2a {
   color: #141b0d;
   font-weight: 600;
@@ -369,6 +680,16 @@ button.data-v-1cf27b2a::after {
   top: 50%;
   transform: translateY(-50%);
   font-size: 36rpx;
+  z-index: 1;
+  pointer-events: none;
+}
+.input-emoji-img.data-v-1cf27b2a {
+  position: absolute;
+  left: 24rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36rpx;
+  height: 36rpx;
   z-index: 1;
   pointer-events: none;
 }
@@ -461,6 +782,70 @@ button.data-v-1cf27b2a::after {
     transform: translateY(-50%) scale(0.7) rotate(15deg);
 }
 }
+/* 屁币悬浮按钮 */
+.points-button.data-v-1cf27b2a {
+  position: fixed;
+  right: 32rpx;
+  bottom: 440rpx;
+  width: 120rpx;
+  height: 120rpx;
+  background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+  border-radius: 50%;
+  box-shadow: 0 8rpx 24rpx rgba(76, 175, 80, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  transition: all 0.3s ease;
+}
+.points-button.data-v-1cf27b2a:active {
+  transform: scale(0.9);
+  box-shadow: 0 4rpx 12rpx rgba(76, 175, 80, 0.3);
+}
+.points-icon.data-v-1cf27b2a {
+  width: 52rpx;
+  height: 52rpx;
+  margin-bottom: 4rpx;
+}
+.points-text.data-v-1cf27b2a {
+  font-size: 24rpx;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* 屁友悬浮按钮 */
+.friend-button.data-v-1cf27b2a {
+  position: fixed;
+  right: 32rpx;
+  bottom: 280rpx;
+  width: 120rpx;
+  height: 120rpx;
+  background: #FF8399;
+  border-radius: 50%;
+  box-shadow: 0 8rpx 24rpx rgba(255, 131, 153, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  transition: all 0.3s ease;
+}
+.friend-button.data-v-1cf27b2a:active {
+  transform: scale(0.9);
+  box-shadow: 0 4rpx 12rpx rgba(255, 131, 153, 0.3);
+}
+.friend-icon.data-v-1cf27b2a {
+  width: 52rpx;
+  height: 52rpx;
+  margin-bottom: 4rpx;
+}
+.friend-text.data-v-1cf27b2a {
+  font-size: 24rpx;
+  color: #333333;
+  font-weight: 600;
+}
+
 /* 补卡悬浮按钮 */
 .makeup-button.data-v-1cf27b2a {
   position: fixed;
@@ -484,13 +869,38 @@ button.data-v-1cf27b2a::after {
   box-shadow: 0 4rpx 12rpx rgba(255, 215, 0, 0.3);
 }
 .makeup-icon.data-v-1cf27b2a {
-  width: 48rpx;
-  height: 48rpx;
+  width: 52rpx;
+  height: 52rpx;
   margin-bottom: 4rpx;
 }
 .makeup-text.data-v-1cf27b2a {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #8B6914;
+  font-weight: 600;
+}
+
+/* 创建自己的屁按钮 */
+.create-fart-button.data-v-1cf27b2a {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100rpx;
+  background: linear-gradient(135deg, #FF6B9D 0%, #FF8E9B 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 -4rpx 12rpx rgba(255, 107, 157, 0.3);
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+.create-fart-button.data-v-1cf27b2a:active {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+.create-fart-text.data-v-1cf27b2a {
+  font-size: 32rpx;
+  color: #fff;
   font-weight: 600;
 }
 
@@ -516,6 +926,11 @@ button.data-v-1cf27b2a::after {
 }
 .time-label.data-v-1cf27b2a {
   font-size: 36rpx;
+}
+.time-label-img.data-v-1cf27b2a {
+  width: 36rpx;
+  height: 36rpx;
+  flex-shrink: 0;
 }
 .time-value.data-v-1cf27b2a {
   flex: 1;
@@ -652,9 +1067,10 @@ button.data-v-1cf27b2a::after {
 
 /* 音频设置按钮 */
 .audio-setting-btn.data-v-1cf27b2a {
-  position: absolute;
-  top: 24rpx;
-  right: 24rpx;
+  position: fixed;
+  right: 32rpx;
+  top: 300rpx;
+  /* 在屁友按钮上方，屁友按钮是280rpx，加上按钮高度120rpx和间距 */
   width: 64rpx;
   height: 64rpx;
   border-radius: 50%;
@@ -662,7 +1078,7 @@ button.data-v-1cf27b2a::after {
   align-items: center;
   justify-content: center;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
-  z-index: 10;
+  z-index: 50;
   transition: all 0.3s ease;
 }
 .audio-setting-btn.data-v-1cf27b2a:active {
@@ -899,8 +1315,9 @@ button.data-v-1cf27b2a::after {
   height: 36rpx;
   transition: all 0.3s ease;
   z-index: 10;
-  pointer-events: none;
-  /* 防止阻挡点击事件 */
+  pointer-events: auto;
+  /* 允许点击事件 */
+  cursor: pointer;
 }
 
 /* 默认音频选项样式 */
@@ -1046,6 +1463,33 @@ button.data-v-1cf27b2a::after {
 }
 .confirm-btn.data-v-1cf27b2a:active {
   transform: scale(0.95);
+}
+
+/* 创建自己的屁按钮 */
+.create-fart-btn.data-v-1cf27b2a {
+  width: 100%;
+  height: 80rpx;
+  background: linear-gradient(135deg, #FF6B9D 0%, #FF8E9B 100%);
+  border-radius: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(255, 107, 157, 0.3);
+  border: none;
+  line-height: 80rpx;
+  font-size: 0;
+  transition: all 0.3s ease;
+}
+.create-fart-btn.data-v-1cf27b2a::after {
+  border: none;
+}
+.create-fart-btn.data-v-1cf27b2a:active {
+  transform: scale(0.98);
+}
+.create-fart-btn-text.data-v-1cf27b2a {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: 500;
 }
 /**
  * 这里是uni-app内置的常用样式变量

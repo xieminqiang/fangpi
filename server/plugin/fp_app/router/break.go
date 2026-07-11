@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/middleware"
+	fpMiddleware "github.com/flipped-aurora/gin-vue-admin/server/plugin/fp_app/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -11,14 +12,22 @@ type breakRouter struct{}
 
 // Init 初始化 Break App 路由
 func (r *breakRouter) Init(public *gin.RouterGroup, private *gin.RouterGroup) {
-	// 需要JWT认证的接口
+	// 需要JWT认证的接口（使用小程序端 JWT，与 xhsQuickLogin/wxQuickLogin 颁发的 token 一致）
 	{
-		group := public.Group("break").Use(middleware.JWTAuth()).Use(middleware.OperationRecord()) // ✅ 添加JWT中间件
+		group := public.Group("break").Use(fpMiddleware.WxJWTAuth()).Use(middleware.OperationRecord())
 
 		// 放屁记录相关
-		group.POST("record", apiFartRecord.CreateFartRecord) // 创建放屁记录
-		group.POST("makeup", apiFartRecord.MakeupFartRecord) // 补卡记录
-		group.GET("today", apiFartRecord.GetTodayRecords)    // 获取今日记录
+		group.POST("record", apiFartRecord.CreateFartRecord)      // 创建放屁记录
+		group.POST("makeup", apiFartRecord.MakeupFartRecord)      // 补卡记录
+		group.GET("today", apiFartRecord.GetTodayRecords)         // 获取今日记录
+		group.GET("today/last", apiFartRecord.GetTodayLastRecord) // 获取今日最近一次记录
+
+		// 屁友一起打屁记录相关
+		group.GET("together/last", apiFartTogetherRecord.GetLastFartTogetherRecord)   // 获取最近一次屁友一起打屁记录
+		group.GET("together/:id", apiFartTogetherRecord.GetFartTogetherRecordById)    // 根据ID获取一起打屁记录
+		group.POST("together", apiFartTogetherRecord.CreateFartTogetherRecord)        // 创建一起打屁记录
+		group.PUT("together/:id", apiFartTogetherRecord.UpdateFartTogetherRecord)     // 更新一起打屁记录
+		group.POST("together/sex", apiFartTogetherRecord.UpdateFartTogetherRecordSex) // 只更新性别字段（POST请求，id在请求体中）
 
 		// 统计分析相关
 		group.GET("statistics/trend", apiStatistics.GetTrendData)           // 获取趋势数据
@@ -39,7 +48,9 @@ func (r *breakRouter) Init(public *gin.RouterGroup, private *gin.RouterGroup) {
 		group.GET("levelConfig/all", apiLevelConfig.GetAllLevelConfigs)   // 获取所有等级配置
 
 		// 音频库（小程序）
-		group.GET("audioLibrary/feed", apiAudioLibrary.GetAudioLibraryFeed) // 获取屁趣音效音频库
+		group.GET("audioLibrary/feed", apiAudioLibrary.GetAudioLibraryFeed)       // 获取屁趣音效音频库
+		group.POST("audioLibrary/my", apiAudioLibrary.CreateMyAudioLibrary)       // 创建用户自己的音频库记录
+		group.DELETE("audioLibrary/my/:id", apiAudioLibrary.DeleteMyAudioLibrary) // 删除用户自己的音频库记录
 
 		// 小程序配置（公开接口）
 		group.GET("appConfig/showFartEncyclopediaEntry", apiAppConfig.GetShowFartEncyclopediaEntry) // 获取是否显示"屁的全家族大全"入口
@@ -85,6 +96,13 @@ func (r *breakRouter) Init(public *gin.RouterGroup, private *gin.RouterGroup) {
 		group.DELETE("audioLibrary/:id", apiAudioLibrary.DeleteAudioLibrary) // 删除音频库
 
 		// 小程序配置相关
-		group.PUT("appConfig/showFartEncyclopediaEntry", apiAppConfig.SetShowFartEncyclopediaEntry)   // 设置是否显示"屁的全家族大全"入口
+		group.PUT("appConfig/showFartEncyclopediaEntry", apiAppConfig.SetShowFartEncyclopediaEntry) // 设置是否显示"屁的全家族大全"入口
+
+		// 昵称模板管理相关
+		group.POST("nicknameTemplate", apiNicknameTemplate.CreateNicknameTemplate)                    // 创建昵称模板
+		group.DELETE("nicknameTemplate/:id", apiNicknameTemplate.DeleteNicknameTemplate)              // 删除昵称模板
+		group.DELETE("nicknameTemplate/deleteByIds", apiNicknameTemplate.DeleteNicknameTemplateByIds) // 批量删除昵称模板
+		group.PUT("nicknameTemplate", apiNicknameTemplate.UpdateNicknameTemplate)                     // 更新昵称模板
+		group.GET("nicknameTemplate/list", apiNicknameTemplate.GetNicknameTemplateList)               // 分页获取昵称模板列表
 	}
 }

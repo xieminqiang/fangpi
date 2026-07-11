@@ -113,11 +113,53 @@ to {
 	min-height: 300rpx;
 	max-height: 500rpx;
 	border-radius: 16rpx;
-	overflow: hidden;
+	overflow: visible; /* 改为 visible，避免裁剪图表内容 */
 	/* 确保图表容器有明确的定位上下文 */
 	z-index: 1;
 	/* 响应式高度调整 */
 	height: auto;
+	/* 确保容器有明确的尺寸 */
+	box-sizing: border-box;
+}
+
+/* 图表 Loading 遮罩层 */
+.chart-loading.data-v-af28c7f4 {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background-color: rgba(246, 248, 247, 0.9);
+	border-radius: 16rpx;
+	z-index: 10;
+}
+
+/* Loading 旋转动画 */
+.loading-spinner.data-v-af28c7f4 {
+	width: 60rpx;
+	height: 60rpx;
+	border: 4rpx solid rgba(138, 245, 191, 0.2);
+	border-top-color: #8af5bf;
+	border-radius: 50%;
+	animation: spin-af28c7f4 1s linear infinite;
+	margin-bottom: 20rpx;
+}
+@keyframes spin-af28c7f4 {
+0% {
+		transform: rotate(0deg);
+}
+100% {
+		transform: rotate(360deg);
+}
+}
+.loading-text.data-v-af28c7f4 {
+	color: rgba(13, 27, 20, 0.6);
+	font-size: 24rpx;
+	font-weight: 500;
 }
 
 /* 临时数据显示 */

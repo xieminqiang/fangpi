@@ -37,10 +37,45 @@
 						<text class="data-value">{{ value }}次</text>
 					</view>
 				</view>
-				<!-- 图表组件 -->
-				<view class="trend-chart-echart">
+				<!-- 图表组件 - 今日 -->
+				<view v-show="selectedPeriod === '今日'" class="trend-chart-echart">
+					<!-- Loading 遮罩层 -->
+					<view v-if="chartLoading.day" class="chart-loading">
+						<view class="loading-spinner"></view>
+						<text class="loading-text">加载中...</text>
+					</view>
 					<l-echart 
-						ref="trendChartRef" 
+						ref="dayChartRef" 
+						:custom-style="chartStyle"
+						type="2d"
+						:is-disable-scroll="false"
+					></l-echart>
+				</view>
+				
+				<!-- 图表组件 - 本周 -->
+				<view v-show="selectedPeriod === '本周'" class="trend-chart-echart">
+					<!-- Loading 遮罩层 -->
+					<view v-if="chartLoading.week" class="chart-loading">
+						<view class="loading-spinner"></view>
+						<text class="loading-text">加载中...</text>
+					</view>
+					<l-echart 
+						ref="weekChartRef" 
+						:custom-style="chartStyle"
+						type="2d"
+						:is-disable-scroll="false"
+					></l-echart>
+				</view>
+				
+				<!-- 图表组件 - 本月 -->
+				<view v-show="selectedPeriod === '本月'" class="trend-chart-echart">
+					<!-- Loading 遮罩层 -->
+					<view v-if="chartLoading.month" class="chart-loading">
+						<view class="loading-spinner"></view>
+						<text class="loading-text">加载中...</text>
+					</view>
+					<l-echart 
+						ref="monthChartRef" 
 						:custom-style="chartStyle"
 						type="2d"
 						:is-disable-scroll="false"
@@ -55,18 +90,18 @@
 					<text class="ai-title">小结卡片</text>
 				</view>
 				<view class="ai-content">
-					<text class="ai-item">{{ selectedPeriod }}共记录 <text class="ai-highlight">{{ totalCount }}</text> 次，排气频率适中 💫</text>
-					<text class="ai-item">{{ mostCommonType }}占比最高，平均气味为{{ averageSmell }}～💧</text>
-					<text class="ai-item">整体心情{{ mostCommonMood.name }}，保持愉快状态 {{ mostCommonMood.emoji }}</text>
+					<text class="ai-item">{{ selectedPeriod }}共记录 <text class="ai-highlight">{{ totalCount }}</text> 次，排气频率适中 </text>
+					<text class="ai-item">{{ mostCommonType }}占比最高，平均气味为{{ averageSmell }}～</text>
+					<text class="ai-item">整体心情{{ mostCommonMood.name }}，保持愉快状态 </text>
 				</view>
-				<text class="ai-bg-icon">☁️</text>
+			
 			</view>
 		</scroll-view>
 	</view>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 
 // 引入 lime-echart 组件
 import LEchart from '@/uni_modules/lime-echart/components/l-echart/l-echart.vue'
@@ -105,38 +140,81 @@ const dataCache = ref({
 // 缓存有效期（5分钟）
 const CACHE_DURATION = 5 * 60 * 1000
 
-// ECharts 图表引用
-const trendChartRef = ref(null)
+// ECharts 图表引用 - 分别为今日、本周、本月
+const dayChartRef = ref(null)
+const weekChartRef = ref(null)
+const monthChartRef = ref(null)
 
-// 根据真实数据动态计算图表数据和标签
-const chartLabels = computed(() => {
-	if (!trendData.value) return ['凌晨', '上午', '下午', '晚上']
-	
-	if (trendData.value.type === 'day') {
-		return ['凌晨', '上午', '下午', '晚上']
-	} else if (trendData.value.type === 'week') {
-		// 将日期标签转换为周一到周日
-		return ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-	} else if (trendData.value.type === 'month') {
-		// 将月标签改为月初、月中、月底
-		return ['月初', '月中', '月底']
+// 图表实例 - 分别为今日、本周、本月
+const chartInstances = {
+	day: null,
+	week: null,
+	month: null
+}
+
+// 初始化标志，防止重复初始化
+const isInitializing = {
+	day: false,
+	week: false,
+	month: false
+}
+
+const isInitialized = {
+	day: false,
+	week: false,
+	month: false
+}
+
+// 图表加载状态（首次进入时显示 loading）
+const chartLoading = ref({
+	day: true,
+	week: false,
+	month: false
+})
+
+// 根据周期类型获取图表数据和标签
+const getChartData = (periodType) => {
+	const cache = dataCache.value[periodType]
+	if (!cache || !cache.trendData) {
+		// 返回默认数据
+		if (periodType === 'day') return { labels: ['凌晨', '上午', '下午', '晚上'], data: [0, 0, 0, 0] }
+		if (periodType === 'week') return { labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'], data: [0, 0, 0, 0, 0, 0, 0] }
+		if (periodType === 'month') return { labels: ['月初', '月中', '月底'], data: [0, 0, 0] }
+		return { labels: [], data: [] }
 	}
-	return []
+	
+	const trendData = cache.trendData
+	if (periodType === 'day') {
+		const tp = trendData.timePeriodData || {}
+		return {
+			labels: ['凌晨', '上午', '下午', '晚上'],
+			data: [tp.dawn || 0, tp.morning || 0, tp.afternoon || 0, tp.evening || 0]
+		}
+	} else if (periodType === 'week') {
+		return {
+			labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+			data: trendData.weekData || [0, 0, 0, 0, 0, 0, 0]
+		}
+	} else if (periodType === 'month') {
+		return {
+			labels: ['月初', '月中', '月底'],
+			data: trendData.monthData || [0, 0, 0]
+		}
+	}
+	return { labels: [], data: [] }
+}
+
+// 当前显示的图表数据和标签（用于数据显示）
+const chartLabels = computed(() => {
+	const typeMap = { '今日': 'day', '本周': 'week', '本月': 'month' }
+	const periodType = typeMap[selectedPeriod.value]
+	return getChartData(periodType).labels
 })
 
 const chartData = computed(() => {
-	if (!trendData.value) return [0, 0, 0, 0]
-	
-	if (trendData.value.type === 'day') {
-		const tp = trendData.value.timePeriodData || {}
-		return [tp.dawn || 0, tp.morning || 0, tp.afternoon || 0, tp.evening || 0]
-	} else if (trendData.value.type === 'week') {
-		return trendData.value.weekData || []
-	} else if (trendData.value.type === 'month') {
-		// 后端已经返回3个时间段的数据（月初、月中、月底）
-		return trendData.value.monthData || []
-	}
-	return []
+	const typeMap = { '今日': 'day', '本周': 'week', '本月': 'month' }
+	const periodType = typeMap[selectedPeriod.value]
+	return getChartData(periodType).data
 })
 
 // 动态计算图表高度
@@ -302,134 +380,310 @@ const moodEmojiPositions = computed(() => [
 // 时间段数据聚合（已废弃，使用 chartData 替代）
 // const sampledData = computed(() => [])
 
-// ECharts 配置项
-const chartOption = computed(() => ({
-	grid: {
-		left: '10%',
-		right: '10%',
-		bottom: '15%',
-		top: '10%',
-		containLabel: true
-	},
-	xAxis: {
-		type: 'category',
-		boundaryGap: false,
-		data: chartLabels.value,
-		axisLine: {
-			lineStyle: {
-				color: 'rgba(138, 245, 191, 0.3)'
-			}
-		},
-		axisLabel: {
-			color: 'rgba(138, 245, 191, 0.8)',
-			fontSize: 11,
-			fontWeight: 'bold'
-		},
-		axisTick: {
-			show: false
-		}
-	},
-	yAxis: {
-		type: 'value',
-		axisLine: {
-			show: false
-		},
-		axisTick: {
-			show: false
-		},
-		axisLabel: {
-			color: 'rgba(138, 245, 191, 0.6)',
-			fontSize: 11
-		},
-		splitLine: {
-			lineStyle: {
-				color: 'rgba(138, 245, 191, 0.1)',
-				type: 'dashed'
-			}
-		}
-	},
-	series: [{
-		data: chartData.value,
-		type: 'line',
-		smooth: true,
-		smoothMonotone: 'x',
-		symbol: 'none',
-		itemStyle: {
-			color: '#8af5bf',
-			borderColor: '#fff',
-			borderWidth: 2
-		},
-		lineStyle: {
-			color: '#8af5bf',
-			width: 2,
-			shadowColor: 'rgba(138, 245, 191, 0.3)',
-			shadowBlur: 8,
-			shadowOffsetY: 3
-		},
-		areaStyle: {
-			color: {
-				type: 'linear',
-				x: 0,
-				y: 0,
-				x2: 0,
-				y2: 1,
-				colorStops: [
-					{ offset: 0, color: 'rgba(138, 245, 191, 0.3)' },
-					{ offset: 1, color: 'rgba(138, 245, 191, 0.05)' }
-				]
-			}
-		},
-		emphasis: {
-			focus: 'series',
-			itemStyle: {
-				color: '#5BCFA0',
-				borderColor: '#fff',
-				borderWidth: 3,
-				shadowBlur: 10,
-				shadowColor: 'rgba(138, 245, 191, 0.8)'
-			}
-		}
-	}]
-}))
+// 确保数据连续性，避免区域线折断
+const ensureDataContinuity = (data) => {
+	if (!data || data.length === 0) return [0]
+	// 确保所有值都是数字，将 null/undefined 转换为 0
+	return data.map(val => (val === null || val === undefined || isNaN(val)) ? 0 : Number(val))
+}
 
-// 初始化图表
-const initChart = async () => {
+// 获取指定周期的图表配置
+const getChartOption = (periodType) => {
+	const { labels, data } = getChartData(periodType)
+	const safeData = ensureDataContinuity(data)
+	const safeLabels = labels.length > 0 ? labels : ['数据']
+	
+	return {
+		grid: {
+			left: '10%',
+			right: '10%',
+			bottom: '15%',
+			top: '10%',
+			containLabel: true
+		},
+		xAxis: {
+			type: 'category',
+			boundaryGap: false,
+			data: safeLabels,
+			axisLine: {
+				lineStyle: {
+					color: 'rgba(138, 245, 191, 0.3)'
+				}
+			},
+			axisLabel: {
+				color: 'rgba(138, 245, 191, 0.8)',
+				fontSize: 11,
+				fontWeight: 'bold'
+			},
+			axisTick: {
+				show: false
+			}
+		},
+		yAxis: {
+			type: 'value',
+			min: 0, // 确保最小值从0开始，避免区域线折断
+			axisLine: {
+				show: false
+			},
+			axisTick: {
+				show: false
+			},
+			axisLabel: {
+				color: 'rgba(138, 245, 191, 0.6)',
+				fontSize: 11
+			},
+			splitLine: {
+				lineStyle: {
+					color: 'rgba(138, 245, 191, 0.1)',
+					type: 'dashed'
+				}
+			}
+		},
+		series: [{
+			data: safeData,
+			type: 'line',
+			smooth: true,
+			smoothMonotone: 'x',
+			symbol: 'circle', // 显示数据点，便于调试
+			symbolSize: 6,
+			connectNulls: true, // 连接空值，避免折断
+			itemStyle: {
+				color: '#8af5bf',
+				borderColor: '#fff',
+				borderWidth: 2
+			},
+			lineStyle: {
+				color: '#8af5bf',
+				width: 2,
+				shadowColor: 'rgba(138, 245, 191, 0.3)',
+				shadowBlur: 8,
+				shadowOffsetY: 3
+			},
+			areaStyle: {
+				color: {
+					type: 'linear',
+					x: 0,
+					y: 0,
+					x2: 0,
+					y2: 1,
+					colorStops: [
+						{ offset: 0, color: 'rgba(138, 245, 191, 0.3)' },
+						{ offset: 1, color: 'rgba(138, 245, 191, 0.05)' }
+					]
+				}
+			},
+			emphasis: {
+				focus: 'series',
+				itemStyle: {
+					color: '#5BCFA0',
+					borderColor: '#fff',
+					borderWidth: 3,
+					shadowBlur: 10,
+					shadowColor: 'rgba(138, 245, 191, 0.8)'
+				}
+			}
+		}]
+	}
+}
+
+// 当前显示的图表配置（用于兼容）
+const chartOption = computed(() => {
+	const typeMap = { '今日': 'day', '本周': 'week', '本月': 'month' }
+	const periodType = typeMap[selectedPeriod.value]
+	return getChartOption(periodType)
+})
+
+// 更新指定周期的图表数据
+const updateChart = async (periodType) => {
+	// 如果正在初始化，等待初始化完成
+	if (isInitializing[periodType]) {
+		return
+	}
+	
+	const instance = chartInstances[periodType]
+	if (!instance) {
+		// 如果图表实例不存在，先初始化
+		await initChart(periodType)
+		return
+	}
+	
+	try {
+		// 等待数据更新完成
+		await nextTick()
+		
+		// 获取该周期的图表配置
+		const option = getChartOption(periodType)
+		
+		// 更新图表配置
+		instance.setOption(option, {
+			notMerge: false, // 合并配置，保留动画等状态
+			lazyUpdate: false // 立即更新
+		})
+		
+		// 延迟 resize 确保容器尺寸已更新
+		setTimeout(() => {
+			if (chartInstances[periodType]) {
+				chartInstances[periodType].resize()
+			}
+		}, 150)
+	} catch (error) {
+		console.error(`更新${periodType}图表失败：`, error)
+		// 如果更新失败，尝试重新初始化
+		chartInstances[periodType] = null
+		isInitialized[periodType] = false
+		await initChart(periodType)
+	}
+}
+
+// 初始化指定周期的图表
+const initChart = async (periodType) => {
+	// 如果已经初始化过，直接更新数据
+	if (isInitialized[periodType] && chartInstances[periodType]) {
+		await updateChart(periodType)
+		return
+	}
+	
+	// 如果正在初始化，直接返回
+	if (isInitializing[periodType]) {
+		return
+	}
+	
+	// 设置初始化标志
+	isInitializing[periodType] = true
+	
 	// 等待 DOM 渲染完成
 	await nextTick()
 	
+	// 获取该周期的数据
+	const { data } = getChartData(periodType)
+	
+	// 确保数据已准备好
+	if (!data || data.length === 0) {
+		console.warn(`${periodType}图表数据未准备好，延迟初始化`)
+		isInitializing[periodType] = false
+		// 如果数据一直未准备好，延迟后隐藏 loading（避免一直显示）
+		setTimeout(() => {
+			if (!isInitialized[periodType]) {
+				chartLoading.value[periodType] = false
+			}
+		}, 3000)
+		setTimeout(() => initChart(periodType), 300)
+		return
+	}
+	
 	setTimeout(async () => {
-		if (!trendChartRef.value) {
-			console.warn('图表 ref 未找到')
+		// 根据周期类型获取对应的 ref
+		const chartRef = periodType === 'day' ? dayChartRef.value : 
+		                periodType === 'week' ? weekChartRef.value : 
+		                monthChartRef.value
+		
+		if (!chartRef) {
+			console.warn(`${periodType}图表 ref 未找到`)
+			isInitializing[periodType] = false
+			chartLoading.value[periodType] = false
 			return
 		}
+		
 		try {
 			// 初始化图表，第二个参数可以传入回调
-			const myChart = await trendChartRef.value.init(echarts, (chart) => {
-				console.log('图表实例创建成功', chart)
+			const myChart = await chartRef.init(echarts, (chart) => {
+				console.log(`${periodType}图表实例创建成功`, chart)
 			})
 			
 			if (myChart) {
+				// 保存图表实例
+				chartInstances[periodType] = myChart
+				isInitialized[periodType] = true
+				isInitializing[periodType] = false
+				
+				// 获取该周期的图表配置
+				const option = getChartOption(periodType)
+				
 				// 设置配置项
-				myChart.setOption(chartOption.value)
-				console.log('图表初始化成功')
+				myChart.setOption(option, {
+					notMerge: true // 首次初始化不合并
+				})
+				console.log(`${periodType}图表初始化成功`)
+				
+				// 隐藏 loading（首次初始化完成后）
+				chartLoading.value[periodType] = false
 				
 				// 确保图表适配容器大小
 				setTimeout(() => {
-					myChart.resize()
-				}, 100)
+					if (chartInstances[periodType]) {
+						chartInstances[periodType].resize()
+					}
+				}, 200)
 				
 				// 监听窗口大小变化，重新调整图表大小
 				uni.onWindowResize(() => {
-					setTimeout(() => {
-						myChart.resize()
-					}, 100)
+					if (chartInstances[periodType]) {
+						setTimeout(() => {
+							chartInstances[periodType].resize()
+						}, 100)
+					}
 				})
+			} else {
+				isInitializing[periodType] = false
 			}
 		} catch (error) {
-			console.error('图表初始化失败：', error)
+			console.error(`${periodType}图表初始化失败：`, error)
+			chartInstances[periodType] = null
+			isInitialized[periodType] = false
+			isInitializing[periodType] = false
+			// 初始化失败时也隐藏 loading
+			chartLoading.value[periodType] = false
 		}
-	}, 800)
+	}, 500)
 }
+
+// 防抖定时器
+const updateTimers = {
+	day: null,
+	week: null,
+	month: null
+}
+
+// 监听周期切换，初始化或显示对应图表
+watch(selectedPeriod, async (newPeriod) => {
+	const typeMap = { '今日': 'day', '本周': 'week', '本月': 'month' }
+	const periodType = typeMap[newPeriod]
+	
+	// 检查该周期的数据是否已加载
+	const cache = dataCache.value[periodType]
+	if (!cache || !cache.trendData) {
+		// 数据未加载，先加载数据（loadData 会处理图表初始化）
+		return
+	}
+	
+	// 如果该周期的图表未初始化，先初始化
+	if (!isInitialized[periodType]) {
+		chartLoading.value[periodType] = true
+		await initChart(periodType)
+	} else {
+		// 已初始化，更新数据
+		await updateChart(periodType)
+	}
+})
+
+// 监听数据缓存变化，更新对应周期的图表
+watch(() => dataCache.value, () => {
+	// 更新所有已初始化的图表
+	Object.keys(chartInstances).forEach(periodType => {
+		if (isInitialized[periodType] && chartInstances[periodType]) {
+			// 清除之前的定时器
+			if (updateTimers[periodType]) {
+				clearTimeout(updateTimers[periodType])
+			}
+			
+			// 防抖：延迟更新，避免短时间内多次更新
+			updateTimers[periodType] = setTimeout(() => {
+				updateChart(periodType)
+				updateTimers[periodType] = null
+			}, 100)
+		}
+	})
+}, { deep: true })
 
 // 生命周期
 onMounted(() => {
@@ -438,14 +692,11 @@ onMounted(() => {
 	const userStore = useUserStore()
 	if (userStore.token) {
 		console.log('已有 token，直接加载数据')
-		// 可以在这里加载真实数据
+		// 加载数据，数据加载完成后会自动初始化图表
 		loadData()
 	} else {
 		console.log('暂无 token，等待登录完成...')
 	}
-	
-	// 初始化图表
-	initChart()
 	
 	// 监听登录成功事件
 	uni.$on('loginSuccess', onLoginSuccess)
@@ -464,10 +715,35 @@ const onLoginSuccess = () => {
 	loadData()
 }
 
-// 页面卸载时移除事件监听
+// 页面卸载时移除事件监听和清理图表实例
 onUnmounted(() => {
 	uni.$off('loginSuccess', onLoginSuccess)
 	uni.$off('fartRecordAdded')
+	
+	// 清除所有防抖定时器
+	Object.keys(updateTimers).forEach(periodType => {
+		if (updateTimers[periodType]) {
+			clearTimeout(updateTimers[periodType])
+			updateTimers[periodType] = null
+		}
+	})
+	
+	// 清理所有图表实例
+	Object.keys(chartInstances).forEach(periodType => {
+		if (chartInstances[periodType]) {
+			chartInstances[periodType].dispose && chartInstances[periodType].dispose()
+			chartInstances[periodType] = null
+		}
+		isInitialized[periodType] = false
+		isInitializing[periodType] = false
+	})
+	
+	// 重置 loading 状态
+	chartLoading.value = {
+		day: true,
+		week: false,
+		month: false
+	}
 })
 
 // 检查缓存是否有效
@@ -515,8 +791,16 @@ const loadData = async (forceRefresh = false) => {
 		// 检查缓存，如果有效且不强制刷新，则使用缓存
 		if (!forceRefresh && isCacheValid(statType)) {
 			loadFromCache(statType)
-			// 更新图表
-			initChart()
+			// 等待数据更新后初始化或更新图表
+			await nextTick()
+			if (!isInitialized[statType]) {
+				// 首次加载，初始化图表
+				chartLoading.value[statType] = true
+				await initChart(statType)
+			} else {
+				// 已初始化，更新图表
+				updateChart(statType)
+			}
 			return
 		}
 		
@@ -550,8 +834,16 @@ const loadData = async (forceRefresh = false) => {
 		
 		uni.hideLoading()
 		
-		// 更新图表
-		initChart()
+		// 等待数据更新后初始化或更新图表
+		await nextTick()
+		if (!isInitialized[statType]) {
+			// 首次加载，初始化图表
+			chartLoading.value[statType] = true
+			await initChart(statType)
+		} else {
+			// 已初始化，更新图表
+			updateChart(statType)
+		}
 	} catch (error) {
 		console.error('加载数据失败:', error)
 		uni.hideLoading()
@@ -707,11 +999,55 @@ defineExpose({
 	min-height: 300rpx;
 	max-height: 500rpx;
 	border-radius: 16rpx;
-	overflow: hidden;
+	overflow: visible; /* 改为 visible，避免裁剪图表内容 */
 	/* 确保图表容器有明确的定位上下文 */
 	z-index: 1;
 	/* 响应式高度调整 */
 	height: auto;
+	/* 确保容器有明确的尺寸 */
+	box-sizing: border-box;
+}
+
+/* 图表 Loading 遮罩层 */
+.chart-loading {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background-color: rgba(246, 248, 247, 0.9);
+	border-radius: 16rpx;
+	z-index: 10;
+}
+
+/* Loading 旋转动画 */
+.loading-spinner {
+	width: 60rpx;
+	height: 60rpx;
+	border: 4rpx solid rgba(138, 245, 191, 0.2);
+	border-top-color: #8af5bf;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+	margin-bottom: 20rpx;
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+.loading-text {
+	color: rgba(13, 27, 20, 0.6);
+	font-size: 24rpx;
+	font-weight: 500;
 }
 
 /* 临时数据显示 */

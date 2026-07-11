@@ -82,9 +82,11 @@
   "/src/plugin/fp_app/form/achievement.vue": "Achievement",
   "/src/plugin/fp_app/form/audio_library.vue": "Audio_library",
   "/src/plugin/fp_app/form/levelConfig.vue": "LevelConfig",
+  "/src/plugin/fp_app/form/nickname_template.vue": "Nickname_template",
   "/src/plugin/fp_app/form/wx_user.vue": "WxUserForm",
   "/src/plugin/fp_app/view/achievement.vue": "Achievement",
   "/src/plugin/fp_app/view/audio_library.vue": "Audio_library",
   "/src/plugin/fp_app/view/levelConfig.vue": "LevelConfig",
+  "/src/plugin/fp_app/view/nickname_template.vue": "Nickname_template",
   "/src/plugin/fp_app/view/wx_user.vue": "WxUser"
 }

@@ -8,13 +8,18 @@ if (!Math) {
   "./pages/index/index.js";
   "./pages/login/index.js";
   "./pages/entry/index.js";
+  "./pages/index/fart.js";
   "./pages/entry/detail.js";
   "./pages/data/index.js";
+  "./pages/entry/creat.js";
   "./pages/me/index.js";
-  "./pages/me/level.js";
   "./pages/me/aiFx.js";
   "./pages/me/edit.js";
+  "./pages/me/points.js";
+  "./pages/me/pointsDetail.js";
   "./pages/achievement/achievement.js";
+  "./pages/profile/level.js";
+  "./pages/profile/jz.js";
 }
 const _sfc_main = {
   __name: "App",
