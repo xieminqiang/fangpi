@@ -46,10 +46,23 @@ jobs:
           test -d server/resource
           file server/server
 
-      - name: Setup SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.KEY }}
+      - name: Setup SSH key
+        env:
+          KEY_B64: ${{ secrets.KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "$KEY_B64" ]; then
+            echo "error: GitHub Secret KEY is empty"
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          echo "$KEY_B64" | tr -d ' \n\r\t' | base64 -d > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "Validating private key..."
+          ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/deploy_key
+          echo "SSH key loaded"
 
       - name: Deploy via SSH
         env:

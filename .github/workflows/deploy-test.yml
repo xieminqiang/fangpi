@@ -35,12 +35,23 @@ jobs:
       - name: Build backend
         run: |
           go mod tidy
-          CGO_ENABLED=0 go build -o server .
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server .
         working-directory: server
+
+      - name: Setup SSH key
+        env:
+          KEY_B64: ${{ secrets.KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          echo "$KEY_B64" | tr -d ' \n\r\t' | base64 -d > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/deploy_key
 
       - name: Deploy via SSH
         env:
-          SSH_KEY: ${{ secrets.KEY }}
           SSH_HOST: ${{ secrets.HOST }}
           SSH_USER: ${{ secrets.USER }}
           SSH_PORT: ${{ secrets.PROT }}
@@ -48,18 +59,19 @@ jobs:
         run: |
           set -euo pipefail
 
-          mkdir -p ~/.ssh
-          echo "$SSH_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          case "$DEPLOY_DIR" in
+            */) ;;
+            *) DEPLOY_DIR="${DEPLOY_DIR}/" ;;
+          esac
 
-          SSH_OPTS="-p ${SSH_PORT} -o StrictHostKeyChecking=no"
+          mkdir -p ~/.ssh
+          ssh-keyscan -H -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+
           REMOTE="${SSH_USER}@${SSH_HOST}"
 
-          ssh $SSH_OPTS "$REMOTE" "mkdir -p ${DEPLOY_DIR}dist ${DEPLOY_DIR}resource"
-
-          scp $SSH_OPTS -r web/dist/* "${REMOTE}:${DEPLOY_DIR}dist/"
-          scp $SSH_OPTS server/server "${REMOTE}:${DEPLOY_DIR}server"
-          scp $SSH_OPTS -r server/resource/* "${REMOTE}:${DEPLOY_DIR}resource/"
-
-          ssh $SSH_OPTS "$REMOTE" "cd ${DEPLOY_DIR} && bash restart.sh"
+          ssh -p "$SSH_PORT" "$REMOTE" "mkdir -p ${DEPLOY_DIR}dist ${DEPLOY_DIR}resource"
+          scp -P "$SSH_PORT" -r web/dist/. "${REMOTE}:${DEPLOY_DIR}dist/"
+          scp -P "$SSH_PORT" server/server "${REMOTE}:${DEPLOY_DIR}server"
+          scp -P "$SSH_PORT" -r server/resource/. "${REMOTE}:${DEPLOY_DIR}resource/"
+          scp -P "$SSH_PORT" deploy/scripts/restart.sh "${REMOTE}:${DEPLOY_DIR}restart.sh"
+          ssh -p "$SSH_PORT" "$REMOTE" "chmod +x ${DEPLOY_DIR}restart.sh ${DEPLOY_DIR}server && cd ${DEPLOY_DIR} && bash restart.sh"
