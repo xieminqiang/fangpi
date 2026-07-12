@@ -92,6 +92,7 @@ jobs:
           target: "/opt/gva"
           strip_components: 2
 
+<<<<<<< HEAD
       - name: Restart service
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -105,3 +106,46 @@ jobs:
             cd /opt/gva
             bash restart.sh
 
+=======
+          for name in SSH_HOST SSH_USER; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::GitHub Secret is empty: $name"
+              exit 1
+            fi
+          done
+
+          SSH_PORT="${SSH_PORT:-22}"
+          DEPLOY_DIR="${DEPLOY_DIR:-/opt/gva/}"
+          case "$DEPLOY_DIR" in
+            */) ;;
+            *) DEPLOY_DIR="${DEPLOY_DIR}/" ;;
+          esac
+
+          mkdir -p ~/.ssh
+          ssh-keyscan -H -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+          REMOTE="${SSH_USER}@${SSH_HOST}"
+          SSH_OPTS="-p $SSH_PORT -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15"
+          SCP_OPTS="-P $SSH_PORT -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15"
+
+          echo "Deploy target: ${SSH_USER}@${SSH_HOST}:${SSH_PORT} -> ${DEPLOY_DIR}"
+          echo "Testing SSH connection to ${SSH_HOST}:${SSH_PORT}..."
+          ssh $SSH_OPTS "$REMOTE" "echo connected && mkdir -p ${DEPLOY_DIR}dist ${DEPLOY_DIR}resource"
+
+          echo "Uploading frontend..."
+          scp $SCP_OPTS -r web/dist/. "${REMOTE}:${DEPLOY_DIR}dist/"
+
+          echo "Uploading backend binary..."
+          scp $SCP_OPTS server/server "${REMOTE}:${DEPLOY_DIR}server"
+
+          echo "Uploading backend resource..."
+          scp $SCP_OPTS -r server/resource/. "${REMOTE}:${DEPLOY_DIR}resource/"
+
+          echo "Uploading restart script..."
+          scp $SCP_OPTS deploy/scripts/restart.sh "${REMOTE}:${DEPLOY_DIR}restart.sh"
+
+          echo "Restarting service..."
+          ssh $SSH_OPTS "$REMOTE" "chmod +x ${DEPLOY_DIR}restart.sh ${DEPLOY_DIR}server && cd ${DEPLOY_DIR} && bash restart.sh"
+
+          echo "Deploy success"
+>>>>>>> 027820c03fb3a377b733a389f49f83ed8f71ef97
