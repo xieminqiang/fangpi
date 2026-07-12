@@ -1,4 +1,3 @@
-
 name: Deploy Prod
 
 on:
@@ -48,60 +47,83 @@ jobs:
           test -f web/dist/index.html
           test -f server/server
 
-      - name: Upload frontend
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.KEY }}
-          port: 22
-          source: "web/dist/*"
-          target: "/opt/gva/dist"
-          strip_components: 2
+      - name: Setup SSH key
+        env:
+          KEY_B64: ${{ secrets.KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "$KEY_B64" ]; then
+            echo "::error::GitHub Secret KEY is empty"
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          KEY_CLEAN="$(printf '%s' "$KEY_B64" | tr -d '\r\t')"
 
-      - name: Upload backend
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.KEY }}
-          port: 22
-          source: "server/server"
-          target: "/opt/gva"
-          strip_components: 1
+          if echo "$KEY_CLEAN" | grep -q 'BEGIN OPENSSH PRIVATE KEY'; then
+            printf '%s\n' "$KEY_CLEAN" | sed 's/\r$//' > ~/.ssh/deploy_key
+          else
+            printf '%s' "$KEY_CLEAN" | tr -d ' \n' | openssl base64 -d -A > ~/.ssh/deploy_key
+          fi
 
-      - name: Upload resource
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.KEY }}
-          port: 22
-          source: "server/resource/*"
-          target: "/opt/gva/resource"
-          strip_components: 2
+          chmod 600 ~/.ssh/deploy_key
+          echo "Validating private key..."
+          if ! ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null 2>&1; then
+            echo "::error::Invalid SSH private key in Secret KEY"
+            echo "hint (Mac): base64 < ~/.ssh/gva_deploy | tr -d '\\n' | pbcopy"
+            exit 1
+          fi
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/deploy_key
+          echo "Key fingerprint (SHA256):"
+          ssh-keygen -lf ~/.ssh/deploy_key
+          echo "Public key (verify this is in server ~/.ssh/authorized_keys):"
+          ssh-keygen -y -f ~/.ssh/deploy_key
 
-      - name: Upload restart script
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.KEY }}
-          port: 22
-          source: "deploy/scripts/restart.sh"
-          target: "/opt/gva"
-          strip_components: 2
+      - name: Deploy via SSH
+        env:
+          SSH_HOST: ${{ secrets.HOST }}
+          SSH_USER: ${{ secrets.USER }}
+          SSH_PORT: ${{ secrets.PROT }}
+          DEPLOY_DIR: ${{ secrets.MKDIR }}
+        run: |
+          set -euo pipefail
 
-      - name: Restart service
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.KEY }}
-          port: 22
-          script: |
-            chmod +x /opt/gva/server
-            chmod +x /opt/gva/restart.sh
-            cd /opt/gva
-            bash restart.sh
+          for name in SSH_HOST SSH_USER SSH_PORT; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::GitHub Secret is empty: $name"
+              exit 1
+            fi
+          done
 
+          DEPLOY_DIR="${DEPLOY_DIR:-/opt/gva/}"
+          case "$DEPLOY_DIR" in
+            */) ;;
+            *) DEPLOY_DIR="${DEPLOY_DIR}/" ;;
+          esac
+
+          mkdir -p ~/.ssh
+          ssh-keyscan -H -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+          REMOTE="${SSH_USER}@${SSH_HOST}"
+          SSH_OPTS="-p $SSH_PORT -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15"
+          SCP_OPTS="-P $SSH_PORT -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15"
+
+          echo "Testing SSH connection to ${SSH_HOST}:${SSH_PORT}..."
+          ssh $SSH_OPTS "$REMOTE" "echo connected && mkdir -p ${DEPLOY_DIR}dist ${DEPLOY_DIR}resource"
+
+          echo "Uploading frontend..."
+          scp $SCP_OPTS -r web/dist/. "${REMOTE}:${DEPLOY_DIR}dist/"
+
+          echo "Uploading backend binary..."
+          scp $SCP_OPTS server/server "${REMOTE}:${DEPLOY_DIR}server"
+
+          echo "Uploading backend resource..."
+          scp $SCP_OPTS -r server/resource/. "${REMOTE}:${DEPLOY_DIR}resource/"
+
+          echo "Uploading restart script..."
+          scp $SCP_OPTS deploy/scripts/restart.sh "${REMOTE}:${DEPLOY_DIR}restart.sh"
+
+          echo "Restarting service..."
+          ssh $SSH_OPTS "$REMOTE" "chmod +x ${DEPLOY_DIR}restart.sh ${DEPLOY_DIR}server && cd ${DEPLOY_DIR} && bash restart.sh"
+
+          echo "Deploy success"
