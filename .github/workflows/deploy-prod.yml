@@ -57,6 +57,7 @@ jobs:
           port: 22
           source: "web/dist/*"
           target: "/opt/gva/dist"
+          strip_components: 2
 
       - name: Upload backend
         uses: appleboy/scp-action@v0.1.7
@@ -67,6 +68,7 @@ jobs:
           port: 22
           source: "server/server"
           target: "/opt/gva"
+          strip_components: 1
 
       - name: Upload resource
         uses: appleboy/scp-action@v0.1.7
@@ -77,6 +79,7 @@ jobs:
           port: 22
           source: "server/resource/*"
           target: "/opt/gva/resource"
+          strip_components: 2
 
       - name: Upload restart script
         uses: appleboy/scp-action@v0.1.7
@@ -87,6 +90,7 @@ jobs:
           port: 22
           source: "deploy/scripts/restart.sh"
           target: "/opt/gva"
+          strip_components: 2
 
       - name: Restart service
         uses: appleboy/ssh-action@v1.2.0
