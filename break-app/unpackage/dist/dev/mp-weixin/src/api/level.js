@@ -1,10 +1,2 @@
-"use strict";
-const src_util_http = require("../util/http.js");
-const getAllLevelConfigsAPI = () => {
-  return src_util_http.http({
-    method: "GET",
-    url: "/break/levelConfig/all"
-  });
-};
-exports.getAllLevelConfigsAPI = getAllLevelConfigsAPI;
+"use strict";const e=require("../util/http.js"),t=()=>e.http({method:"GET",url:"/break/levelConfig/all"});exports.getAllLevelConfigsAPI=t;
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/src/api/level.js.map

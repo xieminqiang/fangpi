@@ -1,24 +1,11 @@
 {
+	"lazyCodeLoading": "requiredComponents",
 	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
 		{
 			"path": "pages/index/index",
 			"style": {
 				"navigationBarTitleText": "今日放屁",
 				"navigationBarBackgroundColor": "#f6f8f7"
-			}
-		},
-		{
-			"path": "pages/login/index",
-			"style": {
-				"navigationBarTitleText": ""
-			}
-		},
-		{
-			"path": "pages/entry/index",
-			"style": {
-				"navigationBarTitleText": "屁的全家族大全"
-				
-				
 			}
 		},
 		{
@@ -30,25 +17,10 @@
 			}
 		},
 		{
-			"path": "pages/entry/detail",
-			"style": {
-				"navigationBarTitleText": "屁趣家族成员",
-				"navigationBarBackgroundColor": "#f7fbf7"
-			}
-		},
-		{
 			"path": "pages/data/index",
 			"style": {
 				"navigationBarTitleText": "实验室",
 				"navigationStyle": "custom"
-			}
-		},
-		
-		{
-			"path": "pages/entry/creat",
-			"style": {
-				"navigationBarTitleText": "创建自己的屁"
-			
 			}
 		},
 		{
@@ -133,6 +105,43 @@
 		]
 	},
 	"subPackages": [
+		{
+			"root": "pages/login",
+			"name": "login",
+			"pages": [
+				{
+					"path": "index",
+					"style": {
+						"navigationBarTitleText": ""
+					}
+				}
+			]
+		},
+		{
+			"root": "pages/entry",
+			"name": "entry",
+			"pages": [
+				{
+					"path": "index",
+					"style": {
+						"navigationBarTitleText": "屁的全家族大全"
+					}
+				},
+				{
+					"path": "detail",
+					"style": {
+						"navigationBarTitleText": "屁趣家族成员",
+						"navigationBarBackgroundColor": "#f7fbf7"
+					}
+				},
+				{
+					"path": "creat",
+					"style": {
+						"navigationBarTitleText": "创建自己的屁"
+					}
+				}
+			]
+		},
 		{
 			"root": "pages/achievement",
 			"name": "achievement",

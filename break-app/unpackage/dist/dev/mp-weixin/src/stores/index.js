@@ -1,6 +1,2 @@
-"use strict";
-const common_vendor = require("../../common/vendor.js");
-const pinia = common_vendor.createPinia();
-pinia.use(common_vendor.src_default);
-exports.pinia = pinia;
+"use strict";const e=require("../../common/vendor.js"),i=e.createPinia();i.use(e.src_default);exports.pinia=i;
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/src/stores/index.js.map

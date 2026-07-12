@@ -1,12 +1,8 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/login/index",
-    "pages/entry/index",
     "pages/index/fart",
-    "pages/entry/detail",
     "pages/data/index",
-    "pages/entry/creat",
     "pages/me/index",
     "pages/me/aiFx",
     "pages/me/edit",
@@ -14,6 +10,22 @@
     "pages/me/pointsDetail"
   ],
   "subPackages": [
+    {
+      "root": "pages/login",
+      "pages": [
+        "index"
+      ],
+      "name": "login"
+    },
+    {
+      "root": "pages/entry",
+      "pages": [
+        "index",
+        "detail",
+        "creat"
+      ],
+      "name": "entry"
+    },
     {
       "root": "pages/achievement",
       "pages": [
