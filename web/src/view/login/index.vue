@@ -70,15 +70,6 @@
               >登 录</el-button
             >
           </el-form-item>
-          <el-form-item class="mb-6">
-            <el-button
-              class="shadow shadow-active h-11 w-full"
-              type="primary"
-              size="large"
-              @click="checkInit"
-              >前往初始化</el-button
-            >
-          </el-form-item>
         </el-form>
       </div>
     </div>
@@ -87,10 +78,8 @@
 
 <script setup>
   import { captcha } from '@/api/user'
-  import { checkDB } from '@/api/initdb'
   import { reactive, ref } from 'vue'
   import { ElMessage } from 'element-plus'
-  import { useRouter } from 'vue-router'
   import { useUserStore } from '@/pinia/modules/user'
   import Logo from '@/components/logo/index.vue'
 
@@ -98,7 +87,6 @@
     name: 'Login'
   })
 
-  const router = useRouter()
   const captchaRequiredLength = ref(6)
   // 验证函数
   const checkUsername = (rule, value, callback) => {
@@ -191,23 +179,5 @@
       // 登陆成功
       return true
     })
-  }
-
-  // 跳转初始化
-  const checkInit = async () => {
-    const res = await checkDB()
-    userStore.NeedInit()
-    await router.push({ name: 'Init' })
-    if (res.code === 0) {
-      if (res.data?.needInit) {
-        userStore.NeedInit()
-        await router.push({ name: 'Init' })
-      } else {
-        ElMessage({
-          type: 'info',
-          message: '已配置数据库信息，无法初始化'
-        })
-      }
-    }
   }
 </script>
