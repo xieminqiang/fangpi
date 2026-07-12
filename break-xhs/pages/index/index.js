@@ -2,7 +2,11 @@
  * 屁屁打卡小组件 - 主页面逻辑
  */
 const { getTodayRecordsAPI, getStatisticsSummaryAPI, createFartRecordAPI } = require('../../api/fart.js');
+const { getUserInfoAPI } = require('../../api/user.js');
 const { assets } = require('../../util/config.js');
+
+const DEFAULT_AVATAR =
+  'https://sbx-server.oss-cn-shenzhen.aliyuncs.com/fp-wx/uploads/default-avatar.png';
 
 const MOOD_ICONS = { '😌': '😌', '🤣': '🤣', '😖': '😖' };
 const MOOD_VALUE_ICONS = { normal: '😌', happy: '🤣', embarrassed: '😖' };
@@ -60,6 +64,7 @@ const PERIOD_META = {
 
 Page({
   data: {
+    activeTab: 'home',
     todayCount: 0,
     mostHappyMood: '🤣',
     lastFartTime: '暂无记录',
@@ -74,23 +79,116 @@ Page({
     selectedFartType: '响亮型',
     selectedSmellLevel: '清香',
     selectedMood: '放松',
-    inputText: ''
+    inputText: '',
+    nickname: '新手屁屁',
+    avatarUrl: DEFAULT_AVATAR,
+    totalFarts: 0,
+    experience: 0,
+    levelName: '',
+    safeAreaBottom: 0
   },
 
   async onLoad() {
+    this.initSafeArea();
     // 等待 App 登录完成后再加载数据
     const app = getApp();
     if (app.loginReady) {
       await app.loginReady;
     }
     this.loadStatisticsData();
+    this.loadProfile();
+  },
+
+  /** 真机安全区：CSS env() 在部分小组件环境不生效，改用 API 取值 */
+  initSafeArea() {
+    try {
+      const info = xhs.getSystemInfoSync();
+      let bottom = 0;
+      if (info.safeAreaInsets && info.safeAreaInsets.bottom) {
+        bottom = info.safeAreaInsets.bottom;
+      } else if (info.safeArea && info.screenHeight) {
+        bottom = Math.max(0, info.screenHeight - info.safeArea.bottom);
+      }
+      if (bottom > 0) {
+        this.setData({ safeAreaBottom: bottom });
+      }
+    } catch (e) {
+      // 忽略，使用默认 0
+    }
   },
 
   onShow() {
     const token = xhs.getStorageSync('token');
     if (token) {
-      this.loadStatisticsData();
+      if (this.data.activeTab === 'home') {
+        this.loadStatisticsData();
+      } else {
+        this.loadProfile();
+      }
     }
+  },
+
+  switchTab(e) {
+    const tab = e.currentTarget.dataset.tab;
+    if (!tab || tab === this.data.activeTab) return;
+
+    this.setData({
+      activeTab: tab,
+      showStatsPopup: false,
+      showArchivePopup: false
+    });
+
+    xhs.setNavigationBarTitle({
+      title: tab === 'home' ? '今日放屁' : '个人中心'
+    });
+
+    if (tab === 'home') {
+      this.loadStatisticsData();
+    } else {
+      this.loadProfile();
+    }
+  },
+
+  mapUserInfo(user) {
+    return {
+      nickname: user.nickname || '新手屁屁',
+      avatarUrl: user.avatar || DEFAULT_AVATAR,
+      totalFarts: user.totalFarts != null ? user.totalFarts : 0,
+      experience: user.experience != null ? user.experience : 0,
+      levelName: user.levelName || ''
+    };
+  },
+
+  loadProfile() {
+    const cached = xhs.getStorageSync('userInfo');
+    if (cached) {
+      this.setData(this.mapUserInfo(cached));
+    }
+
+    Promise.all([getUserInfoAPI(), getTodayRecordsAPI()])
+      .then(([userRes, todayRes]) => {
+        const updates = {};
+
+        if (userRes.data && userRes.data.code === 0 && userRes.data.data) {
+          const user = userRes.data.data;
+          xhs.setStorageSync('userInfo', user);
+          Object.assign(updates, this.mapUserInfo(user));
+        }
+
+        if (todayRes.data && todayRes.data.code === 0 && todayRes.data.data) {
+          updates.todayCount = todayRes.data.data.todayCount || 0;
+        }
+
+        if (Object.keys(updates).length) {
+          this.setData(updates);
+        }
+      })
+      .catch(() => {});
+  },
+
+  refreshProfile() {
+    xhs.showToast({ title: '刷新中…', icon: 'none' });
+    this.loadProfile();
   },
 
   /** 兼容 { code,data } 与外层挂在 mood 等字段下的结构 */

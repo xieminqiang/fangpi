@@ -809,7 +809,7 @@ break-app/
 ```
 break-xhs/
 ├── project.config.json    # ★ 小红书 IDE 工程配置（appid、编译选项）
-├── app.json               # 页面注册、窗口样式、组件框架
+├── app.json               # 页面注册、窗口样式（⚠️ 小组件不支持 tabBar，Tab 在单页内自定义）
 ├── app.js                 # 全局入口（登录、globalData）
 ├── app.css                # 全局样式
 ├── .xhs-ide/settings.json # IDE 编辑器偏好（非运行时）
@@ -832,7 +832,7 @@ break-xhs/
 | `util/config.js` | API 基址与环境 | `development`、`production`、`currentEnv`、`baseUrl` |
 | `util/http.js` | 网络层 | `xhs.request`；header `source-client: xhs-widget`；`x-token` |
 | `project.config.json` | 工程 | `appid`、`setting.urlCheck`、`libVersion` |
-| `app.json` | 应用 | `pages`、`window.navigationBarTitleText`（今日放屁） |
+| `app.json` | 应用 | `pages`（仅单页）、`window`；**勿配置 tabBar** |
 | `api/user.js` | 登录 | `POST /wxuser/xhsQuickLogin`（后端已实现） |
 | `api/fart.js` | 打卡 | 与 `break-app/src/api/fart.js` 路径保持一致 |
 

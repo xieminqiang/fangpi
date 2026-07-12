@@ -18,7 +18,7 @@
 ```
 break-xhs/
 ├── project.config.json    # 小红书 IDE 工程配置
-├── app.json               # 应用页面与窗口
+├── app.json               # 应用页面与窗口（⚠️ 小组件不支持 tabBar）
 ├── app.js                 # 全局登录与 globalData
 ├── app.css
 ├── util/
@@ -73,10 +73,23 @@ https://fangpi.mqcode.cn/api
 
 ### 4. `app.json`
 
-- `pages`：目前仅 `pages/index/index`
+- `pages`：目前仅 `pages/index/index`（单页应用）
 - `window`：导航栏标题「今日放屁」，背景 `#f6f8f7`
+- **不支持 `tabBar`**：小红书小组件无原生底部栏，首页/我的切换在 `pages/index/index` 内用自定义 `custom-tabbar` 实现
 - `componentFramework`：`glass-easel`
 - `lazyCodeLoading`：`requiredComponents`
+
+### 5. 页面内 Tab 切换
+
+小组件文档见 [小红书小组件开发文档](https://miniapp.xiaohongshu.com/doc/DC602239)，不支持 `app.json` 的 `tabBar`。
+
+在 `pages/index/index` 单页内实现：
+
+| 字段 / 方法 | 说明 |
+|-------------|------|
+| `activeTab` | `home` \| `me`，控制显示打卡区或个人中心 |
+| `switchTab` | 切换 tab，并更新导航栏标题 |
+| `.custom-tabbar` | 固定底部自定义切换栏 |
 
 ### 5. `api/*.js`
 
