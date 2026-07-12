@@ -88,13 +88,14 @@ jobs:
         run: |
           set -euo pipefail
 
-          for name in SSH_HOST SSH_USER SSH_PORT; do
+          for name in SSH_HOST SSH_USER; do
             if [ -z "${!name:-}" ]; then
               echo "::error::GitHub Secret is empty: $name"
               exit 1
             fi
           done
 
+          SSH_PORT="${SSH_PORT:-22}"
           DEPLOY_DIR="${DEPLOY_DIR:-/opt/gva/}"
           case "$DEPLOY_DIR" in
             */) ;;
@@ -108,6 +109,7 @@ jobs:
           SSH_OPTS="-p $SSH_PORT -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15"
           SCP_OPTS="-P $SSH_PORT -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15"
 
+          echo "Deploy target: ${SSH_USER}@${SSH_HOST}:${SSH_PORT} -> ${DEPLOY_DIR}"
           echo "Testing SSH connection to ${SSH_HOST}:${SSH_PORT}..."
           ssh $SSH_OPTS "$REMOTE" "echo connected && mkdir -p ${DEPLOY_DIR}dist ${DEPLOY_DIR}resource"
 
