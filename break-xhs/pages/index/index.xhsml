@@ -1,0 +1,158 @@
+<!-- 屁屁打卡小组件 - 小红书少女风 -->
+<view class="page-container">
+  <scroll-view class="checkin-page" scroll-y>
+    <!-- 完整版档案馆入口 -->
+    <view class="archive-cta-outer" bindtap="openArchivePopup">
+      <view class="archive-cta-inner">
+        <text class="archive-cta-folder">📂</text>
+        <view class="archive-cta-copy">
+          <text class="archive-cta-name">进入屁味档案馆</text>
+        </view>
+        <text class="archive-cta-spark">✨</text>
+      </view>
+    </view>
+
+    <!-- 输入框 -->
+    <view class="form-section">
+      <view class="input-card">
+        <input class="note-input" placeholder="碎碎念备忘心情、和谁、在哪儿…" value="{{inputText}}" bindinput="onInputChange" />
+      </view>
+    </view>
+
+    <!-- 主打卡区 -->
+    <view class="checkin-form">
+      <!-- 屁屁类型 -->
+      <view class="form-section">
+        <text class="section-label">💨 屁屁类型</text>
+        <view class="card-row">
+          <view xhs:for="{{fartTypes}}" xhs:key="value"
+            class="option-card {{selectedFartType === item.value ? 'selected' : ''}}"
+            bindtap="selectFartType" data-value="{{item.value}}">
+            <text class="option-emoji">{{item.emoji}}</text>
+            <text class="option-label">{{item.label}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 气味等级 -->
+      <view class="form-section">
+        <text class="section-label">🌸 气味等级</text>
+        <view class="card-row">
+          <view xhs:for="{{smellLevels}}" xhs:key="value"
+            class="option-card {{selectedSmellLevel === item.value ? 'selected' : ''}}"
+            bindtap="selectSmellLevel" data-value="{{item.value}}">
+            <text class="option-emoji">{{item.emoji}}</text>
+            <text class="option-label">{{item.label}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 当前心情 -->
+      <view class="form-section">
+        <text class="section-label">😊 当前心情</text>
+        <view class="card-row">
+          <view xhs:for="{{moods}}" xhs:key="value"
+            class="option-card {{selectedMood === item.value ? 'selected' : ''}}"
+            bindtap="selectMood" data-value="{{item.value}}">
+            <text class="option-emoji">{{item.emoji}}</text>
+            <text class="option-label">{{item.label}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 数据入口 -->
+      <view class="stats-entry" bindtap="toggleStatsPopup">
+        <text class="stats-entry-icon">📊</text>
+        <view class="stats-entry-copy">
+          <text class="stats-entry-title">今日数据</text>
+          <text class="stats-entry-sub">已记 {{todayCount}} 条 · {{lastFartTime}}</text>
+        </view>
+        <text class="stats-entry-arrow">›</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 打卡按钮 - 固定底部（移出 scroll-view） -->
+  <view class="submit-btn-wrapper">
+    <button class="submit-btn {{isSubmitting ? 'submitting' : ''}}" bindtap="confirmFart">
+      <text class="submit-emoji">💨</text>
+      <text class="submit-text">{{isSubmitting ? '记录中...' : '记一下'}}</text>
+    </button>
+  </view>
+
+  <!-- 今日数据 · 底部抽屉 -->
+  <view class="popup-mask popup-mask-bottom" xhs:if="{{showStatsPopup}}" bindtap="toggleStatsPopup">
+    <view class="stats-sheet" catchtap="preventBubble">
+      <view class="sheet-handle"></view>
+      <view class="sheet-header">
+        <view class="sheet-header-text">
+          <text class="sheet-title">今日记录</text>
+          <text class="sheet-caption">温柔记录每一个小瞬间 ✨</text>
+        </view>
+        <view class="sheet-close" catchtap="toggleStatsPopup">✕</view>
+      </view>
+
+      <view class="sheet-summary-row">
+        <view class="summary-card">
+          <text class="summary-card-value">{{todayCount}}</text>
+          <text class="summary-card-label">今日打卡</text>
+        </view>
+        <view class="summary-card summary-card-mood">
+          <text class="summary-card-emoji">{{mostHappyMood || '😊'}}</text>
+          <text class="summary-card-label">今日心情</text>
+        </view>
+      </view>
+
+      <view class="sheet-list-bar">
+        <text class="sheet-list-title">记录明细</text>
+        <text class="sheet-list-count">共 {{todayRecords.length}} 条</text>
+      </view>
+
+      <scroll-view scroll-y class="sheet-scroll">
+        <view xhs:if="{{!todayRecords.length}}" class="sheet-empty">
+          <text class="sheet-empty-icon">📒</text>
+          <text class="sheet-empty-text">今天还没有记录</text>
+          <text class="sheet-empty-hint">去记下第一条吧～</text>
+        </view>
+        <view xhs:for="{{todayRecords}}" xhs:key="id" class="record-row">
+          <view class="record-time-col">
+            <text class="record-time">{{item.timeStr}}</text>
+            <text xhs:if="{{item.period}}" class="record-period">{{item.period}}</text>
+          </view>
+          <view class="record-main">
+            <view class="record-tags">
+              <view class="tag-chip">
+                <text class="tag-emoji">{{item.typeEmoji}}</text>
+                <text class="tag-txt">{{item.typeLabel}}</text>
+              </view>
+              <view class="tag-chip tag-chip-soft">
+                <text class="tag-emoji">{{item.smellEmoji}}</text>
+                <text class="tag-txt">{{item.smellLabel}}</text>
+              </view>
+              <view class="tag-chip tag-chip-mood">
+                <text class="tag-emoji">{{item.moodEmoji}}</text>
+                <text class="tag-txt">{{item.moodLabel}}</text>
+              </view>
+            </view>
+            <text xhs:if="{{item.note}}" class="record-note">{{item.note}}</text>
+          </view>
+        </view>
+        <view class="sheet-scroll-pad"></view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 档案馆指引（居中弹层） -->
+  <view class="archive-mask" xhs:if="{{showArchivePopup}}" bindtap="closeArchivePopup">
+    <view class="archive-dialog" catchtap="preventBubble">
+      <view class="archive-dialog-close" catchtap="closeArchivePopup">✕</view>
+      <text class="archive-dialog-title">更加丰富的放屁档案</text>
+      <text class="archive-dialog-desc">已收录于小程序「放屁档案」</text>
+
+      <view class="archive-dialog-img-shell">
+        <image class="archive-dialog-img" src="{{archivePosterUrl}}" mode="widthFix" />
+      </view>
+      <text class="archive-dialog-foot">如需完整体验，可去星球自行在搜「放屁档案」</text>
+    </view>
+  </view>
+</view>

@@ -759,3 +759,121 @@ web/src/plugin/[插件名]/
 4. **优化用户体验**：关注页面加载速度、交互流畅性和错误处理
 5. **考虑扩展性**：设计时预留扩展接口，便于后续功能增强
 6. **重视安全性**：实现完善的权限控制和数据验证机制
+
+---
+
+## **放屁档案多端客户端**
+
+### **项目关系**
+
+| 目录 | 平台 | 技术栈 | 形态 | 后端插件 |
+|------|------|--------|------|----------|
+| `break-app/` | 微信 | Vue 3 + uni-app + Pinia | 完整小程序（多页面） | `server/plugin/fp_app` |
+| `break-xhs/` | 小红书 | 原生小组件（xhsml + Page） | 桌面小组件（单页打卡） | 同上，共用 API |
+
+两端共用 GVA 后端 `fp_app` 插件，接口前缀为 `/break/*`（业务）和 `/wxuser/*`（用户登录）。  
+请求头通过 `source-client` 区分来源：`miniapp`（微信）/ `xhs-widget`（小红书）。
+
+```
+break-app (微信小程序)  ──┐
+                          ├──> fp_app 插件 API ──> MySQL
+break-xhs (小红书小组件) ──┘
+```
+
+### **break-app 配置文件规划**
+
+```
+break-app/
+├── manifest.json          # 应用元信息、各端 AppID、编译设置
+├── pages.json             # 页面路由、导航栏、tabBar、分包
+├── uni.scss               # 全局 SCSS 变量
+├── vite.config.js         # Vite 构建（如存在）
+└── src/util/
+    ├── config.js          # ★ 环境 API 地址（development / production）
+    └── http.js            # HTTP 拦截器，读取 config，注入 source-client: miniapp
+```
+
+| 文件 | 职责 | 关键字段 |
+|------|------|----------|
+| `src/util/config.js` | API 基址 | `development.baseUrl`、`production.baseUrl` |
+| `src/util/http.js` | 请求封装 | 按 `process.env.NODE_ENV` 选环境；`x-token` 鉴权 |
+| `manifest.json` | 平台配置 | `mp-weixin.appid`、权限、`urlCheck` |
+| `pages.json` | 页面与导航 | `pages`、`tabBar`、`subPackages` |
+
+**环境切换**：uni-app 构建时由 `process.env.NODE_ENV` 自动选择 `config.development` 或 `config.production`。
+
+**当前生产 API**：`https://fangpi.mqcode.cn/api`
+
+### **break-xhs 配置文件规划**
+
+```
+break-xhs/
+├── project.config.json    # ★ 小红书 IDE 工程配置（appid、编译选项）
+├── app.json               # 页面注册、窗口样式、组件框架
+├── app.js                 # 全局入口（登录、globalData）
+├── app.css                # 全局样式
+├── .xhs-ide/settings.json # IDE 编辑器偏好（非运行时）
+├── .eslintrc.js           # ESLint 规则
+├── util/
+│   ├── config.js          # ★ 环境 API 地址 + currentEnv 切换
+│   └── http.js            # xhs.request 封装，注入 source-client: xhs-widget
+├── api/
+│   ├── user.js            # 登录：/wxuser/xhsQuickLogin、openidLogin
+│   └── fart.js            # 业务：/break/record、/break/today 等
+└── pages/index/
+    ├── index.xhsml        # 小组件模板
+    ├── index.js           # 页面逻辑
+    ├── index.json         # 页面配置
+    └── index.css          # 页面样式
+```
+
+| 文件 | 职责 | 关键字段 / 约定 |
+|------|------|----------------|
+| `util/config.js` | API 基址与环境 | `development`、`production`、`currentEnv`、`baseUrl` |
+| `util/http.js` | 网络层 | `xhs.request`；header `source-client: xhs-widget`；`x-token` |
+| `project.config.json` | 工程 | `appid`、`setting.urlCheck`、`libVersion` |
+| `app.json` | 应用 | `pages`、`window.navigationBarTitleText`（今日放屁） |
+| `api/user.js` | 登录 | `POST /wxuser/xhsQuickLogin`（后端已实现） |
+| `api/fart.js` | 打卡 | 与 `break-app/src/api/fart.js` 路径保持一致 |
+
+**环境切换**：原生小红书无 `process.env.NODE_ENV`，在 `util/config.js` 中维护 `currentEnv`：
+
+```javascript
+// util/config.js
+const currentEnv = 'production'; // 本地调试改为 'development'
+const baseUrl = config[currentEnv].baseUrl;
+```
+
+**与 break-app 对齐项**：
+
+| 配置项 | break-app | break-xhs |
+|--------|-----------|-----------|
+| API 基址 | `https://fangpi.mqcode.cn/api` | 同上 |
+| 鉴权头 | `x-token` | `x-token` |
+| 来源标识 | `source-client: miniapp` | `source-client: xhs-widget` |
+| 登录接口 | `/wxuser/wxQuickLogin` | `/wxuser/xhsQuickLogin` |
+| 打卡接口 | `/break/record` | `/break/record`（共用） |
+| Token 存储 | Pinia + `uni.getStorageSync` | `xhs.getStorageSync('token')` |
+
+### **后端 fp_app 相关配置（参考）**
+
+客户端 `baseUrl` 指向 GVA 服务根路径，插件路由挂载在：
+
+- `/break/*` — 放屁记录、统计、成就等（`server/plugin/fp_app/router/break.go`）
+- `/wxuser/*` — 微信/小红书用户登录（`server/plugin/fp_app/router/wx_user.go`）
+
+小红书登录接口：`POST /wxuser/xhsQuickLogin`，与微信 `wxQuickLogin` 共用同一套 JWT 中间件（`WxJWTAuth`）。
+
+### **新增 / 修改配置时的检查清单**
+
+1. **API 地址**：`break-app` 与 `break-xhs` 的 `baseUrl` 必须指向同一后端，仅 `source-client` 不同。
+2. **接口路径**：`break-xhs/api/*.js` 中的 `url` 与 `break-app/src/api/*.js` 保持一致，避免重复造路径。
+3. **小红书域名白名单**：在小红书开放平台配置 request 合法域名（与 `baseUrl` 主机名一致）。
+4. **微信域名白名单**：微信小程序后台配置 request 合法域名。
+5. **AppID**：`break-app/manifest.json` → `mp-weixin.appid`；`break-xhs/project.config.json` → `appid`，二者独立，不可混用。
+6. **勿提交密钥**：AppSecret、token 等只放服务端 `server/config.yaml` 或环境变量，不进前端仓库。
+7. **静态资源**：小组件内 CDN 图片 URL（如档案海报）建议后续抽到 `util/config.js` 的 `assets` 字段统一管理。
+
+### **break-xhs 专用规范文件**
+
+更细的小红书小组件开发约定见：`break-xhs/.cursor/rules/project_rules.md`（与 `break-app/.cursor/rules/project_rules.md` 并列）。
