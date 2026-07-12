@@ -2,10 +2,12 @@ package api
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/plugin/fp_app/model"
+	"github.com/flipped-aurora/gin-vue-admin/server/plugin/fp_app/model/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/plugin/fp_app/service"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -288,4 +290,118 @@ func (a *fartTogetherRecord) UpdateFartTogetherRecordSex(c *gin.Context) {
 	}
 
 	response.OkWithMessage("更新成功", c)
+}
+
+// GetFartTogetherRecordList 管理端分页获取邀请放屁记录
+// @Tags BreakApp
+// @Summary 管理端分页获取邀请放屁记录
+// @Security ApiKeyAuth
+// @Accept application/json
+// @Produce application/json
+// @Param data body request.FartTogetherRecordSearch true "分页获取邀请放屁记录"
+// @Success 200 {object} response.Response{data=object,msg=string} "获取成功"
+// @Router /break/fartTogetherRecord/list [post]
+func (a *fartTogetherRecord) GetFartTogetherRecordList(c *gin.Context) {
+	var pageInfo request.FartTogetherRecordSearch
+	if err := c.ShouldBindJSON(&pageInfo); err != nil {
+		response.FailWithMessage("参数错误: "+err.Error(), c)
+		return
+	}
+
+	list, total, summary, err := service.Service.FartTogetherRecord.GetFartTogetherRecordList(c.Request.Context(), &pageInfo)
+	if err != nil {
+		global.GVA_LOG.Error("获取邀请放屁记录列表失败", zap.Error(err))
+		response.FailWithMessage("获取失败: "+err.Error(), c)
+		return
+	}
+
+	response.OkWithDetailed(gin.H{
+		"list":     list,
+		"total":    total,
+		"page":     pageInfo.Page,
+		"pageSize": pageInfo.PageSize,
+		"summary":  summary,
+	}, "获取成功", c)
+}
+
+// GetFartTogetherRecord 管理端根据ID获取邀请放屁记录
+// @Tags BreakApp
+// @Summary 管理端根据ID获取邀请放屁记录
+// @Security ApiKeyAuth
+// @Accept application/json
+// @Produce application/json
+// @Param id path uint true "记录ID"
+// @Success 200 {object} response.Response{data=service.FartTogetherRecordAdminItem,msg=string} "获取成功"
+// @Router /break/fartTogetherRecord/{id} [get]
+func (a *fartTogetherRecord) GetFartTogetherRecord(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+
+	result, err := service.Service.FartTogetherRecord.GetFartTogetherRecord(c.Request.Context(), uint(id))
+	if err != nil {
+		global.GVA_LOG.Error("获取邀请放屁记录失败", zap.Error(err))
+		response.FailWithMessage("获取失败: "+err.Error(), c)
+		return
+	}
+
+	response.OkWithDetailed(result, "获取成功", c)
+}
+
+// DeleteFartTogetherRecord 管理端删除邀请放屁记录
+// @Tags BreakApp
+// @Summary 管理端删除邀请放屁记录
+// @Security ApiKeyAuth
+// @Accept application/json
+// @Produce application/json
+// @Param id path uint true "记录ID"
+// @Success 200 {object} response.Response{msg=string} "删除成功"
+// @Router /break/fartTogetherRecord/{id} [delete]
+func (a *fartTogetherRecord) DeleteFartTogetherRecord(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+
+	if err = service.Service.FartTogetherRecord.DeleteFartTogetherRecord(c.Request.Context(), uint(id)); err != nil {
+		global.GVA_LOG.Error("删除邀请放屁记录失败", zap.Error(err))
+		response.FailWithMessage("删除失败: "+err.Error(), c)
+		return
+	}
+
+	response.OkWithMessage("删除成功", c)
+}
+
+// DeleteFartTogetherRecordByIds 管理端批量删除邀请放屁记录
+// @Tags BreakApp
+// @Summary 管理端批量删除邀请放屁记录
+// @Security ApiKeyAuth
+// @Accept application/json
+// @Produce application/json
+// @Param data body request.IdsReq true "记录ID列表"
+// @Success 200 {object} response.Response{msg=string} "删除成功"
+// @Router /break/fartTogetherRecord/deleteByIds [delete]
+func (a *fartTogetherRecord) DeleteFartTogetherRecordByIds(c *gin.Context) {
+	var req struct {
+		IDs []uint `json:"ids"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.FailWithMessage("参数错误: "+err.Error(), c)
+		return
+	}
+	if len(req.IDs) == 0 {
+		response.FailWithMessage("请选择要删除的记录", c)
+		return
+	}
+
+	if err := service.Service.FartTogetherRecord.DeleteFartTogetherRecordByIds(c.Request.Context(), req.IDs); err != nil {
+		global.GVA_LOG.Error("批量删除邀请放屁记录失败", zap.Error(err))
+		response.FailWithMessage("删除失败: "+err.Error(), c)
+		return
+	}
+
+	response.OkWithMessage("删除成功", c)
 }

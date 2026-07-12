@@ -73,6 +73,24 @@ func Menu(ctx context.Context) {
 			Sort:      4,
 			Meta:      model.Meta{Title: "放屁音频库", Icon: "video-play"},
 		},
+		// 子菜单5：放屁记录
+		{
+			Path:      "fartRecord",
+			Name:      "fartRecord",
+			Hidden:    false,
+			Component: "plugin/fp_app/view/fart_record.vue",
+			Sort:      5,
+			Meta:      model.Meta{Title: "放屁记录", Icon: "list"},
+		},
+		// 子菜单6：邀请放屁
+		{
+			Path:      "fartTogetherRecord",
+			Name:      "fartTogetherRecord",
+			Hidden:    false,
+			Component: "plugin/fp_app/view/fart_together_record.vue",
+			Sort:      6,
+			Meta:      model.Meta{Title: "邀请放屁", Icon: "connection"},
+		},
 	}
 
 	// 逐个检查并创建子菜单

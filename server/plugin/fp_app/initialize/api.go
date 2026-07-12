@@ -24,6 +24,16 @@ func Api(ctx context.Context) {
 		{Path: "/break/audioLibrary/:id", Description: "根据ID获取音频库", ApiGroup: "放屁音频库", Method: "GET"},
 		{Path: "/break/audioLibrary/:id", Description: "删除音频库", ApiGroup: "放屁音频库", Method: "DELETE"},
 		{Path: "/break/audioLibrary/feed", Description: "屁趣音效音频库", ApiGroup: "放屁音频库", Method: "GET"},
+		// 放屁记录管理相关API
+		{Path: "/break/fartRecord/list", Description: "分页获取放屁记录", ApiGroup: "放屁记录", Method: "POST"},
+		{Path: "/break/fartRecord/:id", Description: "根据ID获取放屁记录", ApiGroup: "放屁记录", Method: "GET"},
+		{Path: "/break/fartRecord/:id", Description: "删除放屁记录", ApiGroup: "放屁记录", Method: "DELETE"},
+		{Path: "/break/fartRecord/deleteByIds", Description: "批量删除放屁记录", ApiGroup: "放屁记录", Method: "DELETE"},
+		// 邀请放屁记录管理相关API
+		{Path: "/break/fartTogetherRecord/list", Description: "分页获取邀请放屁记录", ApiGroup: "邀请放屁", Method: "POST"},
+		{Path: "/break/fartTogetherRecord/:id", Description: "根据ID获取邀请放屁记录", ApiGroup: "邀请放屁", Method: "GET"},
+		{Path: "/break/fartTogetherRecord/:id", Description: "删除邀请放屁记录", ApiGroup: "邀请放屁", Method: "DELETE"},
+		{Path: "/break/fartTogetherRecord/deleteByIds", Description: "批量删除邀请放屁记录", ApiGroup: "邀请放屁", Method: "DELETE"},
 	}
 	utils.RegisterApis(entities...)
 }

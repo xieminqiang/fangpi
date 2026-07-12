@@ -9,6 +9,7 @@ import (
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/plugin/fp_app/model"
+	fpReq "github.com/flipped-aurora/gin-vue-admin/server/plugin/fp_app/model/request"
 	"gorm.io/gorm"
 )
 
@@ -635,4 +636,135 @@ type LastRecordInfo struct {
 	FartTime string `json:"fartTime"`
 	FartType string `json:"fartType"`
 	Mood     string `json:"mood"`
+}
+
+// FartRecordAdminItem 管理端放屁记录列表项
+type FartRecordAdminItem struct {
+	model.BreakFartRecord
+	UserNickname string `json:"userNickname"`
+}
+
+// FartRecordSummary 放屁记录统计摘要
+type FartRecordSummary struct {
+	TotalCount   int64 `json:"totalCount"`
+	TodayCount   int64 `json:"todayCount"`
+	LoudCount    int64 `json:"loudCount"`
+	SoftCount    int64 `json:"softCount"`
+	SilentCount  int64 `json:"silentCount"`
+}
+
+// GetFartRecordList 管理端分页获取放屁记录
+func (s *fartRecord) GetFartRecordList(ctx context.Context, pageInfo *fpReq.FartRecordSearch) (list []FartRecordAdminItem, total int64, summary FartRecordSummary, err error) {
+	limit := pageInfo.PageSize
+	offset := pageInfo.PageSize * (pageInfo.Page - 1)
+	db := global.GVA_DB.Model(&model.BreakFartRecord{})
+
+	if pageInfo.UserId != nil && *pageInfo.UserId > 0 {
+		db = db.Where("user_id = ?", *pageInfo.UserId)
+	}
+	if pageInfo.FartType != "" {
+		db = db.Where("fart_type = ?", pageInfo.FartType)
+	}
+	if pageInfo.SmellLevel != nil {
+		db = db.Where("smell_level = ?", *pageInfo.SmellLevel)
+	}
+	if pageInfo.Mood != "" {
+		db = db.Where("mood = ?", pageInfo.Mood)
+	}
+	if pageInfo.VolumeLevel != "" {
+		db = db.Where("volume_level = ?", pageInfo.VolumeLevel)
+	}
+	if pageInfo.TimePeriod != "" {
+		db = db.Where("time_period = ?", pageInfo.TimePeriod)
+	}
+	if len(pageInfo.FartDateRange) == 2 {
+		db = db.Where("fart_date >= ? AND fart_date <= ?", pageInfo.FartDateRange[0], pageInfo.FartDateRange[1])
+	}
+	if len(pageInfo.CreatedAtRange) == 2 {
+		db = db.Where("created_at BETWEEN ? AND ?", pageInfo.CreatedAtRange[0], pageInfo.CreatedAtRange[1])
+	}
+	switch pageInfo.NoteStatus {
+	case "with":
+		db = db.Where("note IS NOT NULL AND note != ''")
+	case "without":
+		db = db.Where("note IS NULL OR note = ''")
+	}
+
+	if err = db.Count(&total).Error; err != nil {
+		return
+	}
+
+	var records []model.BreakFartRecord
+	err = db.Order("fart_date DESC, fart_time DESC").Limit(limit).Offset(offset).Find(&records).Error
+	if err != nil {
+		return
+	}
+
+	userIds := make([]uint, 0, len(records))
+	for _, record := range records {
+		userIds = append(userIds, record.UserId)
+	}
+	nicknameMap := s.getUserNicknameMap(userIds)
+
+	list = make([]FartRecordAdminItem, 0, len(records))
+	for _, record := range records {
+		list = append(list, FartRecordAdminItem{
+			BreakFartRecord: record,
+			UserNickname:    nicknameMap[record.UserId],
+		})
+	}
+
+	summary, _ = s.getFartRecordSummary(ctx)
+	return
+}
+
+func (s *fartRecord) getUserNicknameMap(userIds []uint) map[uint]string {
+	result := make(map[uint]string)
+	if len(userIds) == 0 {
+		return result
+	}
+
+	var users []model.WxUser
+	global.GVA_DB.Select("id", "nickname").Where("id IN ?", userIds).Find(&users)
+	for _, user := range users {
+		if user.Nickname != nil {
+			result[user.ID] = *user.Nickname
+		}
+	}
+	return result
+}
+
+func (s *fartRecord) getFartRecordSummary(ctx context.Context) (summary FartRecordSummary, err error) {
+	today := nowCST().Format("2006-01-02")
+	global.GVA_DB.Model(&model.BreakFartRecord{}).Count(&summary.TotalCount)
+	global.GVA_DB.Model(&model.BreakFartRecord{}).Where("fart_date = ?", today).Count(&summary.TodayCount)
+	global.GVA_DB.Model(&model.BreakFartRecord{}).Where("fart_type = ?", "loud").Count(&summary.LoudCount)
+	global.GVA_DB.Model(&model.BreakFartRecord{}).Where("fart_type = ?", "soft").Count(&summary.SoftCount)
+	global.GVA_DB.Model(&model.BreakFartRecord{}).Where("fart_type = ?", "silent").Count(&summary.SilentCount)
+	return
+}
+
+// GetFartRecord 管理端根据ID获取放屁记录
+func (s *fartRecord) GetFartRecord(ctx context.Context, id uint) (*FartRecordAdminItem, error) {
+	var record model.BreakFartRecord
+	if err := global.GVA_DB.Where("id = ?", id).First(&record).Error; err != nil {
+		return nil, err
+	}
+
+	item := &FartRecordAdminItem{
+		BreakFartRecord: record,
+	}
+	nicknameMap := s.getUserNicknameMap([]uint{record.UserId})
+	item.UserNickname = nicknameMap[record.UserId]
+	return item, nil
+}
+
+// DeleteFartRecord 管理端删除放屁记录
+func (s *fartRecord) DeleteFartRecord(ctx context.Context, id uint) error {
+	return global.GVA_DB.Delete(&model.BreakFartRecord{}, id).Error
+}
+
+// DeleteFartRecordByIds 管理端批量删除放屁记录
+func (s *fartRecord) DeleteFartRecordByIds(ctx context.Context, ids []uint) error {
+	return global.GVA_DB.Delete(&model.BreakFartRecord{}, ids).Error
 }

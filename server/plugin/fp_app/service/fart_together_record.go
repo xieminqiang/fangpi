@@ -7,6 +7,7 @@ import (
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/plugin/fp_app/model"
+	fpReq "github.com/flipped-aurora/gin-vue-admin/server/plugin/fp_app/model/request"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -303,4 +304,149 @@ func (s *fartTogetherRecord) UpdateFartTogetherRecordSex(ctx context.Context, re
 		zap.Any("updateData", updateData))
 
 	return nil
+}
+
+// FartTogetherRecordAdminItem 管理端邀请放屁记录列表项
+type FartTogetherRecordAdminItem struct {
+	model.BreakFartTogetherRecord
+	InviterNickname string `json:"inviterNickname"`
+	InviteeNickname string `json:"inviteeNickname"`
+}
+
+// FartTogetherRecordSummary 邀请放屁统计摘要
+type FartTogetherRecordSummary struct {
+	TotalCount    int64 `json:"totalCount"`
+	TodayCount    int64 `json:"todayCount"`
+	PendingCount  int64 `json:"pendingCount"`
+	CompletedCount int64 `json:"completedCount"`
+	MaleInvites   int64 `json:"maleInvites"`
+	FemaleInvites int64 `json:"femaleInvites"`
+}
+
+const (
+	fartTogetherPendingCondition   = "(invitee_id = 0 OR IFNULL(JSON_UNQUOTE(JSON_EXTRACT(invitee_record_info, '$.fartType')), '') = '')"
+	fartTogetherCompletedCondition = "(invitee_id > 0 AND IFNULL(JSON_UNQUOTE(JSON_EXTRACT(invitee_record_info, '$.fartType')), '') != '')"
+)
+
+func (s *fartTogetherRecord) applyTogetherStatusFilter(db *gorm.DB, status string) *gorm.DB {
+	switch status {
+	case "pending":
+		return db.Where(fartTogetherPendingCondition)
+	case "completed":
+		return db.Where(fartTogetherCompletedCondition)
+	default:
+		return db
+	}
+}
+
+// GetFartTogetherRecordList 管理端分页获取邀请放屁记录
+func (s *fartTogetherRecord) GetFartTogetherRecordList(ctx context.Context, pageInfo *fpReq.FartTogetherRecordSearch) (list []FartTogetherRecordAdminItem, total int64, summary FartTogetherRecordSummary, err error) {
+	limit := pageInfo.PageSize
+	offset := pageInfo.PageSize * (pageInfo.Page - 1)
+	db := global.GVA_DB.Model(&model.BreakFartTogetherRecord{})
+
+	if pageInfo.InviterId != nil && *pageInfo.InviterId > 0 {
+		db = db.Where("inviter_id = ?", *pageInfo.InviterId)
+	}
+	if pageInfo.InviteeId != nil && *pageInfo.InviteeId > 0 {
+		db = db.Where("invitee_id = ?", *pageInfo.InviteeId)
+	}
+	if len(pageInfo.CreatedAtRange) == 2 {
+		db = db.Where("created_at BETWEEN ? AND ?", pageInfo.CreatedAtRange[0], pageInfo.CreatedAtRange[1])
+	}
+	db = s.applyTogetherStatusFilter(db, pageInfo.Status)
+
+	if err = db.Count(&total).Error; err != nil {
+		return
+	}
+
+	var records []model.BreakFartTogetherRecord
+	err = db.Order("created_at DESC").Limit(limit).Offset(offset).Find(&records).Error
+	if err != nil {
+		return
+	}
+
+	userIds := make([]uint, 0, len(records)*2)
+	for _, record := range records {
+		userIds = append(userIds, record.InviterId, record.InviteeId)
+	}
+	nicknameMap := s.getTogetherUserNicknameMap(userIds)
+
+	list = make([]FartTogetherRecordAdminItem, 0, len(records))
+	for _, record := range records {
+		list = append(list, FartTogetherRecordAdminItem{
+			BreakFartTogetherRecord: record,
+			InviterNickname:         nicknameMap[record.InviterId],
+			InviteeNickname:         nicknameMap[record.InviteeId],
+		})
+	}
+
+	summary, _ = s.getFartTogetherRecordSummary(ctx)
+	return
+}
+
+func (s *fartTogetherRecord) getTogetherUserNicknameMap(userIds []uint) map[uint]string {
+	result := make(map[uint]string)
+	if len(userIds) == 0 {
+		return result
+	}
+
+	var users []model.WxUser
+	global.GVA_DB.Select("id", "nickname").Where("id IN ?", userIds).Find(&users)
+	for _, user := range users {
+		if user.Nickname != nil {
+			result[user.ID] = *user.Nickname
+		}
+	}
+	return result
+}
+
+func (s *fartTogetherRecord) getFartTogetherRecordSummary(ctx context.Context) (summary FartTogetherRecordSummary, err error) {
+	now := time.Now()
+	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	tomorrowStart := todayStart.AddDate(0, 0, 1)
+
+	global.GVA_DB.Model(&model.BreakFartTogetherRecord{}).Count(&summary.TotalCount)
+	global.GVA_DB.Model(&model.BreakFartTogetherRecord{}).
+		Where("created_at >= ? AND created_at < ?", todayStart, tomorrowStart).
+		Count(&summary.TodayCount)
+	global.GVA_DB.Model(&model.BreakFartTogetherRecord{}).
+		Where(fartTogetherPendingCondition).
+		Count(&summary.PendingCount)
+	global.GVA_DB.Model(&model.BreakFartTogetherRecord{}).
+		Where(fartTogetherCompletedCondition).
+		Count(&summary.CompletedCount)
+	global.GVA_DB.Model(&model.BreakFartTogetherRecord{}).
+		Where("inviter_sex = ? OR invitee_sex = ?", 1, 1).
+		Count(&summary.MaleInvites)
+	global.GVA_DB.Model(&model.BreakFartTogetherRecord{}).
+		Where("inviter_sex = ? OR invitee_sex = ?", 2, 2).
+		Count(&summary.FemaleInvites)
+	return
+}
+
+// GetFartTogetherRecord 管理端根据ID获取邀请放屁记录
+func (s *fartTogetherRecord) GetFartTogetherRecord(ctx context.Context, id uint) (*FartTogetherRecordAdminItem, error) {
+	var record model.BreakFartTogetherRecord
+	if err := global.GVA_DB.Where("id = ?", id).First(&record).Error; err != nil {
+		return nil, err
+	}
+
+	item := &FartTogetherRecordAdminItem{
+		BreakFartTogetherRecord: record,
+	}
+	nicknameMap := s.getTogetherUserNicknameMap([]uint{record.InviterId, record.InviteeId})
+	item.InviterNickname = nicknameMap[record.InviterId]
+	item.InviteeNickname = nicknameMap[record.InviteeId]
+	return item, nil
+}
+
+// DeleteFartTogetherRecord 管理端删除邀请放屁记录
+func (s *fartTogetherRecord) DeleteFartTogetherRecord(ctx context.Context, id uint) error {
+	return global.GVA_DB.Delete(&model.BreakFartTogetherRecord{}, id).Error
+}
+
+// DeleteFartTogetherRecordByIds 管理端批量删除邀请放屁记录
+func (s *fartTogetherRecord) DeleteFartTogetherRecordByIds(ctx context.Context, ids []uint) error {
+	return global.GVA_DB.Delete(&model.BreakFartTogetherRecord{}, ids).Error
 }

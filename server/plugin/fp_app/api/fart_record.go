@@ -1,6 +1,8 @@
 package api
 
 import (
+	"strconv"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
@@ -208,4 +210,118 @@ func getWxUserIdFromToken(c *gin.Context) uint {
 	}
 
 	return 0
+}
+
+// GetFartRecordList 管理端分页获取放屁记录
+// @Tags BreakApp
+// @Summary 管理端分页获取放屁记录
+// @Security ApiKeyAuth
+// @Accept application/json
+// @Produce application/json
+// @Param data body fpReq.FartRecordSearch true "分页获取放屁记录"
+// @Success 200 {object} response.Response{data=object,msg=string} "获取成功"
+// @Router /break/fartRecord/list [post]
+func (a *fartRecord) GetFartRecordList(c *gin.Context) {
+	var pageInfo fpReq.FartRecordSearch
+	if err := c.ShouldBindJSON(&pageInfo); err != nil {
+		response.FailWithMessage("参数错误: "+err.Error(), c)
+		return
+	}
+
+	list, total, summary, err := service.Service.FartRecord.GetFartRecordList(c.Request.Context(), &pageInfo)
+	if err != nil {
+		global.GVA_LOG.Error("获取放屁记录列表失败", zap.Error(err))
+		response.FailWithMessage("获取失败: "+err.Error(), c)
+		return
+	}
+
+	response.OkWithDetailed(gin.H{
+		"list":     list,
+		"total":    total,
+		"page":     pageInfo.Page,
+		"pageSize": pageInfo.PageSize,
+		"summary":  summary,
+	}, "获取成功", c)
+}
+
+// GetFartRecord 管理端根据ID获取放屁记录
+// @Tags BreakApp
+// @Summary 管理端根据ID获取放屁记录
+// @Security ApiKeyAuth
+// @Accept application/json
+// @Produce application/json
+// @Param id path uint true "记录ID"
+// @Success 200 {object} response.Response{data=service.FartRecordAdminItem,msg=string} "获取成功"
+// @Router /break/fartRecord/{id} [get]
+func (a *fartRecord) GetFartRecord(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+
+	result, err := service.Service.FartRecord.GetFartRecord(c.Request.Context(), uint(id))
+	if err != nil {
+		global.GVA_LOG.Error("获取放屁记录失败", zap.Error(err))
+		response.FailWithMessage("获取失败: "+err.Error(), c)
+		return
+	}
+
+	response.OkWithDetailed(result, "获取成功", c)
+}
+
+// DeleteFartRecord 管理端删除放屁记录
+// @Tags BreakApp
+// @Summary 管理端删除放屁记录
+// @Security ApiKeyAuth
+// @Accept application/json
+// @Produce application/json
+// @Param id path uint true "记录ID"
+// @Success 200 {object} response.Response{msg=string} "删除成功"
+// @Router /break/fartRecord/{id} [delete]
+func (a *fartRecord) DeleteFartRecord(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+
+	if err = service.Service.FartRecord.DeleteFartRecord(c.Request.Context(), uint(id)); err != nil {
+		global.GVA_LOG.Error("删除放屁记录失败", zap.Error(err))
+		response.FailWithMessage("删除失败: "+err.Error(), c)
+		return
+	}
+
+	response.OkWithMessage("删除成功", c)
+}
+
+// DeleteFartRecordByIds 管理端批量删除放屁记录
+// @Tags BreakApp
+// @Summary 管理端批量删除放屁记录
+// @Security ApiKeyAuth
+// @Accept application/json
+// @Produce application/json
+// @Param data body request.IdsReq true "记录ID列表"
+// @Success 200 {object} response.Response{msg=string} "删除成功"
+// @Router /break/fartRecord/deleteByIds [delete]
+func (a *fartRecord) DeleteFartRecordByIds(c *gin.Context) {
+	var req struct {
+		IDs []uint `json:"ids"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.FailWithMessage("参数错误: "+err.Error(), c)
+		return
+	}
+	if len(req.IDs) == 0 {
+		response.FailWithMessage("请选择要删除的记录", c)
+		return
+	}
+
+	if err := service.Service.FartRecord.DeleteFartRecordByIds(c.Request.Context(), req.IDs); err != nil {
+		global.GVA_LOG.Error("批量删除放屁记录失败", zap.Error(err))
+		response.FailWithMessage("删除失败: "+err.Error(), c)
+		return
+	}
+
+	response.OkWithMessage("删除成功", c)
 }

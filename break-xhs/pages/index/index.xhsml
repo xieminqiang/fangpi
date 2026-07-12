@@ -1,0 +1,250 @@
+<!--
+  放屁档案 · 小红书小组件（单页）
+  约束：仅 1 个 page；无 tabBar；navigationStyle: custom
+  结构：Tab 面板(home/me) + 底部 Dock + 浮层
+-->
+<view class="widget">
+  <!-- ===== 首页：打卡 ===== -->
+  <scroll-view
+    class="widget-panel widget-panel--home"
+    hidden="{{activeTab !== 'home'}}"
+    scroll-y
+  >
+    <view class="home-archive" bindtap="openArchivePopup">
+      <view class="home-archive__inner">
+        <text class="home-archive__icon">📂</text>
+        <text class="home-archive__text">进入屁味档案馆</text>
+        <text class="home-archive__spark">✨</text>
+      </view>
+    </view>
+
+    <view class="home-note">
+      <input
+        class="home-note__input"
+        placeholder="碎碎念备忘心情、和谁、在哪儿…"
+        value="{{inputText}}"
+        bindinput="onInputChange"
+      />
+    </view>
+
+    <view class="home-form">
+      <view class="form-block">
+        <text class="form-block__label">💨 屁屁类型</text>
+        <view class="option-row">
+          <view
+            xhs:for="{{fartTypes}}"
+            xhs:key="value"
+            class="option-chip {{selectedFartType === item.value ? 'option-chip--on' : ''}}"
+            bindtap="onSelectOption"
+            data-field="fartType"
+            data-value="{{item.value}}"
+          >
+            <text class="option-chip__emoji">{{item.emoji}}</text>
+            <text class="option-chip__text">{{item.label}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="form-block">
+        <text class="form-block__label">🌸 气味等级</text>
+        <view class="option-row">
+          <view
+            xhs:for="{{smellLevels}}"
+            xhs:key="value"
+            class="option-chip {{selectedSmellLevel === item.value ? 'option-chip--on' : ''}}"
+            bindtap="onSelectOption"
+            data-field="smellLevel"
+            data-value="{{item.value}}"
+          >
+            <text class="option-chip__emoji">{{item.emoji}}</text>
+            <text class="option-chip__text">{{item.label}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="form-block">
+        <text class="form-block__label">😊 当前心情</text>
+        <view class="option-row">
+          <view
+            xhs:for="{{moods}}"
+            xhs:key="value"
+            class="option-chip {{selectedMood === item.value ? 'option-chip--on' : ''}}"
+            bindtap="onSelectOption"
+            data-field="mood"
+            data-value="{{item.value}}"
+          >
+            <text class="option-chip__emoji">{{item.emoji}}</text>
+            <text class="option-chip__text">{{item.label}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- ===== 我的：个人中心 ===== -->
+  <scroll-view
+    class="widget-panel widget-panel--me"
+    hidden="{{activeTab !== 'me'}}"
+    scroll-y
+  >
+    <view class="me-summary">
+      <view class="me-summary__top">
+        <image class="me-summary__avatar" src="{{avatarUrl}}" mode="aspectFill" />
+        <view class="me-summary__info">
+          <text class="me-summary__name">{{nickname}}</text>
+          <view class="me-summary__level" xhs:if="{{levelName}}">
+            <text class="me-summary__level-text">🏅 {{levelName}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="me-summary__stats">
+        <view class="me-summary__stat">
+          <text class="me-summary__stat-val">{{todayCount}}</text>
+          <text class="me-summary__stat-lbl">今日</text>
+        </view>
+        <view class="me-summary__divider"></view>
+        <view class="me-summary__stat">
+          <text class="me-summary__stat-val">{{totalFarts}}</text>
+          <text class="me-summary__stat-lbl">累计</text>
+        </view>
+        <view class="me-summary__divider"></view>
+        <view class="me-summary__stat">
+          <text class="me-summary__stat-val">{{experience}}</text>
+          <text class="me-summary__stat-lbl">经验</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="me-entry" bindtap="toggleStatsPopup">
+      <text class="me-entry__icon">📊</text>
+      <view class="me-entry__copy">
+        <text class="me-entry__title">今日数据</text>
+        <text class="me-entry__sub">已记 {{todayCount}} 条 · {{lastFartTime}}</text>
+      </view>
+      <text class="me-entry__arrow">›</text>
+    </view>
+
+    <view class="me-menu">
+      <view class="me-menu__item" bindtap="openArchivePopup">
+        <text class="me-menu__icon">📂</text>
+        <view class="me-menu__copy">
+          <text class="me-menu__title">屁味档案馆</text>
+          <text class="me-menu__sub">完整版请去小程序「放屁档案」</text>
+        </view>
+        <text class="me-menu__arrow">›</text>
+      </view>
+    </view>
+
+    <view class="me-footer">
+      <text class="me-footer__text">放屁档案 · 温柔记录每一个小瞬间 ✨</text>
+    </view>
+  </scroll-view>
+
+  <!-- ===== 底部 Dock：打卡按钮 + Tab 切换 ===== -->
+  <view class="widget-dock">
+    <view
+      class="widget-dock__submit"
+      hidden="{{activeTab !== 'home'}}"
+      style="bottom: {{submitBottom}}px;"
+    >
+      <button class="submit-btn {{isSubmitting ? 'submit-btn--busy' : ''}}" bindtap="confirmFart">
+        <text class="submit-btn__emoji">💨</text>
+        <text class="submit-btn__text">{{isSubmitting ? '记录中...' : '记一下'}}</text>
+      </button>
+    </view>
+
+    <view class="widget-dock__tabbar">
+      <view
+        class="tab-btn {{activeTab === 'home' ? 'tab-btn--on' : ''}}"
+        bindtap="switchTab"
+        data-tab="home"
+      >
+        <text class="tab-btn__icon">{{activeTab === 'home' ? '🏠' : '🏡'}}</text>
+        <text class="tab-btn__text">首页</text>
+      </view>
+      <view
+        class="tab-btn {{activeTab === 'me' ? 'tab-btn--on' : ''}}"
+        bindtap="switchTab"
+        data-tab="me"
+      >
+        <text class="tab-btn__icon">{{activeTab === 'me' ? '👤' : '👥'}}</text>
+        <text class="tab-btn__text">我的</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 浮层：今日记录抽屉 ===== -->
+  <view class="overlay overlay--sheet" xhs:if="{{showStatsPopup}}" bindtap="toggleStatsPopup">
+    <view class="sheet" catchtap="preventBubble">
+      <view class="sheet__handle"></view>
+      <view class="sheet__head">
+        <view class="sheet__head-copy">
+          <text class="sheet__title">今日记录</text>
+          <text class="sheet__caption">温柔记录每一个小瞬间 ✨</text>
+        </view>
+        <view class="sheet__close" catchtap="toggleStatsPopup">✕</view>
+      </view>
+
+      <view class="sheet__summary">
+        <view class="sheet__summary-card">
+          <text class="sheet__summary-val">{{todayCount}}</text>
+          <text class="sheet__summary-lbl">今日打卡</text>
+        </view>
+        <view class="sheet__summary-card">
+          <text class="sheet__summary-emoji">{{mostHappyMood || '😊'}}</text>
+          <text class="sheet__summary-lbl">今日心情</text>
+        </view>
+      </view>
+
+      <view class="sheet__list-bar">
+        <text class="sheet__list-title">记录明细</text>
+        <text class="sheet__list-count">共 {{todayRecords.length}} 条</text>
+      </view>
+
+      <scroll-view scroll-y class="sheet__scroll">
+        <view xhs:if="{{!todayRecords.length}}" class="sheet__empty">
+          <text class="sheet__empty-icon">📒</text>
+          <text class="sheet__empty-text">今天还没有记录</text>
+          <text class="sheet__empty-hint">去记下第一条吧～</text>
+        </view>
+        <view xhs:for="{{todayRecords}}" xhs:key="id" class="record-item">
+          <view class="record-item__time-col">
+            <text class="record-item__time">{{item.timeStr}}</text>
+            <text xhs:if="{{item.period}}" class="record-item__period">{{item.period}}</text>
+          </view>
+          <view class="record-item__body">
+            <view class="record-item__tags">
+              <view class="tag">
+                <text class="tag__emoji">{{item.typeEmoji}}</text>
+                <text class="tag__text">{{item.typeLabel}}</text>
+              </view>
+              <view class="tag tag--soft">
+                <text class="tag__emoji">{{item.smellEmoji}}</text>
+                <text class="tag__text">{{item.smellLabel}}</text>
+              </view>
+              <view class="tag tag--mood">
+                <text class="tag__emoji">{{item.moodEmoji}}</text>
+                <text class="tag__text">{{item.moodLabel}}</text>
+              </view>
+            </view>
+            <text xhs:if="{{item.note}}" class="record-item__note">{{item.note}}</text>
+          </view>
+        </view>
+        <view class="sheet__scroll-pad"></view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- ===== 浮层：档案馆指引 ===== -->
+  <view class="overlay overlay--dialog" xhs:if="{{showArchivePopup}}" bindtap="closeArchivePopup">
+    <view class="dialog" catchtap="preventBubble">
+      <view class="dialog__close" catchtap="closeArchivePopup">✕</view>
+      <text class="dialog__title">更加丰富的放屁档案</text>
+      <text class="dialog__desc">已收录于VX小程序「放屁档案」</text>
+      <view class="dialog__img-wrap">
+        <image class="dialog__img" src="{{archivePosterUrl}}" mode="widthFix" />
+      </view>
+      <text class="dialog__foot">如需完整体验，可去VX搜索「放屁档案」</text>
+    </view>
+  </view>
+</view>

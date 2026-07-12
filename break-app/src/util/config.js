@@ -1,6 +1,6 @@
 const config = {
     development: {//https://dev.anzhuhui.com/fresh/v1  http://192.168.1.11:9902/v1
-         baseUrl: 'https://fangpi.mqcode.cn/api'
+         baseUrl: 'http://192.168.1.11:8805'
     },
     production: {
          baseUrl: 'https://fangpi.mqcode.cn/api'

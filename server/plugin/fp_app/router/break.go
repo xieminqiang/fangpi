@@ -104,5 +104,17 @@ func (r *breakRouter) Init(public *gin.RouterGroup, private *gin.RouterGroup) {
 		group.DELETE("nicknameTemplate/deleteByIds", apiNicknameTemplate.DeleteNicknameTemplateByIds) // 批量删除昵称模板
 		group.PUT("nicknameTemplate", apiNicknameTemplate.UpdateNicknameTemplate)                     // 更新昵称模板
 		group.GET("nicknameTemplate/list", apiNicknameTemplate.GetNicknameTemplateList)               // 分页获取昵称模板列表
+
+		// 放屁记录管理相关
+		group.POST("fartRecord/list", apiFartRecord.GetFartRecordList)              // 分页获取放屁记录
+		group.GET("fartRecord/:id", apiFartRecord.GetFartRecord)                    // 根据ID获取放屁记录
+		group.DELETE("fartRecord/:id", apiFartRecord.DeleteFartRecord)              // 删除放屁记录
+		group.DELETE("fartRecord/deleteByIds", apiFartRecord.DeleteFartRecordByIds) // 批量删除放屁记录
+
+		// 邀请放屁记录管理相关
+		group.POST("fartTogetherRecord/list", apiFartTogetherRecord.GetFartTogetherRecordList)              // 分页获取邀请放屁记录
+		group.GET("fartTogetherRecord/:id", apiFartTogetherRecord.GetFartTogetherRecord)                    // 根据ID获取邀请放屁记录
+		group.DELETE("fartTogetherRecord/:id", apiFartTogetherRecord.DeleteFartTogetherRecord)              // 删除邀请放屁记录
+		group.DELETE("fartTogetherRecord/deleteByIds", apiFartTogetherRecord.DeleteFartTogetherRecordByIds) // 批量删除邀请放屁记录
 	}
 }
