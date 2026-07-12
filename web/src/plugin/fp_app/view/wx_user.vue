@@ -33,6 +33,13 @@
             <el-form-item label="手机号" prop="phone">
   <el-input v-model="searchInfo.phone" placeholder="输入手机号" />
 </el-form-item>
+
+            <el-form-item label="用户类型" prop="userType">
+  <el-select v-model="searchInfo.userType" clearable filterable placeholder="请选择用户类型" @clear="()=>{searchInfo.userType=undefined}">
+    <el-option label="微信" :value="1" />
+    <el-option label="小红书" :value="2" />
+  </el-select>
+</el-form-item>
            
             <el-form-item label="等级" prop="level">
   <el-select v-model="searchInfo.level" clearable filterable placeholder="请选择等级" @clear="()=>{searchInfo.level=undefined}">
@@ -461,14 +468,16 @@ const getTodayDateRange = () => {
 
 const searchInfo = ref({
   createdAtRange: getTodayDateRange(),
-  openid: ''
+  openid: '',
+  userType: undefined
 })
 
 // 重置
 const onReset = () => {
   searchInfo.value = {
     createdAtRange: getTodayDateRange(),
-    openid: ''
+    openid: '',
+    userType: undefined
   }
   getTableData()
 }

@@ -328,6 +328,9 @@ func (s *wxuser) GetWxUserInfoList(ctx context.Context, info request.WxUserSearc
 	if info.Level != nil {
 		db = db.Where("level = ?", *info.Level)
 	}
+	if info.UserType != nil {
+		db = db.Where("user_type = ?", *info.UserType)
+	}
 	err = db.Count(&total).Error
 	if err != nil {
 		return
