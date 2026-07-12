@@ -804,6 +804,14 @@ break-app/
 
 **当前生产 API**：`https://fangpi.mqcode.cn/api`
 
+### **break-xhs 平台约束（[小组件文档](https://miniapp.xiaohongshu.com/doc/DC602239)）**
+
+| 约束 | 说明 |
+|------|------|
+| 单页 | `app.json` 只能有 1 个 page；Tab 用 `activeTab` 单页切换 |
+| 包体积 ≤ 2M | 图片走 CDN，不打包大图；当前源码约 124KB |
+| 能力限制 | 无支付/交易/原生 tabBar/导航栏 API；`navigationStyle: custom` |
+
 ### **break-xhs 配置文件规划**
 
 ```
@@ -832,7 +840,7 @@ break-xhs/
 | `util/config.js` | API 基址与环境 | `development`、`production`、`currentEnv`、`baseUrl` |
 | `util/http.js` | 网络层 | `xhs.request`；header `source-client: xhs-widget`；`x-token` |
 | `project.config.json` | 工程 | `appid`、`setting.urlCheck`、`libVersion` |
-| `app.json` | 应用 | `pages`（仅单页）、`window`；**勿配置 tabBar** |
+| `app.json` | 应用 | **仅 1 个 page**；`navigationStyle: custom`；**勿配置 tabBar** |
 | `api/user.js` | 登录 | `POST /wxuser/xhsQuickLogin`（后端已实现） |
 | `api/fart.js` | 打卡 | 与 `break-app/src/api/fart.js` 路径保持一致 |
 

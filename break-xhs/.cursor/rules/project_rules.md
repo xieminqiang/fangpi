@@ -1,5 +1,25 @@
 # 放屁档案 · 小红书小组件开发规范
 
+## 平台硬性约束（必须遵守）
+
+依据 [小红书小组件开发文档](https://miniapp.xiaohongshu.com/doc/DC602239)：
+
+| 约束 | 要求 | 本项目做法 |
+|------|------|------------|
+| **单页** | 仅允许 1 个页面 | `app.json` 只注册 `pages/index/index`；首页/我的用 `activeTab` 单页切换 |
+| **包体积** | ≤ 2MB | 无本地大图；图片走 CDN（`util/config.js` → `assets`）；禁止引入 uni-app / UI 库 |
+| **能力限制** | 无支付、交易、原生导航栏、tabBar 等 | 不用 `tabBar`、不调用 `setNavigationBarTitle`；`navigationStyle: custom`；无页面跳转 API |
+
+**禁止事项**：
+
+- 新增第二个 `pages/*` 页面
+- `xhs.navigateTo` / `redirectTo` 等多页路由
+- 支付、下单、分享带交易链路
+- `app.json` 配置 `tabBar`
+- 打包大图、字体、冗余依赖进仓库
+
+当前源码包约 **124KB**（远低于 2MB 上限）。
+
 ## 项目概述
 
 `break-xhs` 是「放屁档案」的**小红书桌面小组件**，提供今日打卡、统计展示等轻量能力。  
@@ -18,7 +38,7 @@
 ```
 break-xhs/
 ├── project.config.json    # 小红书 IDE 工程配置
-├── app.json               # 应用页面与窗口（⚠️ 小组件不支持 tabBar）
+├── app.json               # 单页注册；navigationStyle: custom；禁止 tabBar
 ├── app.js                 # 全局登录与 globalData
 ├── app.css
 ├── util/
@@ -73,25 +93,24 @@ https://fangpi.mqcode.cn/api
 
 ### 4. `app.json`
 
-- `pages`：目前仅 `pages/index/index`（单页应用）
-- `window`：导航栏标题「今日放屁」，背景 `#f6f8f7`
-- **不支持 `tabBar`**：小红书小组件无原生底部栏，首页/我的切换在 `pages/index/index` 内用自定义 `custom-tabbar` 实现
-- `componentFramework`：`glass-easel`
-- `lazyCodeLoading`：`requiredComponents`
+- `pages`：**仅** `pages/index/index`（平台硬性约束：单页）
+- `window.navigationStyle`：`custom`（小组件限制原生导航栏，不用 `navigationBarTitleText`）
+- **禁止 `tabBar`**：底部切换在单页内 `custom-tabbar` + `activeTab` 实现
+- 不配置 `sitemapLocation`（单页小组件无需）
 
 ### 5. 页面内 Tab 切换
 
-小组件文档见 [小红书小组件开发文档](https://miniapp.xiaohongshu.com/doc/DC602239)，不支持 `app.json` 的 `tabBar`。
+小组件文档见 [小红书小组件开发文档](https://miniapp.xiaohongshu.com/doc/DC602239)。
 
 在 `pages/index/index` 单页内实现：
 
 | 字段 / 方法 | 说明 |
 |-------------|------|
 | `activeTab` | `home` \| `me`，控制显示打卡区或个人中心 |
-| `switchTab` | 切换 tab，并更新导航栏标题 |
-| `.custom-tabbar` | 固定底部自定义切换栏 |
+| `switchTab` | 切换 tab（**不**调用 `setNavigationBarTitle`） |
+| `.custom-tabbar` | `position: fixed` 自定义底部切换栏 |
 
-### 5. `api/*.js`
+### 6. `api/*.js`
 
 接口路径与 `break-app/src/api/` **保持一致**，仅登录入口不同：
 
@@ -141,8 +160,11 @@ https://fangpi.mqcode.cn/api
 
 ## 部署检查
 
+- [ ] `app.json` 仅 1 个 page，无 `tabBar`
+- [ ] `navigationStyle: custom`，未使用 `setNavigationBarTitle`
+- [ ] 包体积 < 2MB（无本地大图 / 冗余依赖）
 - [ ] `util/config.js` 的 `currentEnv` 为 `production`
 - [ ] `baseUrl` 与 break-app 生产环境一致
 - [ ] 小红书后台已配置 request 合法域名
 - [ ] `project.config.json` 中 `appid` 正确
-- [ ] 真机验证登录 + 打卡 + 今日统计
+- [ ] 真机验证登录 + 打卡 + 底部切换 + 个人中心

@@ -99,7 +99,7 @@ Page({
     this.loadProfile();
   },
 
-  /** 真机安全区：CSS env() 在部分小组件环境不生效，改用 API 取值 */
+  /** 真机安全区（px），用于底部 tabbar */
   initSafeArea() {
     try {
       const info = xhs.getSystemInfoSync();
@@ -113,7 +113,7 @@ Page({
         this.setData({ safeAreaBottom: bottom });
       }
     } catch (e) {
-      // 忽略，使用默认 0
+      // 忽略
     }
   },
 
@@ -136,10 +136,6 @@ Page({
       activeTab: tab,
       showStatsPopup: false,
       showArchivePopup: false
-    });
-
-    xhs.setNavigationBarTitle({
-      title: tab === 'home' ? '今日放屁' : '个人中心'
     });
 
     if (tab === 'home') {
