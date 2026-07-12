@@ -44,7 +44,12 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
-          echo "$KEY_B64" | tr -d ' \n\r\t' | base64 -d > ~/.ssh/deploy_key
+          KEY_CLEAN="$(printf '%s' "$KEY_B64" | tr -d '\r\t')"
+          if echo "$KEY_CLEAN" | grep -q 'BEGIN OPENSSH PRIVATE KEY'; then
+            printf '%s\n' "$KEY_CLEAN" | sed 's/\r$//' > ~/.ssh/deploy_key
+          else
+            printf '%s' "$KEY_CLEAN" | tr -d ' \n' | openssl base64 -d -A > ~/.ssh/deploy_key
+          fi
           chmod 600 ~/.ssh/deploy_key
           ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null
           eval "$(ssh-agent -s)"

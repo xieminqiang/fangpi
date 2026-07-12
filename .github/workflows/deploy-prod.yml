@@ -56,10 +56,21 @@ jobs:
             exit 1
           fi
           mkdir -p ~/.ssh
-          echo "$KEY_B64" | tr -d ' \n\r\t' | base64 -d > ~/.ssh/deploy_key
+          KEY_CLEAN="$(printf '%s' "$KEY_B64" | tr -d '\r\t')"
+
+          if echo "$KEY_CLEAN" | grep -q 'BEGIN OPENSSH PRIVATE KEY'; then
+            printf '%s\n' "$KEY_CLEAN" | sed 's/\r$//' > ~/.ssh/deploy_key
+          else
+            printf '%s' "$KEY_CLEAN" | tr -d ' \n' | openssl base64 -d -A > ~/.ssh/deploy_key
+          fi
+
           chmod 600 ~/.ssh/deploy_key
           echo "Validating private key..."
-          ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null
+          if ! ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null 2>&1; then
+            echo "error: invalid SSH private key in Secret KEY"
+            echo "hint (Mac): base64 < ~/.ssh/gva_deploy | tr -d '\\n' | pbcopy"
+            exit 1
+          fi
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/deploy_key
           echo "SSH key loaded"
