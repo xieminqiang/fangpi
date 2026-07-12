@@ -13,6 +13,7 @@ type WxUserSearch struct {
 	Status         *string     `json:"status" form:"status"`
 	Gender         *string     `json:"gender" form:"gender"`
 	Level          *int        `json:"level" form:"level"`
+	UserType       *int        `json:"userType" form:"userType"`
 	request.PageInfo
 }
 type WxLoginRequest struct {
